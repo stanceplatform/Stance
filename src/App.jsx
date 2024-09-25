@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import AppRoutes from './AppRoutes'; // Import the Routes component
 import './App.css'
 import Landing from './Landing'
 
@@ -9,7 +8,7 @@ function App() {
 
   return (
     <>
-      <Landing />
+      <AppRoutes /> {/* Use the Routes component here */}
     </>
   )
 }
