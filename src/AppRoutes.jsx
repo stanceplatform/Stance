@@ -4,8 +4,7 @@ import Landing from './Landing';
 import ProtectedRoute from './ProtectedRoute'; // Import the ProtectedRoute component
 import { AuthProvider } from './AuthContext';
 import Dashboard from './components/Dashboard';
-import Card from './components/Card'; // Add this import
-
+import Card from './components/card/Card';
 const AppRoutes = () => {
     return (
         <AuthProvider>

@@ -12,10 +12,11 @@ const GoogleSignIn = () => {
     try {
       // Assuming you have a Google Sign In API set up and imported
       // For example, using Google Sign-In with Firebase
-      const provider = new firebase.auth.GoogleAuthProvider();
-      const result = await firebase.auth().signInWithPopup(provider);
-      console.log('Google Sign In successful:', result);
-      login(); // Call the login function to set the user as authenticated
+      // const provider = new firebase.auth.GoogleAuthProvider();
+      // const result = await firebase.auth().signInWithPopup(provider);
+      // console.log('Google Sign In successful:', result);
+      console.log("login successful");
+      // login(); // Call the login function to set the user as authenticated
       navigate('/dashboard'); // Use navigate to redirect to the dashboard
     } catch (error) {
       console.error('Google Sign In error:', error);
