@@ -1,0 +1,15 @@
+{
+    "question": "Is Vinesh Phogat's disqualification justified?",
+    "answerOptions": [
+      {
+        "text": "Yes",
+        "color": "green-500",
+        "arrowFill": "green-500"
+      },
+      {
+        "text": "No",
+        "color": "red-500",
+        "arrowFill": "red-500"
+      }
+    ]
+  }

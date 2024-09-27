@@ -1,0 +1,16 @@
+[
+    {
+      "id": 1,
+      "author": "User1",
+      "content": "This is a great question!",
+      "likes": 5,
+      "avatarSrc": "https://example.com/avatar1.png"
+    },
+    {
+      "id": 2,
+      "author": "User2",
+      "content": "I think it's justified.",
+      "likes": 3,
+      "avatarSrc": "https://example.com/avatar2.png"
+    }
+  ]
