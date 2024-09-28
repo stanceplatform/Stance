@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import OpinionCard from './OpinionCard';
 import AddOpinionForm from './AddOpinionForm';
+import { fetchOpinions } from '../../operations'; // Import the new function
+import commentsData from '../../data/commentsData.json';
 
 function OpinionThread() {
   const [opinions, setOpinions] = useState([]);
@@ -8,17 +10,15 @@ function OpinionThread() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetchOpinions();
+    loadOpinions();
   }, []);
 
-  const fetchOpinions = async () => {
+  const loadOpinions = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch('https://api.example.com/opinions');
-      if (!response.ok) {
-        throw new Error('Failed to fetch opinions');
-      }
-      const data = await response.json();
+      // const data = await fetchOpinions(); // Use the local JSON function
+      console.log(commentsData);
+      const data = commentsData;
       setOpinions(data);
       setIsLoading(false);
     } catch (err) {
@@ -55,7 +55,7 @@ function OpinionThread() {
   }
 
   return (
-    <section className="flex flex-col px-4 pt-2 pb-4 rounded-3xl bg-neutral-900 max-w-[390px]">
+    <section className="flex flex-col px-4 pt-2 pb-4 rounded-3xl bg-neutral-900 max-w-[480px]">
       <div className="flex flex-col self-center pt-2 pb-3 w-10">
         <div className="flex w-full rounded bg-neutral-400 min-h-[4px]" />
       </div>

@@ -1,9 +1,10 @@
+// Start of Selection
 import React from 'react';
 
 function OpinionCard({ author, content, likes, avatarSrc }) {
   return (
     <article className="flex gap-1 py-1 w-full rounded-lg">
-      <div className="flex flex-col flex-1 shrink self-start p-2 rounded-lg basis-0 bg-yellow-950 min-w-[240px]">
+      <div className="flex flex-col flex-1 shrink self-start p-2 rounded-lg basis-0 bg-yellow-950">
         <h3 className="text-sm leading-none text-yellow-500">{author}</h3>
         <p className="mt-1 text-base leading-6 text-white">{content}</p>
       </div>
