@@ -6,7 +6,6 @@ function CardContent() {
   return (
     <>
       <CardNavigation />
-      <QuestionSection />
     </>
   );
 }

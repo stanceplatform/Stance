@@ -1,0 +1,15 @@
+{
+    "question": "Should the Olympics include more wrestling events?",
+    "answerOptions": [
+        {
+            "text": "Yes",
+            "color": "blue-500",
+            "arrowFill": "blue-500"
+        },
+        {
+            "text": "No",
+            "color": "orange-500",
+            "arrowFill": "orange-500"
+        }
+    ]
+}

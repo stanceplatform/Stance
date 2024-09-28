@@ -49,7 +49,7 @@ export const vote = async (option) => {
   // New function to load comments from local JSON file
 export const fetchOpinions = async () => {
     try {
-      const response = await fetch('/data/mockOpinions.json'); // Adjust the path as necessary
+      const response = await fetch('/data/commentsData.json'); // Adjust the path as necessary
       if (!response.ok) {
         throw new Error('Failed to fetch opinions');
       }
