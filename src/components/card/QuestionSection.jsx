@@ -36,8 +36,8 @@ function QuestionSection() {
   };
 
   return (
-    <section className="relative w-full h-screen">
-      <div className="absolute flex flex-col justify-end  w-full bg-[linear-gradient(180deg,transparent,rgba(0,0,0,0.8))]">
+    <section className="relative  w-full">
+      <div className="absolute bottom-0 flex flex-col justify-end  w-full bg-[linear-gradient(180deg,transparent,rgba(0,0,0,0.8))]">
         <h2 className="text-4xl font-medium text-white leading-[56px] mt-40">
           {questionData.question}
         </h2>
