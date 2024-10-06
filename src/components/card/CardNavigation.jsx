@@ -15,11 +15,12 @@ function CardNavigation() {
   };
 
   return (
-    <nav className="flex absolute inset-0" id="card-navigation">
-      <div className="flex-1" onClick={handleLeftTap} style={{ cursor: 'pointer' }}>
+    
+    <nav className="flex absolute inset-0 h-screen" id="card-navigation">
+      <div className="flex-1 h-screen" onClick={handleLeftTap} style={{ cursor: 'pointer' }}>
         {/* Left half of the screen */}
       </div>
-      <div className="flex-1" onClick={handleRightTap} style={{ cursor: 'pointer' }}>
+      <div className="flex-1 h-screen" onClick={handleRightTap} style={{ cursor: 'pointer' }}>
         {/* Right half of the screen */}
       </div>
       <QuestionSection />

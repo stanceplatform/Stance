@@ -11,7 +11,7 @@ const icons = [
 
 function Header() {
   return (
-    <header className="flex relative flex-row gap-4 justify-between p-4 w-full opacity-[0.86]">
+    <header className="flex relative flex-row gap-4 justify-between p-4 w-full opacity-[0.86] z-10">
       <img 
         loading="lazy" 
         src="https://cdn.builder.io/api/v1/image/assets/TEMP/3ba494924b7b74f2ab4117b9cc51026096cd23cac22c01b5156ebb0070d3bcb4?placeholderIfAbsent=true&apiKey=9667f82c7e1b4746ad9299d82be6adf4" 
