@@ -14,9 +14,9 @@ const AppRoutes = () => {
                     <Route
                         path="/dashboard"
                         element={
-                            <ProtectedRoute>
+                            // <ProtectedRoute>
                                 <Dashboard />
-                            </ProtectedRoute>
+                            // </ProtectedRoute>
                         }
                     />
                     <Route path="/card" element={<Card imageUrl="https://example.com/image.jpg" caption="Sample Caption" />} />
