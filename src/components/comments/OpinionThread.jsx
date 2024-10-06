@@ -17,7 +17,7 @@ function OpinionThread() {
     try {
       setIsLoading(true);
       // const data = await fetchOpinions(); // Use the local JSON function
-      console.log(commentsData);
+      // console.log(commentsData);
       const data = commentsData;
       setOpinions(data);
       setIsLoading(false);
