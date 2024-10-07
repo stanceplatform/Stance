@@ -31,7 +31,7 @@ function QuestionSection() {
         let result = {
           success: true,
           message: 'Vote successful'
-        }
+        };
         console.log('Vote successful:', result);
         setHasVoted(true); // Update state to indicate the user has voted
       } catch (error) {

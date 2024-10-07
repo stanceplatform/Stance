@@ -17,7 +17,6 @@ function OpinionThread() {
     try {
       setIsLoading(true);
       // const data = await fetchOpinions(); // Use the local JSON function
-      // console.log(commentsData);
       const data = commentsData;
       setOpinions(data);
       setIsLoading(false);
@@ -55,16 +54,20 @@ function OpinionThread() {
   }
 
   return (
-    <section className="flex flex-col px-4 pt-2 pb-4 rounded-3xl bg-neutral-900 max-w-[480px]">
-      <div className="flex flex-col self-center pt-2 pb-3 w-10">
-        <div className="flex w-full rounded bg-neutral-400 min-h-[4px]" />
+    <section className="flex flex-col h-full">
+      <div className="flex flex-col overflow-hidden flex-grow px-4 pt-2 pb-4 rounded-3xl bg-neutral-900">
+        <div className="flex flex-col self-center pt-2 pb-3 w-10">
+          <div className="flex w-full rounded bg-neutral-400 min-h-[4px]" />
+        </div>
+        <div className="flex overflow-y-auto flex-col w-full h-[400px] hide-scrollbar"> {/* Adjust height as needed */}
+          {opinions.map((opinion) => (
+            <OpinionCard key={opinion.id} {...opinion} />
+          ))}
+        </div>
       </div>
-      <div className="flex overflow-hidden flex-col w-full h-[532px]">
-        {opinions.map((opinion) => (
-          <OpinionCard key={opinion.id} {...opinion} />
-        ))}
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-neutral-800"> {/* Fixed background for the form */}
+        <AddOpinionForm onAddOpinion={addOpinion} />
       </div>
-      <AddOpinionForm onAddOpinion={addOpinion} />
     </section>
   );
 }

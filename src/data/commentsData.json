@@ -2,15 +2,92 @@
     {
       "id": 1,
       "author": "User1",
-      "content": "This is a great question!",
+      "content": "This is a great question! It really makes you think about the implications and the various perspectives involved. Engaging in discussions like this can lead to a deeper understanding of the topic at hand. I appreciate the opportunity to share my thoughts and hear from others as well. It's important to consider all angles before forming a solid opinion.",
       "likes": 5,
       "avatarSrc": "https://example.com/avatar1.png"
     },
     {
       "id": 2,
       "author": "User2",
+      "content": "I think it's justified. There are many factors to consider when evaluating this situation. It's crucial to look at the evidence and the context surrounding the issue. Discussions like these help us to navigate complex topics and arrive at informed conclusions. I believe that open dialogue is essential for progress and understanding.",
+      "likes": 3,
+      "avatarSrc": "https://example.com/avatar2.png"
+    },
+    {
+      "id": 3,
+      "author": "User3",
+      "content": "I think it's justified. However, we must also acknowledge the nuances that come into play. Each situation is unique, and it's vital to approach these discussions with an open mind. By sharing our perspectives, we can learn from one another and develop a more comprehensive view of the matter. Let's keep the conversation going!",
+      "likes": 3,
+      "avatarSrc": "https://example.com/avatar2.png"
+    },
+    {
+      "id": 4,
+      "author": "User4",
+      "content": "I think it's justified, but we should also consider the potential consequences of our decisions. It's essential to weigh the pros and cons carefully. Engaging in thoughtful discussions can help us uncover different viewpoints and lead to better outcomes. I look forward to hearing more opinions on this topic.",
+      "likes": 3,
+      "avatarSrc": "https://example.com/avatar2.png"
+    },
+    {
+      "id": 5,
+      "author": "User5",
+      "content": "I think it's justified, and I believe that everyone should have a chance to express their views. It's important to foster an environment where people feel comfortable sharing their thoughts. By doing so, we can create a richer dialogue that benefits everyone involved. Let's continue to explore this topic together.",
+      "likes": 3,
+      "avatarSrc": "https://example.com/avatar2.png"
+    },
+    {
+      "id": 6,
+      "author": "User2",
       "content": "I think it's justified.",
       "likes": 3,
       "avatarSrc": "https://example.com/avatar2.png"
+    },
+    {
+      "id": 7,
+      "author": "User7",
+      "content": "I think it's justified.",
+      "likes": 3,
+      "avatarSrc": "https://example.com/avatar2.png"
+    },
+    {
+      "id": 8,
+      "author": "User8",
+      "content": "I think it's justified. However, I believe there are nuances that should be considered.",
+      "likes": 3,
+      "avatarSrc": "https://example.com/avatar2.png"
+    },
+    {
+      "id": 9,
+      "author": "User9",
+      "content": "I disagree with the decision. It seems unfair to penalize without clear evidence.",
+      "likes": 2,
+      "avatarSrc": "https://example.com/avatar3.png"
+    },
+    {
+      "id": 10,
+      "author": "User10",
+      "content": "This is a very controversial topic. Many people have strong opinions on both sides.",
+      "likes": 4,
+      "avatarSrc": "https://example.com/avatar4.png"
+    },
+    {
+      "id": 11,
+      "author": "User11",
+      "content": "I believe more evidence is needed before making such a significant decision.",
+      "likes": 1,
+      "avatarSrc": "https://example.com/avatar5.png"
+    },
+    {
+      "id": 12,
+      "author": "User12",
+      "content": "The rules should be applied fairly to everyone involved, regardless of their status.",
+      "likes": 5,
+      "avatarSrc": "https://example.com/avatar6.png"
+    },
+    {
+      "id": 13,
+      "author": "User13",
+      "content": "I think the decision was hasty and could have been handled with more care and consideration.",
+      "likes": 2,
+      "avatarSrc": "https://example.com/avatar7.png"
     }
   ]
