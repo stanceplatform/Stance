@@ -56,12 +56,10 @@ function OpinionThread() {
   return (
     <section className="flex flex-col h-full">
       <div className="flex flex-col overflow-hidden flex-grow px-4 pt-2 pb-4 rounded-3xl bg-neutral-900">
-        <div className="flex flex-col self-center pt-2 pb-3 w-10">
-          <div className="flex w-full rounded bg-neutral-400 min-h-[4px]" />
-        </div>
-        <div className="flex overflow-y-auto flex-col w-full h-[400px] hide-scrollbar"> {/* Adjust height as needed */}
-          {opinions.map((opinion) => (
-            <OpinionCard key={opinion.id} {...opinion} />
+
+        <div className="flex overflow-y-auto flex-col w-full  hide-scrollbar"> {/* Adjust height as needed */}
+          {opinions.map((opinion, index) => ( // Added index parameter
+            <OpinionCard key={opinion.id} {...opinion} isEven={index % 2 === 0} /> // Pass isEven prop
           ))}
         </div>
       </div>
