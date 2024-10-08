@@ -3,11 +3,11 @@ import QuestionSection from "./QuestionSection";
 import CardNavigation from "./CardNavigation";
 import Header from "../Header";
 
-function CardContent() {
+function CardContent({ question }) {
   return (
     <>
       <Header />
-      <CardNavigation />
+      <CardNavigation question={question} />
     </>
   );
 }

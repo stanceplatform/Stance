@@ -1,15 +1,34 @@
-{
-  "question": "Is Vinesh Phogat's disqualification justified?",
-  "answerOptions": [
-    {
-      "text": "Yes",
-      "color": "green-500",
-      "arrowFill": "green-500"
-    },
-    {
-      "text": "No",
-      "color": "red-500",
-      "arrowFill": "red-500"
-    }
-  ]
-}
+[
+  {
+    "question": "Is Vinesh Phogat's disqualification justified?",
+    "answerOptions": [
+      {
+        "text": "Yes",
+        "color": "green-500",
+        "arrowFill": "green-500"
+      },
+      {
+        "text": "No",
+        "color": "red-500",
+        "arrowFill": "red-500"
+      }
+    ],
+    "backgroundImageUrl": "https://cdn.builder.io/api/v1/image/assets/TEMP/d360cc9e98e904194038ee111af63291b815af7a58054562320e3aa592f821fa?apiKey=9667f82c7e1b4746ad9299d82be6adf4&"
+  },
+  {
+    "question": "Should the Olympics include more wrestling events?",
+    "answerOptions": [
+      {
+        "text": "Yes",
+        "color": "blue-500",
+        "arrowFill": "blue-500"
+      },
+      {
+        "text": "No",
+        "color": "orange-500",
+        "arrowFill": "orange-500"
+      }
+    ],
+    "backgroundImageUrl": "https://cdn.builder.io/api/v1/image/assets/TEMP/0bc28bc039110c9534814adbf1775a21b832d547a0896b462402986c01ad2718?placeholderIfAbsent=true&apiKey=9667f82c7e1b4746ad9299d82be6adf4"
+  }
+]
