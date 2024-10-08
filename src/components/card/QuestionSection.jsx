@@ -56,7 +56,7 @@ function QuestionSection({ question }) {
           {!hasVoted ? (
             <>
               <button
-                className="relative flex-1 shrink gap-2 self-stretch mx-3 px-4 py-3 h-full text-left text-2xl tracking-wide leading-none whitespace-nowrap bg-yellow-400 rounded-lg text-neutral-900 max-w-xs"
+                className="relative flex-1 shrink gap-2 self-stretch mx-3 px-4 py-3 h-full text-left text-2xl tracking-wide leading-none whitespace-wrap bg-yellow-400 rounded-md text-neutral-900 max-w-xs"
                 aria-label="Yes"
                 onClick={() => handleVote(question.answerOptions[0])}
               >
@@ -64,7 +64,7 @@ function QuestionSection({ question }) {
                 <span className="absolute right-[-10px] top-[50%] translate-y-[-80%] w-0 h-0 border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent border-l-[10px] border-l-yellow-400"></span>
               </button>
               <button
-                className="relative flex-1 shrink gap-2 self-stretch mx-3 px-4 py-3 h-full text-right text-2xl text-white tracking-wide leading-none whitespace-nowrap bg-purple-700 rounded-lg text-neutral-900 max-w-xs"
+                className="relative flex-1 shrink gap-2 self-stretch mx-3 px-4 py-3 h-full text-right text-2xl text-white tracking-wide leading-none whitespace-wrap bg-purple-700 rounded-md text-neutral-900 max-w-xs"
                 aria-label="No"
                 onClick={() => handleVote(question.answerOptions[1])}
               >

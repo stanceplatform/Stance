@@ -17,14 +17,28 @@ const Card = () => {
     setCurrentQuestionIndex((prevIndex) => (prevIndex + 1) % questions.length);
   };
 
+  const handlePreviousQuestion = () => {
+    setCurrentQuestionIndex((prevIndex) => 
+      (prevIndex - 1 + questions.length) % questions.length
+    );
+  };
+
   return (
     <div className="flex overflow-hidden flex-col mx-auto w-full bg-blue-500 max-w-[480px] max-h-screen">
       {currentQuestion && (
         <div
-          className="flex relative flex-col w-full h-screen bg-center bg-cover"
+          className="flex relative flex-col w-full h-screen-svh bg-center bg-cover"
           style={{ backgroundImage: `url(${currentQuestion.backgroundImageUrl})` }}
         >
-          <CardContent question={currentQuestion} onNext={handleNextQuestion} />
+          <nav className="flex absolute inset-0 h-full w-full" id="card-navigation">
+            <div className="flex-1 h-full" onClick={handlePreviousQuestion} style={{ cursor: 'pointer', backgroundColor: 'rgba(0,0,0,0.1)' }}>
+              {/* Left half of the screen */}
+            </div>
+            <div className="flex-1 h-full" onClick={handleNextQuestion} style={{ cursor: 'pointer', backgroundColor: 'rgba(0,0,0,0.1)' }}>
+              {/* Right half of the screen */}
+            </div>
+          </nav>
+          <CardContent question={currentQuestion} onNext={handleNextQuestion} onPrevious={handlePreviousQuestion} />
         </div>
       )}
     </div>

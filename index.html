@@ -11,5 +11,11 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    <!-- This is to prevent the page from scrolling when swiping -->
+    <script>
+      document.addEventListener('touchmove', function(event) {
+  event.preventDefault();
+      }, { passive: false });
+    </script>
   </body>
 </html>

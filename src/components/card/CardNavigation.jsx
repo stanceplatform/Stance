@@ -1,10 +1,10 @@
 import React from "react";
 import QuestionSection from "./QuestionSection";
 
-function CardNavigation({ question, onNext }) {
+function CardNavigation({ question, onNext, onPrevious }) { // Added onPrevious prop
   const handleLeftTap = () => {
     console.log("Previous card");
-    // Implement navigation to previous card
+    onPrevious(); // Call the onPrevious function to navigate to the previous card
   };
 
   const handleRightTap = () => {

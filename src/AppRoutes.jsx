@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Landing from './Landing';
 import ProtectedRoute from './ProtectedRoute'; // Import the ProtectedRoute component
 import { AuthProvider } from './AuthContext';
-import Dashboard from './components/Dashboard';
 import Card from './components/card/Card';
 const AppRoutes = () => {
     return (
@@ -19,7 +18,7 @@ const AppRoutes = () => {
                             // </ProtectedRoute>
                         }
                     />
-                    <Route path="/card" element={                                <Dashboard />} />
+                    {/* <Route path="/card" element={                                <Dashboard />} /> */}
                     {/* Add more routes here as needed */}
                 </Routes>
             </Router>
