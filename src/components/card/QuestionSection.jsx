@@ -75,8 +75,8 @@ function QuestionSection() {
           <ProgressBarWithLabels />
         )}
         </div>
-        <button onClick={toggleDrawer} className="gap-2 self-center px-4 py-2 mt-6 text-base tracking-wide text-white bg-white bg-opacity-20 rounded-[40px]">
-          Comments (45)
+        <button onClick={toggleDrawer} className="gap-2 self-center px-4 py-2 mt-6 text-base tracking-wide text-black bg-white bg-opacity-100 rounded-[40px]">
+          {hasVoted ? 'Add Comment (45)' : 'Comments (45)'}
         </button>
       </div>
       <CommentDrawer isOpen={isDrawerOpen} onClose={toggleDrawer} />
