@@ -53,10 +53,10 @@ function QuestionSection() {
           {questionData.question}
         </h2>
         <div className="flex mt-6 w-full">
-        {!hasVoted ? ( // Conditional rendering based on hasVoted
+        {!hasVoted ? ( // Conditional rendering based on hasVoted 
 <>
               <button
-                className="relative flex-1 shrink gap-2 self-stretch mx-3 px-4 py-3 h-full text-2xl tracking-wide leading-none whitespace-nowrap bg-yellow-400 rounded-lg text-neutral-900 max-w-xs"
+                className="relative flex-1 shrink gap-2 self-stretch mx-3 px-4 py-3 h-full text-left text-2xl tracking-wide leading-none whitespace-nowrap bg-yellow-400 rounded-lg text-neutral-900 max-w-xs"
                 aria-label="Yes"
                 onClick={() => handleVote(questionData.answerOptions[0])} // Pass the option to handleVote
               >
@@ -64,12 +64,12 @@ function QuestionSection() {
                 <span className="absolute right-[-10px] top-[50%] translate-y-[-80%] w-0 h-0 border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent border-l-[10px] border-l-yellow-400"></span>
               </button>
               <button
-                className="relative flex-1 shrink gap-2 self-stretch mx-3 px-4 py-3 h-full text-2xl tracking-wide leading-none whitespace-nowrap bg-purple-500 rounded-lg text-neutral-900 max-w-xs"
+                className="relative flex-1 shrink gap-2 self-stretch mx-3 px-4 py-3 h-full text-right text-2xl text-white tracking-wide leading-none whitespace-nowrap bg-purple-700 rounded-lg text-neutral-900 max-w-xs"
                 aria-label="No"
                 onClick={() => handleVote(questionData.answerOptions[1])} // Pass the option to handleVote
               >
                 {questionData.answerOptions[1].text}
-                <span className="absolute left-[-10px] top-[50%] translate-y-[-20%] w-0 h-0 border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent border-r-[10px] border-r-purple-500"></span>
+                <span className="absolute left-[-10px] top-[50%] translate-y-[-20%] w-0 h-0 border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent border-r-[10px] border-r-purple-700"></span>
               </button>
         </>):(
           <ProgressBarWithLabels />

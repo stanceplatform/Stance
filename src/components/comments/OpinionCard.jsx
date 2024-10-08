@@ -1,7 +1,7 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUserCircle } from '@fortawesome/free-solid-svg-icons';
-import {faThumbsUp} from '@fortawesome/free-regular-svg-icons';
+import { faThumbsUp } from '@fortawesome/free-regular-svg-icons';
 
 function getColor(isEven) {
   return isEven ? 'text-yellow-500' : 'text-purple-300';
@@ -15,12 +15,10 @@ function OpinionCard({ author, content, likes, isEven }) { // Added isEven prop
 
   return (
     <article className="flex gap-1 py-1 w-full rounded-lg z-100">
-      <div>
-        {/* Conditional class for background color */}
-        <div className={`flex flex-col flex-1 shrink self-start p-2 rounded-lg basis-0 ${colorBgClass}`}>
-          <h3 className={`text-[14px] leading-[16px] ${colorClass} text-left font-normal`}>{author}</h3>
-          <p className="mt-1 text-[1rem] leading-[24px] text-white text-left">{content}</p>
-        </div>
+      {/* Conditional class for background color */}
+      <div className={`flex flex-col flex-1 shrink self-start p-2 rounded-lg basis-0 ${colorBgClass}`}>
+        <h3 className={`text-[14px] leading-[16px] ${colorClass} text-left font-normal`}>{author}</h3>
+        <p className="mt-1 text-[1rem] leading-[24px] text-white text-left">{content}</p>
       </div>
       <div className="flex flex-col items-center w-10">
         <div className="flex gap-2 items-center p-2 w-10">
@@ -31,26 +29,4 @@ function OpinionCard({ author, content, likes, isEven }) { // Added isEven prop
     </article>
   );
 }
-
 export default OpinionCard;
-
-/* Frame 160 */
-
-/* Auto layout */
-// display: flex;
-// flex-direction: column;
-// align-items: flex-start;
-// padding: 8px;
-// gap: 4px;
-
-// width: 314px;
-// height: 204px;
-
-// /* yellow-900 */
-// background: #343104;
-// border-radius: 8px;
-
-// /* Inside auto layout */
-// flex: none;
-// order: 0;
-// flex-grow: 1;
