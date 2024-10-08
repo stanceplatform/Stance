@@ -13,6 +13,10 @@ const Card = () => {
 
   const currentQuestion = questions[currentQuestionIndex];
 
+  const handleNextQuestion = () => {
+    setCurrentQuestionIndex((prevIndex) => (prevIndex + 1) % questions.length);
+  };
+
   return (
     <div className="flex overflow-hidden flex-col mx-auto w-full bg-blue-500 max-w-[480px] max-h-screen">
       {currentQuestion && (
@@ -20,7 +24,7 @@ const Card = () => {
           className="flex relative flex-col w-full h-screen bg-center bg-cover"
           style={{ backgroundImage: `url(${currentQuestion.backgroundImageUrl})` }}
         >
-          <CardContent question={currentQuestion} />
+          <CardContent question={currentQuestion} onNext={handleNextQuestion} />
         </div>
       )}
     </div>
