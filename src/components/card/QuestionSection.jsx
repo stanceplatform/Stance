@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { fetchQuestionData, vote } from "../../operations";
 import question from "../../data/data.json";
 import CommentDrawer from "../comments/CommentDrawer";
@@ -8,6 +8,7 @@ function QuestionSection() {
   const [questionData, setQuestionData] = useState({ question: '', answerOptions: [{text: '', votes: 0}, {text: '', votes: 0},{text: '', votes: 0}] });
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [hasVoted, setHasVoted] = useState(false); // State variable to track if the user has voted
+  const drawerRef = useRef(null); // Ref for the drawer
 
   useEffect(() => {
     loadDataAsync();
@@ -18,12 +19,12 @@ function QuestionSection() {
     try {
       // Simulate fetching data      
       console.log(question);
-
       setQuestionData(question);
     } catch (error) {
       console.error('Error loading question data:', error);
     }
   };
+
   const handleVote = async (option) => {
     if (!hasVoted) { // Check if the user has already voted
       try {
@@ -46,9 +47,26 @@ function QuestionSection() {
     setIsDrawerOpen(!isDrawerOpen);
   };
 
+  const handleClickOutside = (event) => {
+    if (drawerRef.current && !drawerRef.current.contains(event.target)) {
+      setIsDrawerOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isDrawerOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isDrawerOpen]);
+
   return (
-    <section className="relative  w-full">
-      <div className="absolute bottom-0 flex flex-col justify-end  w-full bg-[linear-gradient(180deg,transparent,rgba(0,0,0,0.8))] p-4">
+    <section className="relative w-full">
+      <div className="absolute bottom-0 flex flex-col justify-end w-full bg-[linear-gradient(180deg,transparent,rgba(0,0,0,0.8))] p-4">
         <h2 className="text-4xl text-left font-medium text-white leading-[56px] mt-40">
           {questionData.question}
         </h2>
@@ -79,7 +97,9 @@ function QuestionSection() {
           {hasVoted ? 'Add Comment (45)' : 'Comments (45)'}
         </button>
       </div>
-      <CommentDrawer isOpen={isDrawerOpen} onClose={toggleDrawer} />
+      <div ref={drawerRef}>
+        <CommentDrawer isOpen={isDrawerOpen} onClose={toggleDrawer} />
+      </div>
     </section>
   );
 }
