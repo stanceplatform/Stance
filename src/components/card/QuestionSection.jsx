@@ -50,7 +50,7 @@ function QuestionSection({ question }) {
   return (
     <section className=" w-full">
       <div className="absolute bottom-0 flex flex-col justify-end w-full bg-[linear-gradient(180deg,transparent,rgba(0,0,0,1))] p-4">
-        <h2 className="text-4xl text-left font-medium text-white leading-[56px] mt-20">
+        <h2 className="text-4xl text-left font-medium text-white leading-[56px] mt-5">
           {question.question}
         </h2>
         <div className="flex mt-6 w-full">
