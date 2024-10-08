@@ -5,6 +5,7 @@ import ProgressBarWithLabels from "../charts/ProgressBar";
 function QuestionSection({ question }) {
   const [hasVoted, setHasVoted] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [userChoice, setUserChoice] = useState(null);
   const drawerRef = useRef(null);
 
   const handleVote = async (option) => {
@@ -58,7 +59,7 @@ function QuestionSection({ question }) {
               <button
                 className="relative flex-1 shrink gap-2 self-stretch mx-3 px-4 py-3 h-full text-left text-2xl tracking-wide leading-none whitespace-wrap bg-yellow-400 rounded-md text-neutral-900 max-w-xs"
                 aria-label="Yes"
-                onClick={() => handleVote(question.answerOptions[0])}
+                onClick={() => handleVote(question.answerOptions[0], setUserChoice(1))}
               >
                 {question.answerOptions[0].text}
                 <span className="absolute right-[-10px] top-[50%] translate-y-[-80%] w-0 h-0 border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent border-l-[10px] border-l-yellow-400"></span>
@@ -66,14 +67,14 @@ function QuestionSection({ question }) {
               <button
                 className="relative flex-1 shrink gap-2 self-stretch mx-3 px-4 py-3 h-full text-right text-2xl text-white tracking-wide leading-none whitespace-wrap bg-purple-700 rounded-md text-neutral-900 max-w-xs"
                 aria-label="No"
-                onClick={() => handleVote(question.answerOptions[1])}
+                onClick={() => handleVote(question.answerOptions[1], setUserChoice(2))}
               >
                 {question.answerOptions[1].text}
                 <span className="absolute left-[-10px] top-[50%] translate-y-[-20%] w-0 h-0 border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent border-r-[10px] border-r-purple-700"></span>
               </button>
             </>
           ) : (
-            <ProgressBarWithLabels />
+            <ProgressBarWithLabels firstOptionPercentage={question.answerOptions[0].percentage} userChoice={userChoice} />
           )}
         </div>
         <button onClick={toggleDrawer} className="gap-2 self-center px-4 py-2 mt-6 text-base tracking-wide text-black bg-white bg-opacity-100 rounded-[40px]">

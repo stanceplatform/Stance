@@ -5,12 +5,14 @@
       {
         "text": "Yes",
         "color": "green-500",
-        "arrowFill": "green-500"
+        "arrowFill": "green-500",
+        "percentage": 30
       },
       {
         "text": "No",
         "color": "red-500",
-        "arrowFill": "red-500"
+        "arrowFill": "red-500",
+        "percentage": 70
       }
     ],
     "backgroundImageUrl": "https://cdn.builder.io/api/v1/image/assets/TEMP/d360cc9e98e904194038ee111af63291b815af7a58054562320e3aa592f821fa?apiKey=9667f82c7e1b4746ad9299d82be6adf4&"
@@ -21,12 +23,14 @@
       {
         "text": "Yes, More Events",
         "color": "blue-500",
-        "arrowFill": "blue-500"
+        "arrowFill": "blue-500",
+        "percentage": 20
       },
       {
         "text": "No Not Needed",
         "color": "orange-500",
-        "arrowFill": "orange-500"
+        "arrowFill": "orange-500",
+        "percentage": 80
       }
     ],
     "backgroundImageUrl": "https://cdn.builder.io/api/v1/image/assets/TEMP/0bc28bc039110c9534814adbf1775a21b832d547a0896b462402986c01ad2718?placeholderIfAbsent=true&apiKey=9667f82c7e1b4746ad9299d82be6adf4"
