@@ -1,7 +1,6 @@
 import React from "react";
-import QuestionSection from "./QuestionSection";
 
-function CardNavigation({ question, onNext, onPrevious }) { // Added onPrevious prop
+function CardNavigation({ onNext, onPrevious }) { // Removed question prop
   const handleLeftTap = () => {
     console.log("Previous card");
     onPrevious(); // Call the onPrevious function to navigate to the previous card
@@ -13,7 +12,6 @@ function CardNavigation({ question, onNext, onPrevious }) { // Added onPrevious 
   };
 
   return (
-    <>
     <nav className="flex absolute inset-0 h-full w-full custom-gradient" id="card-navigation">
       <div className="flex-1 h-full" onClick={handleLeftTap} style={{ cursor: 'pointer', backgroundColor: 'rgba(0,0,0,0.1)' }}>
         {/* Left half of the screen */}
@@ -22,8 +20,6 @@ function CardNavigation({ question, onNext, onPrevious }) { // Added onPrevious 
         {/* Right half of the screen */}
       </div>
     </nav>
-    <QuestionSection question={question} />
-    </>
   );
 }
 

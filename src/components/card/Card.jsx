@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import CardContent from './CardContent';
-import CardNavigation from './CardNavigation'; // Import CardNavigation
+import CardNavigation from './CardNavigation';
+import QuestionSection from './QuestionSection'; // Import QuestionSection
 import questionData from '../../data/data.json';
 
 const Card = () => {
@@ -32,11 +33,11 @@ const Card = () => {
           style={{ backgroundImage: `url(${currentQuestion.backgroundImageUrl})` }}
         >
           <CardNavigation 
-            question={currentQuestion} 
             onNext={handleNextQuestion} 
             onPrevious={handlePreviousQuestion} 
           />
-          <CardContent />
+          <QuestionSection question={currentQuestion} /> {/* Moved QuestionSection here */}
+          <CardContent question={currentQuestion} />
         </div>
       )}
     </div>
