@@ -14,7 +14,7 @@ function CardNavigation({ question, onNext, onPrevious }) { // Added onPrevious 
 
   return (
     <>
-    <nav className="flex absolute inset-0 h-full w-full" id="card-navigation">
+    <nav className="flex absolute inset-0 h-full w-full custom-gradient" id="card-navigation">
       <div className="flex-1 h-full" onClick={handleLeftTap} style={{ cursor: 'pointer', backgroundColor: 'rgba(0,0,0,0.1)' }}>
         {/* Left half of the screen */}
       </div>

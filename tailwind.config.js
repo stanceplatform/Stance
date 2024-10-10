@@ -13,7 +13,7 @@ export default {
         'purple-900': '#280137',  
       },
       fontFamily: {
-        inter: ['Inter', 'Roboto'], // Add Inter to the theme
+        inter: ['Inter'], // Add Inter to the theme
       },
       height: {
         'screen-svh': '100svh', // Small Viewport Height

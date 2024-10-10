@@ -15,7 +15,8 @@
         "percentage": 70
       }
     ],
-    "backgroundImageUrl": "https://cdn.builder.io/api/v1/image/assets/TEMP/d360cc9e98e904194038ee111af63291b815af7a58054562320e3aa592f821fa?apiKey=9667f82c7e1b4746ad9299d82be6adf4&"
+    "backgroundImageUrl": "https://cdn.builder.io/api/v1/image/assets/TEMP/d360cc9e98e904194038ee111af63291b815af7a58054562320e3aa592f821fa?apiKey=9667f82c7e1b4746ad9299d82be6adf4&",
+    "commentCount": 5
   },
   {
     "question": "Should the Olympics include more wrestling events?",
@@ -33,6 +34,7 @@
         "percentage": 80
       }
     ],
-    "backgroundImageUrl": "https://cdn.builder.io/api/v1/image/assets/TEMP/0bc28bc039110c9534814adbf1775a21b832d547a0896b462402986c01ad2718?placeholderIfAbsent=true&apiKey=9667f82c7e1b4746ad9299d82be6adf4"
+    "backgroundImageUrl": "https://cdn.builder.io/api/v1/image/assets/TEMP/0bc28bc039110c9534814adbf1775a21b832d547a0896b462402986c01ad2718?placeholderIfAbsent=true&apiKey=9667f82c7e1b4746ad9299d82be6adf4",
+    "commentCount": 10
   }
 ]

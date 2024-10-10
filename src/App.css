@@ -3,7 +3,7 @@
   margin: 0 auto;
   padding: 0rem;
   text-align: center;
-  font-family: 'Inter','Roboto';
+  font-family: 'Inter';
 }
 
 .logo {
@@ -41,3 +41,9 @@
 .read-the-docs {
   color: #888;
 }
+
+/* Add this to your global CSS file */
+.custom-gradient {
+  background: linear-gradient(to bottom, transparent 0%, rgba(232, 229, 229, 0.1) 60%, black 100%);
+}
+
