@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import CardContent from './CardContent';
+import CardNavigation from './CardNavigation'; // Import CardNavigation
 import questionData from '../../data/data.json';
 
 const Card = () => {
@@ -30,15 +31,12 @@ const Card = () => {
           className="flex relative flex-col w-full h-screen-svh bg-center bg-cover"
           style={{ backgroundImage: `url(${currentQuestion.backgroundImageUrl})` }}
         >
-          <nav className="flex absolute inset-0 h-full w-full" id="card-navigation">
-            <div className="flex-1 h-full" onClick={handlePreviousQuestion} style={{ cursor: 'pointer', backgroundColor: 'rgba(0,0,0,0.1)' }}>
-              {/* Left half of the screen */}
-            </div>
-            <div className="flex-1 h-full" onClick={handleNextQuestion} style={{ cursor: 'pointer', backgroundColor: 'rgba(0,0,0,0.1)' }}>
-              {/* Right half of the screen */}
-            </div>
-          </nav>
-          <CardContent question={currentQuestion} onNext={handleNextQuestion} onPrevious={handlePreviousQuestion} />
+          <CardNavigation 
+            question={currentQuestion} 
+            onNext={handleNextQuestion} 
+            onPrevious={handlePreviousQuestion} 
+          />
+          <CardContent />
         </div>
       )}
     </div>

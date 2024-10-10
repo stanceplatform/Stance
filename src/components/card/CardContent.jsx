@@ -1,12 +1,11 @@
 import React from "react";
-import CardNavigation from "./CardNavigation";
 import Header from "../Header";
 
-function CardContent({ question, onNext, onPrevious }) {
+function CardContent() { // Removed onNext and onPrevious props
   return (
     <>
       <Header />
-      <CardNavigation question={question} onNext={onNext} onPrevious={onPrevious} />
+      {/* Removed CardNavigation */}
     </>
   );
 }
