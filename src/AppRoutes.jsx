@@ -15,11 +15,11 @@ const AppRoutes = () => {
                         path="/dashboard"
                         element={
                             // <ProtectedRoute>
-                            <Card imageUrl="https://example.com/image.jpg" caption="Sample Caption" />
+                            <Card />
                             // </ProtectedRoute>
                         }
                     />
-                                        <Route path="/notification" element={<NotificationsPage />} />
+                    <Route path="/notification" element={<NotificationsPage />} />
 
                     {/* <Route path="/card" element={                                <Dashboard />} /> */}
                     {/* Add more routes here as needed */}

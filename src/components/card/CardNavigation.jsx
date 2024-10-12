@@ -12,7 +12,7 @@ function CardNavigation({ onNext, onPrevious }) { // Removed question prop
   };
 
   return (
-    <nav className="flex absolute inset-0 h-full w-full custom-gradient" id="card-navigation">
+    <nav className="flex absolute inset-0 h-full custom-gradient overflow-hidden mx-auto max-w-[480px]" id="card-navigation" >
       <div className="flex-1 h-full" onClick={handleLeftTap} style={{ cursor: 'pointer', backgroundColor: 'rgba(0,0,0,0.1)' }}>
         {/* Left half of the screen */}
       </div>
