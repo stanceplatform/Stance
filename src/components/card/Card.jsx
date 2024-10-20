@@ -41,6 +41,7 @@ const Card = () => {
         {questions.length > 0 && (
           <div className="relative flex flex-col w-full h-screen-svh bg-center bg-cover">
             {/* Current background image */}
+
             <motion.div
               key={`bg-${currentQuestionIndex}`}
               className="absolute inset-0"
@@ -71,6 +72,8 @@ const Card = () => {
             )}
 
             {/* Main content */}
+            <CardNavigation onNext={handleNextQuestion} onPrevious={handlePreviousQuestion} />
+
             <Header />
             <motion.div
               key={currentQuestionIndex}
@@ -81,7 +84,6 @@ const Card = () => {
               <QuestionSection question={questions[currentQuestionIndex]} />
             </motion.div>
 
-            <CardNavigation onNext={handleNextQuestion} onPrevious={handlePreviousQuestion} />
           </div>
         )}
       </div>
