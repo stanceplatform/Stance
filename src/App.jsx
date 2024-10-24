@@ -8,10 +8,10 @@ function App() {
   const [count, setCount] = useState(0)
 
   return (
-    <Container className='max-h-screen overflow-hidden'>
-      <AppRoutes /> {/* Use the Routes component here */}
-    </Container>
-  )
-}
+<Container className="max-h-screen overflow-hidden flex items-center justify-center">
+  <AppRoutes /> {/* Use the Routes component here */}
+</Container>
+
+  )}
 
 export default App

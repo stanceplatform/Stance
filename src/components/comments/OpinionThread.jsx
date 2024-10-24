@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import OpinionCard from './OpinionCard';
-import AddOpinionForm from './AddOpinionForm';
 import { fetchOpinions } from '../../operations'; // Import the new function
 import commentsData from '../../data/commentsData.json';
 
