@@ -9,6 +9,9 @@ function getColor(isEven) {
 function getColorBg(isEven) {
   return isEven ? 'bg-yellow-900' : 'bg-purple-900';
 }
+function handleLikeClick() {
+  
+}
 function OpinionCard({ author, content, likes, isEven }) { // Added isEven prop
   const colorClass = getColor(isEven);
   const colorBgClass = getColorBg(isEven);
@@ -21,7 +24,7 @@ function OpinionCard({ author, content, likes, isEven }) { // Added isEven prop
         <p className="mt-1 text-[1rem] leading-[24px] text-white text-left">{content}</p>
       </div>
       <div className="flex flex-col items-center w-10">
-        <div className="flex gap-2 items-center p-2 w-10">
+        <div className="flex gap-2 items-center p-2 w-10 cursor-pointer" onClick={handleLikeClick}>
           <FontAwesomeIcon icon={faThumbsUp} className={`${colorClass} w-6 h-6`} />
         </div>
         <div className={`text-xs leading-5 ${colorClass}`}>{likes}</div>
