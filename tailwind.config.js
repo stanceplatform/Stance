@@ -15,6 +15,12 @@ export default {
       fontFamily: {
         inter: ['Inter'], // Add Inter to the theme
       },
+      fontSize: {
+        'responsive': 'clamp(2rem, 6vw + 1rem, 3rem)',
+      },
+      lineHeight: {
+        'responsive': 'clamp(1.25rem, 8vw + 1rem, 4rem)',
+      },
       height: {
         'screen-svh': '100svh', // Small Viewport Height
         'screen-lvh': '100lvh', // Large Viewport Height

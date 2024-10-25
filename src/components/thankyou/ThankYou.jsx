@@ -1,14 +1,14 @@
 import React from "react";
-import Header from "./Header";
 import ThankYouMessage from "./ThankYouMessage.jsx";
-import SuggestTopic from "./SuggestTopic";
+import Header from "../Header.jsx";
+import SuggestTopicSection from "./SuggestTopicSection.jsx";
 
 function ThankYou() {
   return (
-    <div className="flex overflow-hidden flex-col items-center pb-16 mx-auto w-full bg-yellow-400 max-w-[480px]">
+    <div className="flex  flex-col items-center pb-16 mx-auto w-full bg-yellow-400 max-w-[480px] max-h-screen">
       <Header />
       <ThankYouMessage />
-      <SuggestTopic />
+      <SuggestTopicSection />
     </div>
   );
 }

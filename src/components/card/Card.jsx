@@ -4,6 +4,7 @@ import CardNavigation from './CardNavigation';
 import QuestionSection from './QuestionSection';
 import questionData from '../../data/data.json';
 import Header from '../Header';
+import ThankYou from '../thankyou/ThankYou';
 
 const Card = () => {
   const [questions, setQuestions] = useState([]);
@@ -17,7 +18,11 @@ const Card = () => {
 
   const handleNextQuestion = () => {
     setDirection('next');
-    const newIndex = (currentQuestionIndex + 1) % questions.length;
+    const newIndex = (currentQuestionIndex + 1);
+    if (newIndex >= questions.length) {
+      window.location.href = '/thankYou'; // Navigate to thank you route if newIndex exceeds questions length
+      return;
+    }
     setNextBackgroundImage(questions[newIndex].backgroundImageUrl); // Set next image
     setTimeout(() => {
       setCurrentQuestionIndex(newIndex); // Update current question after transition
@@ -38,7 +43,7 @@ const Card = () => {
   return (
     <>
       <div className="flex overflow-hidden flex-col mx-auto w-full max-w-[480px] max-h-screen relative">
-        {questions.length > 0 && (
+        {questions.length > 0 ? (
           <div className="relative flex flex-col w-full h-screen-svh bg-center bg-cover">
             {/* Current background image */}
 
@@ -85,7 +90,7 @@ const Card = () => {
             </motion.div>
 
           </div>
-        )}
+        ):<ThankYou/>}
       </div>
     </>
   );
