@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import OpinionCard from './OpinionCard';
 import { fetchOpinions } from '../../operations'; // Import the new function
 import commentsData from '../../data/commentsData.json';
-import AddOpinionForm from './AddOpinionForm';
+import OpinionForm from './OpinionForm';
 
 function OpinionThread() {
   const [opinions, setOpinions] = useState([]);
@@ -64,7 +64,7 @@ function OpinionThread() {
         </div>
       </div>
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-neutral-800"> {/* Fixed background for the form */}
-        <AddOpinionForm onAddOpinion={addOpinion} />
+        <OpinionForm onAddOpinion={addOpinion} />
       </div>
     </section>
   );

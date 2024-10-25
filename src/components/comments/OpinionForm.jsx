@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-function AddOpinionForm({ onAddOpinion }) {
+function OpinionForm({ onAddOpinion }) {
   const [opinion, setOpinion] = useState('');
 
   const handleSubmit = (e) => {
@@ -34,4 +34,4 @@ function AddOpinionForm({ onAddOpinion }) {
   );
 }
 
-export default AddOpinionForm;
+export default OpinionForm;
