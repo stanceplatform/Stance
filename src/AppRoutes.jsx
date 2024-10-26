@@ -21,7 +21,7 @@ const AppRoutes = () => {
                         }
                     />
                     <Route path="/notification" element={<NotificationsPage />} />
-                    <Route path="/thankYou" element={<ThankYou />} />
+                    <Route path='/thankYou' element={<ThankYou />} />
 
                     {/* <Route path="/card" element={                                <Dashboard />} /> */}
                     {/* Add more routes here as needed */}
