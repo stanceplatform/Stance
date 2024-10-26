@@ -7,7 +7,7 @@ export default {
   theme: {
     extend: {
       colors: {
-        'yellow-700': '#F0E224',
+        'yellow-700': '#776F08',
         'yellow-900': '#333104',
         'yellow-500': '#D2C40F',
         'purple-900': '#280137',  
