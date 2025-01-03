@@ -1,25 +1,30 @@
 import React, { useEffect, useState, useRef } from "react";
 import CommentDrawer from "../comments/CommentDrawer";
 import ProgressBarWithLabels from "../charts/ProgressBar";
+import { voteOnCard } from "../../operations";
 
 function QuestionSection({ question }) {
   const [hasVoted, setHasVoted] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [userChoice, setUserChoice] = useState(null);
+  const [currentAnswers, setCurrentAnswers] = useState(question.answerOptions);
   const drawerRef = useRef(null);
 
-  const handleVote = async (option) => {
+  const handleVote = async (option, choiceNumber) => {
     if (!hasVoted) {
       try {
-        // Simulate a successful vote
-        let result = {
-          success: true,
-          message: 'Vote successful'
-        };
-        console.log('Vote successful:', result);
+        const response = await voteOnCard(question.id, option.id);
+        
+        // Update the local state with new percentages from response
+        if (response.answerOptions) {
+          setCurrentAnswers(response.answerOptions);
+        }
+        
         setHasVoted(true);
+        setUserChoice(choiceNumber);
       } catch (error) {
         console.error('Error voting:', error);
+        // Optionally show an error message to the user
       }
     } else {
       console.log('You have already voted on this question.');
@@ -59,7 +64,7 @@ function QuestionSection({ question }) {
               <button
                 className="relative flex-1 shrink gap-2 self-stretch mx-3 px-3 py-2 h-full text-left text-2xl tracking-wide leading-8 whitespace-wrap bg-yellow-400 rounded-md text-neutral-900 max-w-xs"
                 aria-label="Yes"
-                onClick={() => handleVote(question.answerOptions[0], setUserChoice(1))}
+                onClick={() => handleVote(question.answerOptions[0], 1)}
               >
                 {question.answerOptions[0].value}
                 <span className="absolute right-[-10px] top-[50%] translate-y-[-80%] w-0 h-0 border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent border-l-[10px] border-l-yellow-400"></span>
@@ -67,14 +72,17 @@ function QuestionSection({ question }) {
               <button
                 className="relative flex-1 shrink gap-2 self-stretch mx-3 px-3 py-2 h-full text-right text-2xl text-white tracking-wide leading-8 whitespace-wrap bg-purple-700 rounded-md text-neutral-900 max-w-xs"
                 aria-label="No"
-                onClick={() => handleVote(question.answerOptions[1], setUserChoice(2))}
+                onClick={() => handleVote(question.answerOptions[1], 2)}
               >
                 {question.answerOptions[1].value}
                 <span className="absolute left-[-10px] top-[50%] translate-y-[-20%] w-0 h-0 border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent border-r-[10px] border-r-purple-700"></span>
               </button>
             </>
           ) : (
-            <ProgressBarWithLabels firstOptionPercentage={question.answerOptions[0].percentage} userChoice={userChoice} />
+            <ProgressBarWithLabels 
+              firstOptionPercentage={currentAnswers[0].percentage} 
+              userChoice={userChoice} 
+            />
           )}
         </div>
         <button onClick={toggleDrawer} className="gap-2 self-center px-4 py-2 mt-6 text-base tracking-wide text-white bg-white bg-opacity-20 rounded-[40px]">
