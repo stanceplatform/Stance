@@ -61,7 +61,7 @@ function QuestionSection({ question }) {
                 aria-label="Yes"
                 onClick={() => handleVote(question.answerOptions[0], setUserChoice(1))}
               >
-                {question.answerOptions[0].text}
+                {question.answerOptions[0].value}
                 <span className="absolute right-[-10px] top-[50%] translate-y-[-80%] w-0 h-0 border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent border-l-[10px] border-l-yellow-400"></span>
               </button>
               <button
@@ -69,7 +69,7 @@ function QuestionSection({ question }) {
                 aria-label="No"
                 onClick={() => handleVote(question.answerOptions[1], setUserChoice(2))}
               >
-                {question.answerOptions[1].text}
+                {question.answerOptions[1].value}
                 <span className="absolute left-[-10px] top-[50%] translate-y-[-20%] w-0 h-0 border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent border-r-[10px] border-r-purple-700"></span>
               </button>
             </>
