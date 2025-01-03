@@ -134,7 +134,7 @@ export const voteOnCard = async (cardId, option) => {
 export const likeComment = async (cardId, commentId) => {
   try {
     const response = await fetch(`${BASE_URL}/cards/${cardId}/comments/${commentId}/like`, {
-      method: 'POST',
+      method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
       },

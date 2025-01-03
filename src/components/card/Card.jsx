@@ -5,7 +5,6 @@ import QuestionSection from './QuestionSection';
 import { fetchAllCards } from '../../operations';
 import Header from '../Header';
 import ThankYou from '../thankyou/ThankYou';
-import CommentDrawer from '../comments/CommentDrawer';
 import { faComment } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -14,7 +13,6 @@ const Card = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [nextBackgroundImage, setNextBackgroundImage] = useState(null);
   const [direction, setDirection] = useState('next');
-  const [isCommentDrawerOpen, setIsCommentDrawerOpen] = useState(false);
 
   useEffect(() => {
     loadCards();
@@ -23,6 +21,8 @@ const Card = () => {
   const loadCards = async () => {
     try {
       const data = await fetchAllCards();
+      console.log(data);
+      
       setQuestions(data);
     } catch (error) {
       console.error('Error loading cards:', error);
@@ -97,24 +97,8 @@ const Card = () => {
             >
               <QuestionSection question={questions[currentQuestionIndex]} />
             </motion.div>
-
-            <CommentDrawer 
-              isOpen={isCommentDrawerOpen}
-              onClose={() => setIsCommentDrawerOpen(false)}
-              cardId={questions[currentQuestionIndex]?.id}
-            />
-
-            <button 
-              onClick={() => setIsCommentDrawerOpen(true)}
-              className="fixed bottom-4 right-4 bg-white text-blue-500 p-3 rounded-full shadow-lg flex items-center gap-2"
-            >
-              <FontAwesomeIcon icon={faComment} />
-              <span className="text-sm font-medium">
-                {questions[currentQuestionIndex]?.commentCount || 0}
-              </span>
-            </button>
           </div>
-        ) : <ThankYou/>}
+        ) : <ThankYou />}
       </div>
     </>
   );

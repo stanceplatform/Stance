@@ -7,6 +7,7 @@ function OpinionThread({ cardId }) {
   const [opinions, setOpinions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [likeDebounce, setLikeDebounce] = useState({});
 
   useEffect(() => {
     loadOpinions();
@@ -34,12 +35,25 @@ function OpinionThread({ cardId }) {
     }
   };
 
+  const canLike = (commentId) => {
+    const now = Date.now();
+    const lastLike = likeDebounce[commentId] || 0;
+    return (now - lastLike) >= 2000; // 2 seconds cooldown
+  };
+
   const handleLike = async (commentId) => {
     try {
-      console.log(cardId, commentId);
-      
+      if (!canLike(commentId)) {
+        return;
+      }
+
+      setLikeDebounce(prev => ({
+        ...prev,
+        [commentId]: Date.now()
+      }));
+
       await likeComment(cardId, commentId);
-      // Update the local state to reflect the like change
+      
       setOpinions(opinions.map(opinion => 
         opinion.id === commentId
           ? {

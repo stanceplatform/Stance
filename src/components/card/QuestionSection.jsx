@@ -90,7 +90,7 @@ function QuestionSection({ question }) {
         </button>
       </div>
       <div ref={drawerRef}>
-        <CommentDrawer isOpen={isDrawerOpen} onClose={toggleDrawer} />
+        <CommentDrawer isOpen={isDrawerOpen} onClose={toggleDrawer} cardId={question.id} />
       </div>
     </section>
   );
