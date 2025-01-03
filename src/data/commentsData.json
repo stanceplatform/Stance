@@ -1,4 +1,5 @@
-[
+{
+  "comments": [
     {
       "id": 1,
       "author": "User1",
@@ -91,3 +92,4 @@
       "avatarSrc": "https://example.com/avatar7.png"
     }
   ]
+}

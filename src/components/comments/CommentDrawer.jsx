@@ -3,7 +3,7 @@ import OpinionThread from './OpinionThread';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 
-function CommentDrawer({ isOpen, onClose }) {
+function CommentDrawer({ isOpen, onClose, cardId }) {
   return (
     <div className={`fixed mx-auto inset-x-0 bottom-0 transition-transform transform ${isOpen ? 'translate-y-0' : 'translate-y-full'} bg-neutral-900 rounded-t-3xl max-w-[480px]`}>
       <div className="flex justify-between items-center pt-5">
@@ -14,8 +14,8 @@ function CommentDrawer({ isOpen, onClose }) {
           <FontAwesomeIcon icon={faTimes} className="w-6 h-6" />
         </button>
       </div>
-      <div className="overflow-y-auto max-h-[60vh] hide-scrollbar"> {/* Set a max height and enable scrolling */}
-        <OpinionThread />
+      <div className="overflow-y-auto max-h-[60vh] hide-scrollbar">
+        <OpinionThread cardId={cardId} />
       </div>
     </div>
   );
