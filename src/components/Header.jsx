@@ -24,9 +24,9 @@ function Header({ onOpenNotifications }) {
         loading="lazy" 
         src="https://cdn.builder.io/api/v1/image/assets/TEMP/3ba494924b7b74f2ab4117b9cc51026096cd23cac22c01b5156ebb0070d3bcb4?placeholderIfAbsent=true&apiKey=9667f82c7e1b4746ad9299d82be6adf4" 
         alt="Logo" 
-        className="object-contain z-0 shrink-0 self-stretch my-auto aspect-[2.72] w-[98px]" 
+        className="object-contain z-20 shrink-0 self-stretch my-auto aspect-[2.72] w-[98px]" 
       />
-      <div className="flex absolute right-0 bottom-0 z-0 self-start bg-neutral-900 bg-opacity-10 h-[72px] min-h-[72px] w-[390px]" />
+      <div className="flex absolute right-0 bottom-0 z-10 self-start bg-neutral-900 bg-opacity-10 h-[72px] min-h-[72px] w-full" />
       <nav className="flex z-0 gap-1 items-center self-stretch my-auto">
         <button 
           aria-label="Notification" 
