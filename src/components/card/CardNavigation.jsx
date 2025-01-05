@@ -1,4 +1,3 @@
-import React from "react";
 
 function CardNavigation({ onNext, onPrevious }) { // Removed question prop
   const handleLeftTap = () => {

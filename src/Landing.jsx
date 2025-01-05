@@ -1,8 +1,8 @@
 import React from 'react'
-import Header from './components/Header'
-import Logo from './components/Logo'
-import Footer from './components/Footer'
-import GoogleSignIn from './components/provider/GoogleSignIn'
+import Logo from './components/ui/Logo'
+import Footer from './components/ui/Footer'
+import GoogleSignIn from './components/auth/GoogleSignIn'
+import Header from './components/ui/Header'
 
 const Landing = () => {
     return (

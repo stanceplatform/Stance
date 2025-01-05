@@ -1,7 +1,7 @@
 import React from "react";
 import ThankYouMessage from "./ThankYouMessage.jsx";
-import Header from "../Header.jsx";
 import SuggestTopicSection from "./SuggestTopicSection.jsx";
+import Header from "../ui/Header.jsx";
 
 function ThankYou() {
   return (

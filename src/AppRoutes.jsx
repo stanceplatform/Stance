@@ -1,11 +1,10 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Landing from './Landing';
-import ProtectedRoute from './ProtectedRoute'; // Import the ProtectedRoute component
-import { AuthProvider } from './AuthContext';
 import Card from './components/card/Card';
 import NotificationsPage from './components/notification/NotificationPage';
 import ThankYou from './components/thankyou/ThankYou';
+import { AuthProvider } from './context/AuthContext';
 const AppRoutes = () => {
     return (
         <AuthProvider>

@@ -1,12 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import CardNavigation from './CardNavigation';
 import QuestionSection from './QuestionSection';
 import { fetchAllCards } from '../../operations';
-import Header from '../Header';
 import ThankYou from '../thankyou/ThankYou';
-import { faComment } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import Header from '../ui/Header';
 
 const Card = () => {
   const [questions, setQuestions] = useState([]);
