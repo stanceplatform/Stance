@@ -1,10 +1,11 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Landing from './Landing';
+import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import Card from './components/card/Card';
 import NotificationsPage from './components/notification/NotificationPage';
 import ThankYou from './components/thankyou/ThankYou';
 import { AuthProvider } from './context/AuthContext';
+import Landing from './pages/Landing';
+
 const AppRoutes = () => {
     return (
         <AuthProvider>

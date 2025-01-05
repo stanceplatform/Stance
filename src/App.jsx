@@ -1,7 +1,7 @@
-import { useState } from 'react'
-import AppRoutes from './AppRoutes'; // Import the Routes component
-import './styles/App.css'
+import React, { useState } from 'react';
 import { Container } from 'react-bootstrap';
+import AppRoutes from './AppRoutes';
+import './styles/App.css';
 
 function App() {
   const [count, setCount] = useState(0)

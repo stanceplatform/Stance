@@ -1,7 +1,7 @@
 import React from 'react';
-import OpinionThread from './OpinionThread';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
+import OpinionThread from './OpinionThread';
 
 function CommentDrawer({ isOpen, onClose, cardId }) {
   return (

@@ -1,7 +1,7 @@
-import React, { useEffect, useState, useRef } from "react";
-import CommentDrawer from "../comments/CommentDrawer";
-import ProgressBarWithLabels from "../charts/ProgressBar";
-import { voteOnCard } from "../../operations";
+import React, { useEffect, useState, useRef } from 'react';
+import { voteOnCard } from '../../services/operations';
+import CommentDrawer from '../comments/CommentDrawer';
+import ProgressBarWithLabels from '../charts/ProgressBar';
 
 function QuestionSection({ question }) {
   const [hasVoted, setHasVoted] = useState(false);

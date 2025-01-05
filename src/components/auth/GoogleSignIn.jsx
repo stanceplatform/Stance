@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import { Alert } from 'react-bootstrap';
-import { useAuth } from '../../AuthContext'; // Import the AuthContext
-
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 const GoogleSignIn = () => {
   const navigate = useNavigate(); // Use useNavigate instead of useHistory
   const { login } = useAuth(); // Get the login function from context

@@ -1,5 +1,5 @@
-import * as React from "react";
-import NotificationItem from "./NotificationItem";
+import React from 'react';
+import NotificationItem from './NotificationItem';
 
 function NotificationList({ notifications }) {
   return (

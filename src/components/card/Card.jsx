@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import CardNavigation from './CardNavigation';
-import QuestionSection from './QuestionSection';
-import { fetchAllCards } from '../../operations';
+import React, { useEffect, useState } from 'react';
+import { fetchAllCards } from '../../services/operations';
 import ThankYou from '../thankyou/ThankYou';
 import Header from '../ui/Header';
+import CardNavigation from './CardNavigation';
+import QuestionSection from './QuestionSection';
 
 const Card = () => {
   const [questions, setQuestions] = useState([]);

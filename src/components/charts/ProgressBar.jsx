@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 const ProgressBarWithLabels = ({ firstOptionPercentage, userChoice }) => {
   const secondOptionPercentage = 100 - firstOptionPercentage;
@@ -31,6 +32,11 @@ const ProgressBarWithLabels = ({ firstOptionPercentage, userChoice }) => {
       </div>
     </div>
   );
+};
+
+ProgressBarWithLabels.propTypes = {
+  firstOptionPercentage: PropTypes.number.isRequired,
+  userChoice: PropTypes.oneOf(['Yes', 'No']).isRequired
 };
 
 export default ProgressBarWithLabels;

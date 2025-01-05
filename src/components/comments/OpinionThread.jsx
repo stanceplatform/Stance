@@ -1,7 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import OpinionCard from './OpinionCard';
-import { fetchCardComments, postCommentOnCard, likeComment } from '../../operations';
 import OpinionForm from './OpinionForm';
+import { 
+  fetchCardComments, 
+  postCommentOnCard, 
+  likeComment 
+} from '../../services/operations';
 
 function OpinionThread({ cardId }) {
   const [opinions, setOpinions] = useState([]);
