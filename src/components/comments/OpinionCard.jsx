@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUserCircle } from '@fortawesome/free-solid-svg-icons';
 import { faThumbsUp as regularThumbsUp } from '@fortawesome/free-regular-svg-icons';
 import { faThumbsUp as solidThumbsUp } from '@fortawesome/free-solid-svg-icons';
+import { marked } from 'marked';
 
 function getColor(isEven) {
   return isEven ? 'text-yellow-500' : 'text-purple-300';
@@ -16,6 +17,12 @@ function OpinionCard({ author, content, likes_count, liked_by_me, isEven, onLike
   const [isLikeLoading, setIsLikeLoading] = useState(false);
   const colorClass = getColor(isEven);
   const colorBgClass = getColorBg(isEven);
+
+  // Parse markdown content
+  const htmlContent = marked(content, {
+    breaks: true, // Convert line breaks to <br>
+    gfm: true,    // Enable GitHub Flavored Markdown
+  });
 
   const handleLike = async () => {
     if (isLikeLoading) return; // Prevent multiple clicks while loading
@@ -31,7 +38,10 @@ function OpinionCard({ author, content, likes_count, liked_by_me, isEven, onLike
     <article className="flex gap-1 py-1 w-full rounded-lg z-100">
       <div className={`flex flex-col flex-1 shrink self-start p-2 rounded-lg basis-0 ${colorBgClass}`}>
         <h3 className={`text-[14px] leading-[16px] ${colorClass} text-left font-normal`}>{author}</h3>
-        <p className="mt-1 text-[1rem] leading-[24px] text-white text-left">{content}</p>
+        <div 
+          className="mt-1 text-[1rem] leading-[24px] text-white text-left prose prose-invert max-w-none"
+          dangerouslySetInnerHTML={{ __html: htmlContent }}
+        />
       </div>
       <div className="flex flex-col items-center w-10">
         <div 
