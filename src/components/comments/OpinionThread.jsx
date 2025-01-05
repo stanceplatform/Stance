@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import OpinionCard from './OpinionCard';
 import { fetchCardComments, postCommentOnCard, likeComment } from '../../operations';
 import OpinionForm from './OpinionForm';
@@ -8,30 +8,46 @@ function OpinionThread({ cardId }) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [likeDebounce, setLikeDebounce] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    loadOpinions();
-  }, [cardId]);
-
-  const loadOpinions = async () => {
+  const loadOpinions = useCallback(async () => {
     try {
       setIsLoading(true);
+      setError(null);
       const response = await fetchCardComments(cardId);
       setOpinions(response.comments || []);
-      setIsLoading(false);
     } catch (err) {
       setError(err.message);
+    } finally {
       setIsLoading(false);
     }
-  };
+  }, [cardId]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const load = async () => {
+      await loadOpinions();
+    };
+
+    load();
+
+    return () => {
+      mounted = false;
+    };
+  }, [loadOpinions]);
 
   const addOpinion = async (newOpinion) => {
     try {
+      setIsSubmitting(true);
+      setError(null);
       const addedOpinion = await postCommentOnCard(cardId, newOpinion);
       const newComment = addedOpinion.comments ? addedOpinion.comments[0] : addedOpinion;
-      setOpinions([...opinions, newComment]);
+      setOpinions(prevOpinions => [...prevOpinions, newComment]);
     } catch (err) {
       setError(err.message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -47,6 +63,7 @@ function OpinionThread({ cardId }) {
         return;
       }
 
+      setError(null);
       setLikeDebounce(prev => ({
         ...prev,
         [commentId]: Date.now()
@@ -54,7 +71,7 @@ function OpinionThread({ cardId }) {
 
       await likeComment(cardId, commentId);
       
-      setOpinions(opinions.map(opinion => 
+      setOpinions(prevOpinions => prevOpinions.map(opinion => 
         opinion.id === commentId
           ? {
               ...opinion,
@@ -78,7 +95,7 @@ function OpinionThread({ cardId }) {
 
   return (
     <section className="flex flex-col h-full">
-      <div className="flex flex-col overflow-hidden flex-grow px-4 pt-2 pb-4 rounded-3xl bg-neutral-900">
+      <div className="flex flex-col flex-grow px-4 pt-2 pb-4 rounded-3xl bg-neutral-900">
         <div className="flex overflow-y-auto flex-col w-full hide-scrollbar">
           {opinions.map((opinion, index) => (
             <OpinionCard 
@@ -90,8 +107,11 @@ function OpinionThread({ cardId }) {
           ))}
         </div>
       </div>
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-neutral-800">
-        <OpinionForm onAddOpinion={addOpinion} />
+      <div className="flex bottom-0 left-0 right-0 p-4 bg-neutral-800">
+        <OpinionForm 
+          onAddOpinion={addOpinion} 
+          isSubmitting={isSubmitting}
+        />
       </div>
     </section>
   );
