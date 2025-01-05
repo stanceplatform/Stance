@@ -55,7 +55,7 @@ const Card = () => {
 
   return (
     <>
-      <div className="flex overflow-hidden flex-col mx-auto w-full max-w-[480px] max-h-screen relative">
+      <div className="flex overflow-hidden flex-col mx-auto w-full max-w-[480px] max-h-screen-dvh relative">
         {questions.length > 0 ? (
           <div className="relative flex flex-col w-full h-screen-svh bg-center bg-cover">
             <motion.div

@@ -8,7 +8,7 @@ function App() {
   const [count, setCount] = useState(0)
 
   return (
-<Container className="max-h-screen overflow-hidden flex items-center justify-center">
+<Container className="max-h-screen-dvh overflow-hidden flex items-center justify-center">
   <AppRoutes /> {/* Use the Routes component here */}
 </Container>
 
