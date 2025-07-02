@@ -1,0 +1,2 @@
+export const GOOGLE_CLIENT_ID = '445535444345-vmboeolk6gskoqeghi9ipd816sratu6j.apps.googleusercontent.com'; // Replace with your actual Google Client ID
+// export const GOOGLE_CLIENT_SECRET = 'YOUR_GOOGLE_CLIENT_SECRET'; // Replace with your actual Google Client Secret 
