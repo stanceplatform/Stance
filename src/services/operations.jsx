@@ -10,23 +10,11 @@ export const fetchAnswerOptions = async () => {
       return data;
     } catch (error) {
       console.error('Error fetching answer options:', error);
-      throw error;
+      
+      // throw error;
     }
   };
 
-export const fetchQuestionData = async () => {
-  try {
-    const response = await fetch(`${BASE_URL}/api/question`);
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('Error fetching question data:', error);
-    throw error;
-  }
-};
 
 export const vote = async (option) => {
     try {
@@ -93,7 +81,18 @@ export const fetchAllCards = async () => {
     return data;
   } catch (error) {
     console.error('Error fetching cards:', error);
-    throw error;
+    // Fallback to local JSON file
+    try {
+      const fallbackResponse = await fetch('/src/data/data.json');
+      if (!fallbackResponse.ok) {
+        throw new Error('Failed to fetch fallback cards');
+      }
+      const fallbackData = await fallbackResponse.json();
+      return fallbackData;
+    } catch (fallbackError) {
+      console.error('Error fetching fallback cards:', fallbackError);
+      throw fallbackError;
+    }
   }
 };
 
@@ -107,7 +106,19 @@ export const fetchCardComments = async (cardId) => {
     return data;
   } catch (error) {
     console.error('Error fetching card comments:', error);
-    throw error;
+    // Fallback to local JSON file
+    try {
+      const fallbackResponse = await fetch('/src/data/commentsData.json');
+      if (!fallbackResponse.ok) {
+        throw new Error('Failed to fetch fallback comments');
+      }
+      const fallbackData = await fallbackResponse.json();
+      // fallbackData is an object with a 'comments' array
+      return fallbackData;
+    } catch (fallbackError) {
+      console.error('Error fetching fallback comments:', fallbackError);
+      throw fallbackError;
+    }
   }
 };
 
