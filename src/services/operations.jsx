@@ -53,7 +53,7 @@ export const login = async (credentials) => {
 
 export const fetchAllCards = async () => {
   try {
-    const response = await fetch(`${BASE_URL}/cards/all`);
+    const response = await fetch(`${BASE_URL}/api/questions/list`);
     if (!response.ok) {
       throw new Error('Failed to fetch cards');
     }
