@@ -3,8 +3,9 @@ import { voteOnCard } from '../../services/operations';
 import CommentDrawer from '../comments/CommentDrawer';
 import ProgressBarWithLabels from '../charts/ProgressBar';
 
-function QuestionSection({ question }) {
-  const [hasVoted, setHasVoted] = useState(false);
+function QuestionSection({ question, onVoteUpdate }) {
+  const hasExistingVotes = question.answerOptions.some(option => option.percentage > 0);
+  const [hasVoted, setHasVoted] = useState(hasExistingVotes);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [userChoice, setUserChoice] = useState(null);
   const [currentAnswers, setCurrentAnswers] = useState(question.answerOptions);
@@ -15,19 +16,17 @@ function QuestionSection({ question }) {
       try {
         const response = await voteOnCard(question.id, option.id);
         
-        // Update the local state with new percentages from response
-        if (response.answerOptions) {
-          setCurrentAnswers(response.answerOptions);
+        // Update the local state with new percentages from API response
+        if (response.options) {
+          setCurrentAnswers(response.options);
+          onVoteUpdate?.(question.id, response.options);
         }
         
         setHasVoted(true);
         setUserChoice(choiceNumber);
       } catch (error) {
         console.error('Error voting:', error);
-        // Optionally show an error message to the user
       }
-    } else {
-      console.log('You have already voted on this question.');
     }
   };
 
@@ -81,7 +80,9 @@ function QuestionSection({ question }) {
           ) : (
             <ProgressBarWithLabels 
               firstOptionPercentage={currentAnswers[0].percentage} 
-              userChoice={userChoice} 
+              userChoice={userChoice || 1}
+              firstOptionText={currentAnswers[0].value}
+              secondOptionText={currentAnswers[1].value}
             />
           )}
         </div>

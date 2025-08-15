@@ -13,16 +13,12 @@ function getColorBg(isEven) {
   return isEven ? 'bg-yellow-900' : 'bg-purple-900';
 }
 
-function OpinionCard({ author, content, likes_count, liked_by_me, isEven, onLike }) {
+function OpinionCard({ username, text, likeCount, isLikedByUser, isEven, onLike }) {
   const [isLikeLoading, setIsLikeLoading] = useState(false);
   const colorClass = getColor(isEven);
   const colorBgClass = getColorBg(isEven);
 
-  // Parse markdown content
-  const htmlContent = marked(content, {
-    breaks: true, // Convert line breaks to <br>
-    gfm: true,    // Enable GitHub Flavored Markdown
-  });
+
 
   const handleLike = async () => {
     if (isLikeLoading) return; // Prevent multiple clicks while loading
@@ -37,10 +33,10 @@ function OpinionCard({ author, content, likes_count, liked_by_me, isEven, onLike
   return (
     <article className="flex gap-1 py-1 w-full rounded-lg z-100">
       <div className={`flex flex-col flex-1 shrink self-start p-2 rounded-lg basis-0 ${colorBgClass}`}>
-        <h3 className={`text-[14px] leading-[16px] ${colorClass} text-left font-normal`}>{author}</h3>
+        <h3 className={`text-[14px] leading-[16px] ${colorClass} text-left font-normal`}>{username}</h3>
         <div 
           className="mt-1 text-[1rem] leading-[24px] text-white text-left prose prose-invert max-w-none"
-          dangerouslySetInnerHTML={{ __html: htmlContent }}
+          dangerouslySetInnerHTML={{ __html: marked(text, { breaks: true, gfm: true }) }}
         />
       </div>
       <div className="flex flex-col items-center w-10">
@@ -49,11 +45,11 @@ function OpinionCard({ author, content, likes_count, liked_by_me, isEven, onLike
           onClick={handleLike}
         >
           <FontAwesomeIcon 
-            icon={liked_by_me ? solidThumbsUp : regularThumbsUp} 
-            className={`${colorClass} w-6 h-6 transition-all duration-200 ${liked_by_me ? 'scale-110' : ''}`} 
+            icon={isLikedByUser ? solidThumbsUp : regularThumbsUp} 
+            className={`${colorClass} w-6 h-6 transition-all duration-200 ${isLikedByUser ? 'scale-110' : ''}`} 
           />
         </div>
-        <div className={`text-xs leading-5 ${colorClass}`}>{likes_count}</div>
+        <div className={`text-xs leading-5 ${colorClass}`}>{likeCount}</div>
       </div>
     </article>
   );

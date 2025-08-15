@@ -1,32 +1,31 @@
 import { motion } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
+import { fetchAllCards } from '../../services/operations';
+import { useApi } from '../../hooks/useApi';
+
 import ThankYou from '../thankyou/ThankYou';
 import Header from '../ui/Header';
 import CardNavigation from './CardNavigation';
 import QuestionSection from './QuestionSection';
 
 const Card = () => {
+  const { data: questionsData = [], loading, error } = useApi(fetchAllCards);
   const [questions, setQuestions] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [nextBackgroundImage, setNextBackgroundImage] = useState(null);
   const [direction, setDirection] = useState('next');
 
   useEffect(() => {
-    loadCards();
-  }, []);
+    if (questionsData) {
+      setQuestions(questionsData);
 
-  const loadCards = async () => {
-    try {
-      const response = await fetch(
-        'http://stance.ap-south-1.elasticbeanstalk.com/api/questions/list'
-      );
-      if (!response.ok) throw new Error('Network response was not ok');
-
-      const data = await response.json();
-      setQuestions(data.content); 
-    } catch (error) {
-      console.error('Error loading cards:', error);
     }
+  }, [questionsData]);
+
+  const updateQuestionOptions = (questionId, newOptions) => {
+    setQuestions(prev => prev.map(q => 
+      q.id === questionId ? { ...q, answerOptions: newOptions } : q
+    ));
   };
 
   const handleNextQuestion = () => {
@@ -54,23 +53,19 @@ const Card = () => {
   };
 
   return (
-    <div className="flex overflow-hidden flex-col mx-auto w-full max-w-[480px] max-h-screen-dvh relative">
-      {questions.length > 0 ? (
-        <div className="relative flex flex-col w-full h-screen-svh bg-center bg-cover">
-          <motion.div
-            key={`bg-${currentQuestionIndex}`}
-            className="absolute inset-0"
-            style={{
-              backgroundImage: `url(${questions[currentQuestionIndex].backgroundImageUrl})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-            }}
-            initial={{ x: 0 }}
-            animate={{ x: nextBackgroundImage ? (direction === 'next' ? '-100%' : '100%') : 0 }}
-            transition={{ duration: 0.5, ease: 'easeInOut' }}
-          />
+    <>
+      <div className="flex overflow-hidden flex-col mx-auto w-full max-w-[480px] max-h-screen-dvh relative">
+        {loading ? (
+          <div className="flex items-center justify-center h-screen">
+            <div className="text-white">Loading...</div>
+          </div>
+        ) : error ? (
+          <div className="flex items-center justify-center h-screen">
+            <div className="text-red-500">Error loading questions</div>
+          </div>
+        ) : questions.length > 0 ? (
+          <div className="relative flex flex-col w-full h-screen-svh bg-center bg-cover">
 
-          {nextBackgroundImage && (
             <motion.div
               key={`bg-next-${currentQuestionIndex}`}
               className="absolute inset-0"
@@ -87,20 +82,23 @@ const Card = () => {
 
           <CardNavigation onNext={handleNextQuestion} onPrevious={handlePreviousQuestion} />
 
-          <Header />
-          <motion.div
-            key={currentQuestionIndex}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.3 }}
-          >
-            <QuestionSection question={questions[currentQuestionIndex]} />
-          </motion.div>
-        </div>
-      ) : (
-        <ThankYou />
-      )}
-    </div>
+            <Header />
+            <motion.div
+              key={currentQuestionIndex}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+            >
+              <QuestionSection 
+                question={questions[currentQuestionIndex]} 
+                onVoteUpdate={updateQuestionOptions}
+              />
+            </motion.div>
+          </div>
+        ) : <ThankYou />}
+      </div>
+    </>
+
   );
 };
 

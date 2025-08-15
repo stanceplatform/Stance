@@ -18,8 +18,8 @@ function OpinionThread({ cardId }) {
     try {
       setIsLoading(true);
       setError(null);
-      const response = await fetchCardComments(cardId);
-      setOpinions(response.comments || []);
+      const comments = await fetchCardComments(cardId);
+      setOpinions(comments);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -45,9 +45,8 @@ function OpinionThread({ cardId }) {
     try {
       setIsSubmitting(true);
       setError(null);
-      const addedOpinion = await postCommentOnCard(cardId, newOpinion);
-      const newComment = addedOpinion.comments ? addedOpinion.comments[0] : addedOpinion;
-      setOpinions(prevOpinions => [...prevOpinions, newComment]);
+      const addedComment = await postCommentOnCard(cardId, newOpinion.content);
+      setOpinions(prevOpinions => [...prevOpinions, addedComment]);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -73,14 +72,14 @@ function OpinionThread({ cardId }) {
         [commentId]: Date.now()
       }));
 
-      await likeComment(cardId, commentId);
+      await likeComment(commentId);
       
       setOpinions(prevOpinions => prevOpinions.map(opinion => 
         opinion.id === commentId
           ? {
               ...opinion,
-              likes_count: opinion.liked_by_me ? opinion.likes_count - 1 : opinion.likes_count + 1,
-              liked_by_me: !opinion.liked_by_me
+              likeCount: opinion.isLikedByUser ? opinion.likeCount - 1 : opinion.likeCount + 1,
+              isLikedByUser: !opinion.isLikedByUser
             }
           : opinion
       ));
