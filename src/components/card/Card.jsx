@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
 import { fetchAllCards } from '../../services/operations';
 import { useApi } from '../../hooks/useApi';
+
 import ThankYou from '../thankyou/ThankYou';
 import Header from '../ui/Header';
 import CardNavigation from './CardNavigation';
@@ -17,6 +18,7 @@ const Card = () => {
   useEffect(() => {
     if (questionsData) {
       setQuestions(questionsData);
+
     }
   }, [questionsData]);
 
@@ -28,7 +30,7 @@ const Card = () => {
 
   const handleNextQuestion = () => {
     setDirection('next');
-    const newIndex = (currentQuestionIndex + 1);
+    const newIndex = currentQuestionIndex + 1;
     if (newIndex >= questions.length) {
       window.location.href = '/thankYou';
       return;
@@ -63,35 +65,22 @@ const Card = () => {
           </div>
         ) : questions.length > 0 ? (
           <div className="relative flex flex-col w-full h-screen-svh bg-center bg-cover">
+
             <motion.div
-              key={`bg-${currentQuestionIndex}`}
+              key={`bg-next-${currentQuestionIndex}`}
               className="absolute inset-0"
               style={{
-                backgroundImage: `url(${questions[currentQuestionIndex].backgroundImageUrl})`,
+                backgroundImage: `url(${nextBackgroundImage})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
               }}
-              initial={{ x: 0 }}
-              animate={{ x: nextBackgroundImage ? (direction === 'next' ? '-100%' : '100%') : 0 }}
+              initial={{ x: direction === 'next' ? '100%' : '-100%' }}
+              animate={{ x: 0 }}
               transition={{ duration: 0.5, ease: 'easeInOut' }}
             />
+          )}
 
-            {nextBackgroundImage && (
-              <motion.div
-                key={`bg-next-${currentQuestionIndex}`}
-                className="absolute inset-0"
-                style={{
-                  backgroundImage: `url(${nextBackgroundImage})`,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
-                }}
-                initial={{ x: direction === 'next' ? '100%' : '-100%' }}
-                animate={{ x: 0 }}
-                transition={{ duration: 0.5, ease: 'easeInOut' }}
-              />
-            )}
-
-            <CardNavigation onNext={handleNextQuestion} onPrevious={handlePreviousQuestion} />
+          <CardNavigation onNext={handleNextQuestion} onPrevious={handlePreviousQuestion} />
 
             <Header />
             <motion.div
@@ -109,6 +98,7 @@ const Card = () => {
         ) : <ThankYou />}
       </div>
     </>
+
   );
 };
 

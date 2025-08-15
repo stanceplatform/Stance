@@ -16,6 +16,7 @@ export const fetchAllCards = async () => {
   try {
     const response = await apiService.getQuestions(0, 10, 'DESC');
     return response.content || [];
+
   } catch (error) {
     console.error('API fetch failed, using fallback:', error);
     return await loadFallbackData();
