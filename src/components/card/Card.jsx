@@ -1,30 +1,29 @@
 import { motion } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
 import { fetchAllCards } from '../../services/operations';
+import { useApi } from '../../hooks/useApi';
 import ThankYou from '../thankyou/ThankYou';
 import Header from '../ui/Header';
 import CardNavigation from './CardNavigation';
 import QuestionSection from './QuestionSection';
 
 const Card = () => {
+  const { data: questionsData = [], loading, error } = useApi(fetchAllCards);
   const [questions, setQuestions] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [nextBackgroundImage, setNextBackgroundImage] = useState(null);
   const [direction, setDirection] = useState('next');
 
   useEffect(() => {
-    loadCards();
-  }, []);
-
-  const loadCards = async () => {
-    try {
-      const data = await fetchAllCards();
-      console.log(data);
-      
-      setQuestions(data);
-    } catch (error) {
-      console.error('Error loading cards:', error);
+    if (questionsData) {
+      setQuestions(questionsData);
     }
+  }, [questionsData]);
+
+  const updateQuestionOptions = (questionId, newOptions) => {
+    setQuestions(prev => prev.map(q => 
+      q.id === questionId ? { ...q, answerOptions: newOptions } : q
+    ));
   };
 
   const handleNextQuestion = () => {
@@ -54,7 +53,15 @@ const Card = () => {
   return (
     <>
       <div className="flex overflow-hidden flex-col mx-auto w-full max-w-[480px] max-h-screen-dvh relative">
-        {questions.length > 0 ? (
+        {loading ? (
+          <div className="flex items-center justify-center h-screen">
+            <div className="text-white">Loading...</div>
+          </div>
+        ) : error ? (
+          <div className="flex items-center justify-center h-screen">
+            <div className="text-red-500">Error loading questions</div>
+          </div>
+        ) : questions.length > 0 ? (
           <div className="relative flex flex-col w-full h-screen-svh bg-center bg-cover">
             <motion.div
               key={`bg-${currentQuestionIndex}`}
@@ -93,7 +100,10 @@ const Card = () => {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.3 }}
             >
-              <QuestionSection question={questions[currentQuestionIndex]} />
+              <QuestionSection 
+                question={questions[currentQuestionIndex]} 
+                onVoteUpdate={updateQuestionOptions}
+              />
             </motion.div>
           </div>
         ) : <ThankYou />}

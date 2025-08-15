@@ -1,245 +1,110 @@
-const BASE_URL = 'http://localhost:8080';
+import apiService from './api.js';
 
-export const fetchAnswerOptions = async () => {
-    try {
-      const response = await fetch(`${BASE_URL}/api/answers`);
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error('Error fetching answer options:', error);
-      
-      // throw error;
-    }
-  };
-
-
-  // New function to load comments from local JSON file
-export const fetchOpinions = async () => {
-    try {
-      const response = await fetch('/data/commentsData.json'); // Adjust the path as necessary
-      if (!response.ok) {
-        throw new Error('Failed to fetch opinions');
-      }
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error('Error fetching opinions:', error);
-      throw error;
-    }
-  };
-
-export const login = async (credentials) => {
+// Fallback to local data
+const loadFallbackData = async () => {
   try {
-    const response = await fetch(`${BASE_URL}/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(credentials),
-    });
-    if (!response.ok) {
-      throw new Error('Failed to login');
-    }
-    const data = await response.json();
-    return data;
+    const response = await fetch('/src/data/data.json');
+    if (!response.ok) throw new Error('Failed to fetch fallback data');
+    return await response.json();
   } catch (error) {
-    console.error('Error logging in:', error);
-    throw error;
+    console.error('Fallback data load failed:', error);
+    return [];
   }
 };
 
 export const fetchAllCards = async () => {
   try {
-    const response = await fetch(`${BASE_URL}/cards/all`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch cards');
-    }
-    const data = await response.json();
-    return data;
+    const response = await apiService.getQuestions(0, 10, 'DESC');
+    return response.content || [];
   } catch (error) {
-    console.error('Error fetching cards:', error);
-    // Fallback to local JSON file
-    try {
-      const fallbackResponse = await fetch('/src/data/data.json');
-      if (!fallbackResponse.ok) {
-        throw new Error('Failed to fetch fallback cards');
-      }
-      const fallbackData = await fallbackResponse.json();
-      return fallbackData;
-    } catch (fallbackError) {
-      console.error('Error fetching fallback cards:', fallbackError);
-      throw fallbackError;
-    }
+    console.error('API fetch failed, using fallback:', error);
+    return await loadFallbackData();
   }
 };
 
-export const fetchCardComments = async (cardId) => {
+export const fetchOpinions = async () => {
   try {
-    const response = await fetch(`${BASE_URL}/cards/${cardId}/comments/all`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch card comments');
-    }
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('Error fetching card comments:', error);
-    // Fallback to local JSON file
-    try {
-      const fallbackResponse = await fetch('/src/data/commentsData.json');
-      if (!fallbackResponse.ok) {
-        throw new Error('Failed to fetch fallback comments');
-      }
-      const fallbackData = await fallbackResponse.json();
-      // fallbackData is an object with a 'comments' array
-      return fallbackData;
-    } catch (fallbackError) {
-      console.error('Error fetching fallback comments:', fallbackError);
-      throw fallbackError;
-    }
-  }
-};
-
-export const voteOnCard = async (cardId, option) => {
-  try {
-    const response = await fetch(`${BASE_URL}/cards/${cardId}/vote`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ option }),
-    });
-    if (!response.ok) {
-      throw new Error('Failed to vote on card');
-    }
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('Error voting on card:', error);
-    // Always return a positive structure, even on error
-    return {
-      success: true, // still positive for UI logic
-      answerOptions: [
-        {  percentage: 60 },
-        { percentage: 40 }
-      ],    };
-  }
-};
-
-export const likeComment = async (cardId, commentId) => {
-  try {
-    const response = await fetch(`${BASE_URL}/cards/${cardId}/comments/${commentId}/like`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    
-    if (!response.ok) {
-      throw new Error('Failed to like comment');
-    }
-    
+    const response = await fetch('/data/commentsData.json');
+    if (!response.ok) throw new Error('Failed to fetch opinions');
     return await response.json();
   } catch (error) {
-    throw new Error('Failed to like comment: ' + error.message);
+    console.error('Error fetching opinions:', error);
+    throw error;
+  }
+};
+
+export const fetchCardComments = async (questionId) => {
+  try {
+    const response = await apiService.getComments(questionId);
+    return response.content || [];
+  } catch (error) {
+    console.error('Error fetching comments:', error);
+    return [];
+  }
+};
+
+export const voteOnCard = async (questionId, answerOptionId) => {
+  try {
+    const response = await apiService.voteOnQuestion(questionId, answerOptionId);
+    return response;
+  } catch (error) {
+    console.error('Error voting on card:', error);
+    throw error;
+  }
+};
+
+export const login = async (credentials) => {
+  try {
+    // TODO: Implement login API and set token
+    // const response = await apiService.request('/auth/login', {
+    //   method: 'POST',
+    //   body: JSON.stringify(credentials)
+    // });
+    // apiService.setToken(response.token);
+    return { success: true, token: 'mock-token' };
+  } catch (error) {
+    console.error('Login failed:', error);
+    throw error;
+  }
+};
+
+export const likeComment = async (commentId) => {
+  try {
+    return await apiService.likeComment(commentId);
+  } catch (error) {
+    console.error('Error liking comment:', error);
+    throw error;
   }
 };
 
 export const unlikeComment = async (cardId, commentId) => {
-  try {
-    const response = await fetch(`${BASE_URL}/cards/${cardId}/comments/${commentId}/unlike`, {
-      method: 'PATCH',
-    });
-    if (!response.ok) {
-      throw new Error('Failed to unlike comment');
-    }
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('Error unliking comment:', error);
-    throw error;
-  }
+  // TODO: Implement unlike comment API
+  return { success: true };
 };
 
 export const submitSuggestion = async (suggestion) => {
-  try {
-    const response = await fetch(`${BASE_URL}/suggestion`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(suggestion),
-    });
-    if (!response.ok) {
-      throw new Error('Failed to submit suggestion');
-    }
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('Error submitting suggestion:', error);
-    throw error;
-  }
+  // TODO: Implement suggestion API
+  return { success: true };
 };
 
 export const fetchUserProfile = async () => {
-  try {
-    const response = await fetch(`${BASE_URL}/user/profile`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch user profile');
-    }
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('Error fetching user profile:', error);
-    throw error;
-  }
+  // TODO: Implement user profile API
+  return { name: 'User', email: 'user@example.com' };
 };
 
 export const logout = async () => {
-  try {
-    const response = await fetch(`${BASE_URL}/user/logout`, {
-      method: 'POST',
-    });
-    if (!response.ok) {
-      throw new Error('Failed to logout');
-    }
-    return true;
-  } catch (error) {
-    console.error('Error logging out:', error);
-    throw error;
-  }
+  apiService.setToken(null);
+  return true;
 };
 
 export const fetchUserNotifications = async () => {
-  try {
-    const response = await fetch(`${BASE_URL}/user/notification`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch notifications');
-    }
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('Error fetching notifications:', error);
-    throw error;
-  }
+  // TODO: Implement notifications API
+  return [];
 };
 
-export const postCommentOnCard = async (cardId, comment) => {
+export const postCommentOnCard = async (questionId, commentText) => {
   try {
-    const response = await fetch(`${BASE_URL}/cards/${cardId}/comment`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(comment),
-    });
-    if (!response.ok) {
-      throw new Error('Failed to post comment');
-    }
-    const data = await response.json();
-    return data;
+    return await apiService.addComment(questionId, commentText);
   } catch (error) {
     console.error('Error posting comment:', error);
     throw error;
@@ -247,21 +112,8 @@ export const postCommentOnCard = async (cardId, comment) => {
 };
 
 export const createCard = async (cardData) => {
-  try {
-    const response = await fetch(`${BASE_URL}/cards/card`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(cardData),
-    });
-    if (!response.ok) {
-      throw new Error('Failed to create card');
-    }
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('Error creating card:', error);
-    throw error;
-  }
+  // TODO: Implement create card API
+  return { success: true };
 };
+
+export { apiService };

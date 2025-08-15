@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-const ProgressBarWithLabels = ({ firstOptionPercentage, userChoice }) => {
+const ProgressBarWithLabels = ({ firstOptionPercentage, userChoice, firstOptionText, secondOptionText }) => {
   const secondOptionPercentage = 100 - firstOptionPercentage;
 
   return (
@@ -9,12 +9,12 @@ const ProgressBarWithLabels = ({ firstOptionPercentage, userChoice }) => {
       {/* Answer Labels */}
       <div className="flex justify-between w-full">
         <div className="text-left">
-          <p className="text-white font-bold">Yes!</p>
-          {userChoice === 'Yes' && <p className="text-gray-400 text-sm">(your stance)</p>}
+          <p className="text-white font-bold">{firstOptionText}</p>
+          {userChoice === 1 && <p className="text-gray-400 text-sm">(your stance)</p>}
         </div>
         <div className="text-right">
-          <p className="text-white font-bold">No!</p>
-          {userChoice === 'No' && <p className="text-gray-400 text-sm">(your stance)</p>}
+          <p className="text-white font-bold">{secondOptionText}</p>
+          {userChoice === 2 && <p className="text-gray-400 text-sm">(your stance)</p>}
         </div>
       </div>
 
@@ -36,7 +36,9 @@ const ProgressBarWithLabels = ({ firstOptionPercentage, userChoice }) => {
 
 ProgressBarWithLabels.propTypes = {
   firstOptionPercentage: PropTypes.number.isRequired,
-  userChoice: PropTypes.oneOf(['Yes', 'No']).isRequired
+  userChoice: PropTypes.number,
+  firstOptionText: PropTypes.string.isRequired,
+  secondOptionText: PropTypes.string.isRequired
 };
 
 export default ProgressBarWithLabels;
