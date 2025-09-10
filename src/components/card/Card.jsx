@@ -38,7 +38,7 @@ const Card = () => {
     setTimeout(() => {
       setCurrentQuestionIndex(newIndex);
       setNextBackgroundImage(null);
-    }, 500);
+    }, 150);
   };
 
   const handlePreviousQuestion = () => {
@@ -48,7 +48,7 @@ const Card = () => {
     setTimeout(() => {
       setCurrentQuestionIndex(newIndex);
       setNextBackgroundImage(null);
-    }, 500);
+    }, 150);
   };
 
   return (
@@ -63,7 +63,9 @@ const Card = () => {
             <div className="text-red-500">Error loading questions</div>
           </div>
         ) : questions.length > 0 ? (
-          <div className="relative flex flex-col w-full h-screen-svh bg-center bg-cover">
+          <div className="relative flex flex-col w-full h-screen-svh bg-center bg-cover"
+            style={{ backgroundImage: `url(${questions[currentQuestionIndex]?.backgroundImageUrl})` }}
+          >
             {/* animated incoming background */}
             <motion.div
               key={`bg-next-${currentQuestionIndex}`}
