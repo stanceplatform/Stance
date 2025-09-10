@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 import typography from '@tailwindcss/typography';
+
 export default {
   content: [
     "./index.html",
@@ -14,7 +15,8 @@ export default {
         'purple-900': '#280137',
       },
       fontFamily: {
-        intro: ['"Intro Cd-Trial"', 'sans-serif'],
+        inter: ['Inter', 'sans-serif'],
+        intro: ['Intro', 'sans-serif'],  // 👈 match the font-family name in @font-face 
       },
       fontSize: {
         'responsive': 'clamp(2rem, 6vw + 1rem, 3rem)',

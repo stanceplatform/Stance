@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Header = ({
   onNotificationsClick,
@@ -10,6 +11,7 @@ const Header = ({
 }) => {
   const [open, setOpen] = useState(false);
   const menuRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handler = (e) => {
@@ -69,7 +71,9 @@ const Header = ({
           {/* Invite (person + plus) */}
           <IconButton
             aria-label="Invite"
-            onClick={onInviteClick}
+            onClick={(e) => {
+              navigate("/send-invite");
+            }}
             title="Invite"
           >
             <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">

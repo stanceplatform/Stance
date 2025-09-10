@@ -1,6 +1,4 @@
-// const API_BASE_URL = 'http://stance.ap-south-1.elasticbeanstalk.com/api';
-const API_BASE_URL = '/api';
-
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 class ApiService {
   constructor() {
     this.baseURL = API_BASE_URL;

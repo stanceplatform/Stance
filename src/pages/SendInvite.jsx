@@ -17,7 +17,7 @@ const SendInvite = () => {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState('');
   const [ok, setOk] = useState('');
-  const [invitesLeft, setInvitesLeft] = useState(null);
+  const [invitesLeft, setInvitesLeft] = useState(2);
 
   // Fetch remaining invite quota (optional)
   useEffect(() => {
@@ -120,7 +120,7 @@ const SendInvite = () => {
 
         {/* “invites remaining” copy (matches figma placement) */}
         <div className="mt-2 text-center">
-          <span className="text-white/80 text-[14px]">
+          <span className="text-white font-intro text-[16px] leading-[24px]">
             {invitesLeft !== null ? `${invitesLeft} invites remaining` : ''}
           </span>
         </div>
