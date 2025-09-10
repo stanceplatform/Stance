@@ -11,6 +11,7 @@ import Login from './pages/Login';
 import RequestInvite from './pages/RequestInvite';
 import SendInvite from './pages/SendInvite';
 import Signup from './pages/Signup';
+import Dashboard from './pages/Dashboard';
 
 const AppRoutes = () => {
     return (
@@ -27,7 +28,7 @@ const AppRoutes = () => {
                             path="/dashboard"
                             element={
                                 // <ProtectedRoute>
-                                <Card />
+                                <Dashboard />
                                 // </ProtectedRoute>
                             }
                         />

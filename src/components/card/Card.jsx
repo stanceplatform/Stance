@@ -4,7 +4,7 @@ import { fetchAllCards } from '../../services/operations';
 import { useApi } from '../../hooks/useApi';
 
 import ThankYou from '../thankyou/ThankYou';
-import Header from '../ui/Header';
+// ⛔ removed: import Header from '../ui/Header';
 import CardNavigation from './CardNavigation';
 import QuestionSection from './QuestionSection';
 
@@ -18,14 +18,13 @@ const Card = () => {
   useEffect(() => {
     if (questionsData) {
       setQuestions(questionsData);
-
     }
   }, [questionsData]);
 
   const updateQuestionOptions = (questionId, newOptions) => {
-    setQuestions(prev => prev.map(q =>
-      q.id === questionId ? { ...q, answerOptions: newOptions } : q
-    ));
+    setQuestions(prev =>
+      prev.map(q => (q.id === questionId ? { ...q, answerOptions: newOptions } : q))
+    );
   };
 
   const handleNextQuestion = () => {
@@ -65,7 +64,7 @@ const Card = () => {
           </div>
         ) : questions.length > 0 ? (
           <div className="relative flex flex-col w-full h-screen-svh bg-center bg-cover">
-
+            {/* animated incoming background */}
             <motion.div
               key={`bg-next-${currentQuestionIndex}`}
               className="absolute inset-0"
@@ -78,9 +77,13 @@ const Card = () => {
               animate={{ x: 0 }}
               transition={{ duration: 0.5, ease: 'easeInOut' }}
             />
+
+            {/* top nav for next/prev (unchanged) */}
             <CardNavigation onNext={handleNextQuestion} onPrevious={handlePreviousQuestion} />
 
-            <Header />
+            {/* ⛔ removed <Header /> from here to Dashboard */}
+
+            {/* content */}
             <motion.div
               key={currentQuestionIndex}
               initial={{ opacity: 0 }}
@@ -93,10 +96,11 @@ const Card = () => {
               />
             </motion.div>
           </div>
-        ) : <ThankYou />}
+        ) : (
+          <ThankYou />
+        )}
       </div>
     </>
-
   );
 };
 
