@@ -7,6 +7,10 @@ import ThankYou from './components/thankyou/ThankYou';
 import { AuthProvider } from './context/AuthContext';
 import Landing from './pages/Landing';
 import { GOOGLE_CLIENT_ID } from './config/google';
+import Login from './pages/Login';
+import RequestInvite from './pages/RequestInvite';
+import SendInvite from './pages/SendInvite';
+import Signup from './pages/Signup';
 
 const AppRoutes = () => {
     return (
@@ -15,6 +19,10 @@ const AppRoutes = () => {
                 <Router>
                     <Routes>
                         <Route path="/" element={<Landing />} />
+                        <Route path="/login" element={<Login />} />
+                        <Route path="/request-invite" element={<RequestInvite />} />
+                        <Route path="/send-invite" element={<SendInvite />} />
+                        <Route path="/signup" element={<Signup />} />
                         <Route
                             path="/dashboard"
                             element={

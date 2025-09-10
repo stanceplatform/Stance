@@ -23,7 +23,7 @@ const Card = () => {
   }, [questionsData]);
 
   const updateQuestionOptions = (questionId, newOptions) => {
-    setQuestions(prev => prev.map(q => 
+    setQuestions(prev => prev.map(q =>
       q.id === questionId ? { ...q, answerOptions: newOptions } : q
     ));
   };
@@ -78,9 +78,7 @@ const Card = () => {
               animate={{ x: 0 }}
               transition={{ duration: 0.5, ease: 'easeInOut' }}
             />
-          )}
-
-          <CardNavigation onNext={handleNextQuestion} onPrevious={handlePreviousQuestion} />
+            <CardNavigation onNext={handleNextQuestion} onPrevious={handlePreviousQuestion} />
 
             <Header />
             <motion.div
@@ -89,8 +87,8 @@ const Card = () => {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.3 }}
             >
-              <QuestionSection 
-                question={questions[currentQuestionIndex]} 
+              <QuestionSection
+                question={questions[currentQuestionIndex]}
                 onVoteUpdate={updateQuestionOptions}
               />
             </motion.div>

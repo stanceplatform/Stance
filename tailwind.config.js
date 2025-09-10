@@ -1,4 +1,5 @@
 /** @type {import('tailwindcss').Config} */
+import typography from '@tailwindcss/typography';
 export default {
   content: [
     "./index.html",
@@ -10,10 +11,10 @@ export default {
         'yellow-700': '#776F08',
         'yellow-900': '#333104',
         'yellow-500': '#D2C40F',
-        'purple-900': '#280137',  
+        'purple-900': '#280137',
       },
       fontFamily: {
-        inter: ['Inter'], // Add Inter to the theme
+        intro: ['"Intro Cd-Trial"', 'sans-serif'],
       },
       fontSize: {
         'responsive': 'clamp(2rem, 6vw + 1rem, 3rem)',
@@ -28,5 +29,5 @@ export default {
       },
     },
   },
-  plugins: [require('@tailwindcss/typography')],
+  plugins: [typography],
 }

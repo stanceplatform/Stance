@@ -1,25 +1,75 @@
+// pages/Landing.jsx
 import React from 'react';
-import Footer from '../components/ui/Footer';
-import GoogleSignIn from '../components/auth/GoogleSignIn';
-import Header from '../components/ui/Header';
-import Logo from '../components/ui/Logo'; 
+import { Link } from 'react-router-dom';
+import AuthShell from '../components/layouts/AuthShell';
+import Logo from '../components/ui/Logo';
+import CTAButton from '../components/ui/CTAButton';
+import bg from '../assets/bg.svg';
 
 const Landing = () => {
     return (
-        <main className="flex flex-col mx-auto w-full bg-purple-900 max-w-[480px] h-screen">
-            <section
-                className="flex relative flex-col items-center w-full h-screen bg-cover bg-center"
-                style={{
-                    backgroundImage: `url('https://cdn.builder.io/api/v1/image/assets/TEMP/977014e26f9df71355ad12e5ce2a5a8568fe42a193f8ee2cde09a383dbc74ffc?placeholderIfAbsent=true&apiKey=9667f82c7e1b4746ad9299d82be6adf4')`
-                }}
-            >
-                <Header />
+        <AuthShell bgImage={bg}>
+            {/* Logo */}
+            <div className="mb-6">
                 <Logo />
-                <GoogleSignIn />
-                <Footer />
-            </section>
-        </main>
-    )
-}
+            </div>
 
-export default Landing
+            {/* Headline */}
+            <h1 className="text-center font-intro text-[36px] leading-[48px] font-[600] text-[#F0E224]">
+                Safe space for your<br />opinions
+            </h1>
+
+            {/* CTAs */}
+            <div className="mt-6 w-full space-y-3">
+                <div className="mb-5">
+                    <Link to="/login" className="no-underline">
+                        <CTAButton
+                            as="div"
+                            variant="primary"
+                            icon={
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                    <path
+                                        d="M21.9001 22.5002H20.1001C20.1001 18.4045 20.1001 15.9317 12.0001 15.9317C3.9001 15.9317 3.9001 18.4052 3.9001 22.5002H2.1001C2.1001 17.5997 2.81035 14.1325 12.0001 14.1325C21.1883 14.1325 21.9001 17.599 21.9001 22.5002ZM6.6001 6.75024C6.6001 3.20049 9.31585 1.34424 12.0001 1.34424C14.6843 1.34424 17.4001 3.20049 17.4001 6.75024C17.4001 9.93249 15.1801 12.1562 12.0001 12.1562C8.8201 12.1562 6.6001 9.93249 6.6001 6.75024ZM8.4001 6.75024C8.4001 8.97474 9.7801 10.3577 12.0001 10.3577C14.2201 10.3577 15.6001 8.97549 15.6001 6.75024C15.6001 4.26024 13.7926 3.14424 12.0001 3.14424C10.2076 3.14424 8.4001 4.26024 8.4001 6.75024Z"
+                                        fill="#5B037C"
+                                    />
+                                </svg>
+                            }
+                        >
+                            Login
+                        </CTAButton>
+                    </Link>
+                </div>
+
+                <div>
+                    <Link to="/request-invite" className="no-underline">
+                        <CTAButton
+                            as="div"
+                            variant="secondary"
+                            icon={
+                                <svg width="24" height="19" viewBox="0 0 24 19" fill="none">
+                                    <path
+                                        d="M17.3258 18.686V19.0002H15.5258V18.686C15.5258 13.3445 15.5258 13.2545 9.00003 13.2545C2.47578 13.2545 2.47578 13.2545 2.47578 19.0002H0.675781C0.675781 12.2202 1.50003 11.5002 9.00003 11.5002C16.0658 11.5002 17.31 11.9802 17.3258 18.686ZM4.57578 4.9902C4.56453 4.87095 4.55778 4.7322 4.55778 4.5927C4.55778 2.1657 6.48078 0.187953 8.88603 0.100203H8.89428C8.95578 0.0972032 9.02778 0.0957031 9.10053 0.0957031C10.2743 0.0957031 11.3393 0.560703 12.1215 1.31595L12.12 1.31445C12.9548 2.14995 13.4783 3.2967 13.5 4.5657V4.5702C13.5068 4.6617 13.5105 4.76895 13.5105 4.87695C13.5105 6.1797 12.9728 7.3572 12.1073 8.19945L12.1065 8.2002C11.3258 8.9472 10.2735 9.41595 9.11178 9.44445H9.10653H9.00078C8.97753 9.4452 8.94978 9.4452 8.92278 9.4452C6.52203 9.4452 4.57503 7.49895 4.57503 5.09745C4.57503 5.05995 4.57578 5.0217 4.57653 4.9842V4.98945L4.57578 4.9902ZM6.37578 4.9902C6.37278 5.0367 6.37128 5.0907 6.37128 5.14545C6.37128 5.8317 6.64728 6.4527 7.09503 6.9042C7.59528 7.41195 8.28903 7.68045 9.00078 7.64445C9.70503 7.6362 10.3425 7.35795 10.8165 6.9087L10.815 6.9102C11.3933 6.2982 11.6775 5.46795 11.595 4.6302C11.595 4.61895 11.595 4.6062 11.595 4.5927C11.595 3.81495 11.2995 3.10545 10.8135 2.5722L10.8158 2.57445C10.368 2.1552 9.76503 1.89795 9.10128 1.89795C9.06603 1.89795 9.03003 1.8987 8.99478 1.9002H9.00003C8.99628 1.9002 8.99253 1.9002 8.98803 1.9002C7.52928 1.9002 6.34653 3.08295 6.34653 4.5417C6.34653 4.67895 6.35703 4.81395 6.37728 4.9452L6.37578 4.9302V4.9902Z"
+                                        fill="white"
+                                    />
+                                </svg>
+                            }
+                        >
+                            Request Invite
+                        </CTAButton>
+                    </Link>
+                </div>
+
+                <div className="pt-1 text-center">
+                    <Link
+                        to="/forgot-password"
+                        className="text-[16px] leading-[18px] text-white/90 underline-offset-2 hover:underline"
+                    >
+                        Forgot password?
+                    </Link>
+                </div>
+            </div>
+        </AuthShell>
+    );
+};
+
+export default Landing;

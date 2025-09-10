@@ -4,9 +4,17 @@
 
 /* Add this CSS to your global styles or a specific CSS file */
 .hide-scrollbar {
-    scrollbar-width: none; /* For Firefox */
-  }
-  
-  .hide-scrollbar::-webkit-scrollbar {
-    display: none; /* For Chrome, Safari, and Opera */
-  }
+  scrollbar-width: none; /* For Firefox */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* For Chrome, Safari, and Opera */
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/Inter-Variable.woff2") format("woff2-variations");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
