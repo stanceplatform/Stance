@@ -1,4 +1,5 @@
-const API_BASE_URL = 'http://stance.ap-south-1.elasticbeanstalk.com/api';
+// const API_BASE_URL = 'http://stance.ap-south-1.elasticbeanstalk.com/api';
+const API_BASE_URL = '/api';
 
 class ApiService {
   constructor() {
