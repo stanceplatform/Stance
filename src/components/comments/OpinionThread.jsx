@@ -1,10 +1,10 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import OpinionCard from './OpinionCard';
 import OpinionForm from './OpinionForm';
-import { 
-  fetchCardComments, 
-  postCommentOnCard, 
-  likeComment 
+import {
+  fetchCardComments,
+  postCommentOnCard,
+  likeComment
 } from '../../services/operations';
 
 function OpinionThread({ cardId }) {
@@ -73,14 +73,14 @@ function OpinionThread({ cardId }) {
       }));
 
       await likeComment(commentId);
-      
-      setOpinions(prevOpinions => prevOpinions.map(opinion => 
+
+      setOpinions(prevOpinions => prevOpinions.map(opinion =>
         opinion.id === commentId
           ? {
-              ...opinion,
-              likeCount: opinion.isLikedByUser ? opinion.likeCount - 1 : opinion.likeCount + 1,
-              isLikedByUser: !opinion.isLikedByUser
-            }
+            ...opinion,
+            likeCount: opinion.isLikedByUser ? opinion.likeCount - 1 : opinion.likeCount + 1,
+            isLikedByUser: !opinion.isLikedByUser
+          }
           : opinion
       ));
     } catch (err) {
@@ -101,8 +101,8 @@ function OpinionThread({ cardId }) {
       <div className="flex flex-col flex-grow px-4 pt-2 pb-4 rounded-3xl bg-neutral-900">
         <div className="flex overflow-y-auto flex-col w-full hide-scrollbar">
           {opinions.map((opinion, index) => (
-            <OpinionCard 
-              key={opinion.id} 
+            <OpinionCard
+              key={opinion.id}
               {...opinion}
               isEven={index % 2 === 0}
               onLike={() => handleLike(opinion.id)}
@@ -110,9 +110,9 @@ function OpinionThread({ cardId }) {
           ))}
         </div>
       </div>
-      <div className="flex bottom-0 left-0 right-0 p-4 bg-neutral-800">
-        <OpinionForm 
-          onAddOpinion={addOpinion} 
+      <div className="flex bottom-0 left-0 right-0 p-4 pt-0">
+        <OpinionForm
+          onAddOpinion={addOpinion}
           isSubmitting={isSubmitting}
         />
       </div>

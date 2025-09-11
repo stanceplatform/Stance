@@ -23,7 +23,7 @@ function OpinionForm({ onAddOpinion }) {
         id="opinionInput"
         value={opinion}
         onChange={(e) => setOpinion(e.target.value)}
-        className="overflow-hidden flex-1 shrink gap-2 self-stretch px-4 py-3 my-auto text-base tracking-wide rounded-lg border border-solid bg-neutral-800 border-neutral-700 min-w-[240px] text-neutral-400 resize-none"
+        className="overflow-hidden flex-1 shrink gap-2 self-stretch px-4 py-3 my-auto text-base tracking-wide rounded-lg border border-solid bg-[#3A3A3A] border-neutral-700 min-w-[240px] text-[#8D8D8Ds] resize-none"
         placeholder="Add your opinion..."
         rows={1}
       />

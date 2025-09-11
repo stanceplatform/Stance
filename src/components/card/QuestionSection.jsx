@@ -102,25 +102,25 @@ function QuestionSection({ question, onVoteUpdate }) {
         <div className="flex mt-6 w-full">
           <AnimatePresence mode="wait" initial={false}>
             {!hasVoted ? (
-              <motion.div key="options" {...fadeSlide} className="flex w-full">
+              <motion.div key="options" {...fadeSlide} className="flex w-full font-intro">
                 <button
-                  className="relative flex-1 shrink gap-2 self-stretch mx-3 px-3 py-2 h-full text-left text-2xl tracking-wide leading-8 whitespace-wrap bg-yellow-400 rounded-md text-neutral-900 max-w-xs disabled:opacity-60"
+                  className="relative flex-1 shrink gap-2 self-stretch mx-3 px-4 py-3 h-full text-left font-semibold text-[22px] tracking-wide leading-8 whitespace-wrap bg-[#F0E224] rounded-md text-[#121212] max-w-xs disabled:opacity-60"
                   aria-label={currentAnswers[0]?.value ?? 'Option A'}
                   onClick={() => currentAnswers[0] && handleVote(currentAnswers[0], 1)}
                   disabled={!currentAnswers[0] || isVoting}
                 >
                   {currentAnswers[0]?.value ?? 'Option A'}
-                  <span className="absolute right-[-10px] top-[50%] translate-y-[-80%] w-0 h-0 border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent border-l-[10px] border-l-yellow-400"></span>
+                  <span className="absolute right-[-10px] top-[50%] translate-y-[-20%] w-0 h-0 border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent border-l-[10px] border-l-[#F0E224]"></span>
                 </button>
 
                 <button
-                  className="relative flex-1 shrink gap-2 self-stretch mx-3 px-3 py-2 h-full text-right text-2xl text-white tracking-wide leading-8 whitespace-wrap bg-purple-700 rounded-md text-neutral-900 max-w-xs disabled:opacity-60"
+                  className="relative flex-1 shrink gap-2 self-stretch mx-3 px-3 py-2 h-full text-right font-semibold text-[22px] text-white tracking-wide leading-8 whitespace-wrap bg-[#9105C6] rounded-md max-w-xs disabled:opacity-60"
                   aria-label={currentAnswers[1]?.value ?? 'Option B'}
                   onClick={() => currentAnswers[1] && handleVote(currentAnswers[1], 2)}
                   disabled={!currentAnswers[1] || isVoting}
                 >
                   {currentAnswers[1]?.value ?? 'Option B'}
-                  <span className="absolute left-[-10px] top-[50%] translate-y-[-20%] w-0 h-0 border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent border-r-[10px] border-r-purple-700"></span>
+                  <span className="absolute left-[-10px] top-[50%] translate-y-[-80%] w-0 h-0 border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent border-r-[10px] border-r-[#9105C6]"></span>
                 </button>
               </motion.div>
             ) : (
@@ -141,11 +141,18 @@ function QuestionSection({ question, onVoteUpdate }) {
         </div>
 
         <button
+          disabled={!hasVoted}
           onClick={toggleDrawer}
-          className="gap-2 self-center px-4 py-2 mt-6 font-intro font-semibold text-base tracking-wide text-white bg-white bg-opacity-20 rounded-[40px]"
+          className={`gap-2 self-center px-4 py-2 mt-6 font-intro font-semibold text-base tracking-wide rounded-[40px] ${hasVoted
+            ? "bg-[#F0E224] text-[#5B037C]"
+            : "bg-white bg-opacity-20 text-white"
+            }`}
         >
-          {hasVoted ? `Add Arguments (${question.commentCount})` : `View Arguments (${question.commentCount})`}
+          {!hasVoted
+            ? `Arguments (${question.commentCount})`
+            : `View Arguments (${question.commentCount})`}
         </button>
+
       </div>
 
       <div ref={drawerRef}>
