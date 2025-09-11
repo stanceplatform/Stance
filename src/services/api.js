@@ -59,6 +59,10 @@ class ApiService {
   }
 
   // ===== Questions API =====
+  async getQuestionsResponse(page = 0, size = 10, sort = 'DESC') {
+    return this.request(`/questions/with-responses?page=${page}&size=${size}&sort=${sort}`);
+  }
+
   async getQuestions(page = 0, size = 10, sort = 'DESC') {
     return this.request(`/questions/list?page=${page}&size=${size}&sort=${sort}`);
   }
