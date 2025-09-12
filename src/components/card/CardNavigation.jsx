@@ -1,12 +1,10 @@
 
 function CardNavigation({ onNext, onPrevious }) { // Removed question prop
   const handleLeftTap = () => {
-    console.log("Previous card");
     onPrevious(); // Call the onPrevious function to navigate to the previous card
   };
 
   const handleRightTap = () => {
-    console.log("Next card");
     onNext(); // Call the onNext function to navigate to the next card
   };
 
