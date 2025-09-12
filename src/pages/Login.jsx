@@ -7,12 +7,13 @@ import CTAButton from '../components/ui/CTAButton';
 import ApiService from '../services/api';
 import TextField from '../components/ui/TextField';
 import bg from '../assets/bg.svg';
+import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState({ usernameOrEmail: '', password: '' });
-  const [loading, setLoading] = useState(false);
   const [err, setErr] = useState('');
+  const { login, loading } = useAuth();
 
   const onChange = (e) => {
     const { name, value } = e.target;
@@ -26,16 +27,12 @@ const Login = () => {
       setErr('Please enter email and password.');
       return;
     }
-    setLoading(true);
     try {
-      const data = await ApiService.login(form);
-      if (data?.token) localStorage.setItem('token', data.token);
-      if (data?.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
-      navigate('/dashboard');
+      await login(form); // <-- call AuthContext.login (this updates state + localStorage)
+      const to = location.state?.from?.pathname || '/dashboard';
+      navigate(to, { replace: true });
     } catch (e) {
       setErr(e.message || 'Login failed');
-    } finally {
-      setLoading(false);
     }
   };
 

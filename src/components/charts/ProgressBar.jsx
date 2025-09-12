@@ -8,7 +8,7 @@ const ProgressBarWithLabels = ({ firstOptionPercentage, userChoice, firstOptionT
   const minWidth = 15;
   const leftWidth = Math.max(firstOptionPercentage, firstOptionPercentage === 0 ? minWidth : firstOptionPercentage);
   const rightWidth = Math.max(secondOptionPercentage, secondOptionPercentage === 0 ? minWidth : secondOptionPercentage);
-  console.log('leftWidth', leftWidth, 'rightWidth', rightWidth);
+
   return (
     <div className="flex flex-col items-center w-full space-y-3 p-1">
       {/* Answer Labels */}

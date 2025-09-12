@@ -12,6 +12,8 @@ import RequestInvite from './pages/RequestInvite';
 import SendInvite from './pages/SendInvite';
 import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
+import ProtectedRoute from './components/auth/ProtectedRoute';
+import GuestRoute from './components/auth/GuestRoute';
 
 const AppRoutes = () => {
     return (
@@ -19,24 +21,42 @@ const AppRoutes = () => {
             <AuthProvider>
                 <Router>
                     <Routes>
-                        <Route path="/" element={<Landing />} />
-                        <Route path="/login" element={<Login />} />
-                        <Route path="/request-invite" element={<RequestInvite />} />
-                        <Route path="/send-invite" element={<SendInvite />} />
-                        <Route path="/signup" element={<Signup />} />
+                        {/* Guest-only */}
+                        <Route element={<GuestRoute />}>
+                            <Route path="/" element={<Landing />} />
+                            <Route path="/login" element={<Login />} />
+                            <Route path="/request-invite" element={<RequestInvite />} />
+                            <Route path="/signup" element={<Signup />} />
+                        </Route>
+
+                        {/* Auth-required */}
                         <Route
                             path="/dashboard"
                             element={
-                                // <ProtectedRoute>
-                                <Dashboard />
-                                // </ProtectedRoute>
+                                <ProtectedRoute>
+                                    <Dashboard />
+                                </ProtectedRoute>
                             }
                         />
-                        <Route path="/notification" element={<NotificationsPage />} />
-                        <Route path='/thankYou' element={<ThankYou />} />
+                        <Route
+                            path="/send-invite"
+                            element={
+                                <ProtectedRoute>
+                                    <SendInvite />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/notification"
+                            element={
+                                <ProtectedRoute>
+                                    <NotificationsPage />
+                                </ProtectedRoute>
+                            }
+                        />
 
-                        {/* <Route path="/card" element={                                <Dashboard />} /> */}
-                        {/* Add more routes here as needed */}
+                        {/* Public */}
+                        <Route path="/thankyou" element={<ThankYou />} />
                     </Routes>
                 </Router>
             </AuthProvider>
