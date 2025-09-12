@@ -22,12 +22,38 @@ const AppRoutes = () => {
                 <Router>
                     <Routes>
                         {/* Guest-only */}
-                        <Route element={<GuestRoute />}>
-                            <Route path="/" element={<Landing />} />
-                            <Route path="/login" element={<Login />} />
-                            <Route path="/request-invite" element={<RequestInvite />} />
-                            <Route path="/signup" element={<Signup />} />
-                        </Route>
+                        <Route
+                            path="/"
+                            element={
+                                <GuestRoute>
+                                    <Landing />
+                                </GuestRoute>
+                            }
+                        />
+                        <Route
+                            path="/login"
+                            element={
+                                <GuestRoute>
+                                    <Login />
+                                </GuestRoute>
+                            }
+                        />
+                        <Route
+                            path="/request-invite"
+                            element={
+                                <GuestRoute>
+                                    <RequestInvite />
+                                </GuestRoute>
+                            }
+                        />
+                        <Route
+                            path="/signup"
+                            element={
+                                <GuestRoute>
+                                    <Signup />
+                                </GuestRoute>
+                            }
+                        />
 
                         {/* Auth-required */}
                         <Route
