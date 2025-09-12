@@ -29,17 +29,24 @@ const Card = () => {
 
   const handleNextQuestion = () => {
     setDirection('next');
-    const newIndex = currentQuestionIndex + 1;
-    if (newIndex >= questions.length) {
-      window.location.href = '/thankYou';
-      return;
-    }
+
+    // redirect to thankyou on last question
+    //  const newIndex = currentQuestionIndex + 1;
+    // if (newIndex >= questions.length) {
+    //   window.location.href = '/thankYou';
+    //   return;
+    // }
+
+    // loop to start
+    const newIndex = (currentQuestionIndex + 1) % questions.length;
+
     setNextBackgroundImage(questions[newIndex].backgroundImageUrl);
     setTimeout(() => {
       setCurrentQuestionIndex(newIndex);
       setNextBackgroundImage(null);
     }, 150);
   };
+
 
   const handlePreviousQuestion = () => {
     setDirection('prev');
