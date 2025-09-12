@@ -156,7 +156,7 @@ function QuestionSection({ question, onVoteUpdate }) {
       </div>
 
       <div ref={drawerRef}>
-        <CommentDrawer isOpen={isDrawerOpen} onClose={toggleDrawer} cardId={question.id} />
+        <CommentDrawer isOpen={isDrawerOpen} onClose={toggleDrawer} cardId={question.id} answerOptions={currentAnswers} />
       </div>
     </section>
   );
