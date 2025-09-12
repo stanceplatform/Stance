@@ -109,8 +109,8 @@ const Header = ({
               >
                 <button
                   className="w-full text-left px-4 py-3 hover:bg-gray-100 text-sm"
-                  onClick={() => {
-                    onMenuSelect?.("report");
+                  onClick={(e) => {
+                    navigate("/report");
                     setOpen(false);
                   }}
                 >
@@ -118,8 +118,8 @@ const Header = ({
                 </button>
                 <button
                   className="w-full text-left px-4 py-3 hover:bg-gray-100 text-sm"
-                  onClick={() => {
-                    onMenuSelect?.("help");
+                  onClick={(e) => {
+                    navigate("/help");
                     setOpen(false);
                   }}
                 >
@@ -127,8 +127,8 @@ const Header = ({
                 </button>
                 <button
                   className="w-full text-left px-4 py-3 hover:bg-gray-100 text-sm"
-                  onClick={() => {
-                    onMenuSelect?.("guidelines");
+                  onClick={(e) => {
+                    window.open("/guidelines", "_blank", "noopener,noreferrer");
                     setOpen(false);
                   }}
                 >

@@ -14,6 +14,9 @@ import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import GuestRoute from './components/auth/GuestRoute';
+import ReportIssuePage from './pages/ReportIssuePage';
+import NeedHelpPage from './pages/NeedHelpPage';
+import CommunityGuidelinesPage from './pages/CommunityGuidelinesPage';
 
 const AppRoutes = () => {
     return (
@@ -80,8 +83,28 @@ const AppRoutes = () => {
                                 </ProtectedRoute>
                             }
                         />
+                        <Route
+                            path="/report"
+                            element={
+                                <ProtectedRoute>
+                                    <ReportIssuePage />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/help"
+                            element={
+                                <ProtectedRoute>
+                                    <NeedHelpPage />
+                                </ProtectedRoute>
+                            }
+                        />
 
                         {/* Public */}
+                        <Route
+                            path="/guidelines"
+                            element={<CommunityGuidelinesPage />}
+                        />
                         <Route path="/thankyou" element={<ThankYou />} />
                     </Routes>
                 </Router>
