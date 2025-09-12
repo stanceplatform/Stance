@@ -106,6 +106,10 @@ function OpinionThread({ cardId, answerOptions }) {
                 key={props.id}
                 {...props}
                 onLike={() => handleLike(props.id)}
+                onReport={(payload) => {
+                  // later: call your API.
+                  console.log('Report payload', payload);
+                }}
               />
             );
           })}
