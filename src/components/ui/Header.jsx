@@ -52,7 +52,9 @@ const Header = ({
           {/* Bell (Notifications) */}
           <IconButton
             aria-label="Notifications"
-            onClick={onNotificationsClick}
+            onClick={(e) => {
+              navigate("/notification");
+            }}
             title="Notifications"
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
