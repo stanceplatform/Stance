@@ -4,7 +4,8 @@ import OpinionForm from './OpinionForm';
 import {
   fetchCardComments,
   postCommentOnCard,
-  likeComment
+  likeComment,
+  unlikeComment
 } from '../../services/operations';
 
 function OpinionThread({ cardId, answerOptions }) {
@@ -13,7 +14,6 @@ function OpinionThread({ cardId, answerOptions }) {
   const [error, setError] = useState(null);
   const [likeDebounce, setLikeDebounce] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   // normalize each comment to OpinionCard props
   const mapCommentToCardProps = (c, index) => ({
     id: c.id,
@@ -24,6 +24,7 @@ function OpinionThread({ cardId, answerOptions }) {
     // temporary: still alternating by index until backend sends stance info
     isEven: index % 2 === 0,
     answerOptions: answerOptions,
+    selectedOptionId: c.answer?.selectedOptionId || null, // later: get from backend
   });
 
   const loadOpinions = useCallback(async () => {
@@ -69,9 +70,6 @@ function OpinionThread({ cardId, answerOptions }) {
       setError(null);
       setLikeDebounce(prev => ({ ...prev, [commentId]: Date.now() }));
 
-      likeComment(commentId).catch(() => { });
-
-      // update likes inside nested object
       setOpinions(prev =>
         prev.map(c => {
           if (c.id !== commentId) return c;
@@ -87,10 +85,19 @@ function OpinionThread({ cardId, answerOptions }) {
           };
         })
       );
+
+      // ✅ Call correct API depending on state
+      const comment = opinions.find(c => c.id === commentId);
+      if (comment?.likes?.isLikedByCurrentUser) {
+        await unlikeComment(commentId);
+      } else {
+        await likeComment(commentId);
+      }
     } catch (err) {
       setError(err?.message || 'Failed to like comment');
     }
   };
+
 
   if (isLoading) return <div className="text-white">Loading...</div>;
   if (error) return <div className="text-red-500">Error: {error}</div>;

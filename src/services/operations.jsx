@@ -78,9 +78,13 @@ export const likeComment = async (commentId) => {
   }
 };
 
-export const unlikeComment = async (cardId, commentId) => {
-  // TODO: Implement unlike comment API
-  return { success: true };
+export const unlikeComment = async (commentId) => {
+  try {
+    return await apiService.unlikeComment(commentId);
+  } catch (error) {
+    console.error('Error liking comment:', error);
+    throw error;
+  }
 };
 
 export const submitSuggestion = async (suggestion) => {

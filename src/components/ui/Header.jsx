@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 const Header = ({
   onNotificationsClick,
@@ -12,6 +13,7 @@ const Header = ({
   const [open, setOpen] = useState(false);
   const menuRef = useRef(null);
   const navigate = useNavigate();
+  const { logout } = useAuth()
 
   useEffect(() => {
     const handler = (e) => {
@@ -133,6 +135,15 @@ const Header = ({
                   }}
                 >
                   Community Posting Guidelines
+                </button>
+                <button
+                  className="w-full text-left px-4 py-3 hover:bg-gray-100 text-sm"
+                  onClick={(e) => {
+                    logout()
+                    setOpen(false);
+                  }}
+                >
+                  Logout
                 </button>
                 {/* Optional extra */}
                 {/* <button

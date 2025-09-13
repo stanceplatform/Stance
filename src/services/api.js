@@ -95,6 +95,13 @@ class ApiService {
     });
   }
 
+  async unlikeComment(commentId) {
+    return this.request(`/comments/${commentId}/like`, {
+      method: 'DELETE',
+      body: '',
+    });
+  }
+
   // ===== Waitlist / Invites =====
   async requestInvite(email) {
     // POST /api/waitlist/join  -> body: { email, instituteName }
