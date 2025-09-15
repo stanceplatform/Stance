@@ -17,6 +17,8 @@ import GuestRoute from './components/auth/GuestRoute';
 import ReportIssuePage from './pages/ReportIssuePage';
 import NeedHelpPage from './pages/NeedHelpPage';
 import CommunityGuidelinesPage from './pages/CommunityGuidelinesPage';
+import ResetPassword from './pages/ResetPassword';
+import ForgotPassword from './pages/ForgotPassword';
 
 const AppRoutes = () => {
     return (
@@ -105,6 +107,8 @@ const AppRoutes = () => {
                             path="/guidelines"
                             element={<CommunityGuidelinesPage />}
                         />
+                        <Route path="/forgot-password" element={<ForgotPassword />} />
+                        <Route path="/reset-password" element={<ResetPassword />} />
                         <Route path="/thankyou" element={<ThankYou />} />
                     </Routes>
                 </Router>
