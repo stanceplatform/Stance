@@ -7,6 +7,7 @@ import ThankYou from '../thankyou/ThankYou';
 // ⛔ removed: import Header from '../ui/Header';
 import CardNavigation from './CardNavigation';
 import QuestionSection from './QuestionSection';
+import { useCurrentQuestion } from '../../context/CurrentQuestionContext';
 
 const Card = () => {
   const { data: questionsData = [], loading, error } = useApi(fetchAllCards);
@@ -14,12 +15,20 @@ const Card = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [nextBackgroundImage, setNextBackgroundImage] = useState(null);
   const [direction, setDirection] = useState('next');
+  const { setQuestionId } = useCurrentQuestion();
 
   useEffect(() => {
     if (questionsData) {
       setQuestions(questionsData);
     }
   }, [questionsData]);
+
+  // whenever currentQuestionIndex changes, update context
+  useEffect(() => {
+    if (questions.length > 0) {
+      setQuestionId(questions[currentQuestionIndex]?.id || null);
+    }
+  }, [questions, currentQuestionIndex, setQuestionId]);
 
   const updateQuestionOptions = (questionId, newOptions) => {
     setQuestions(prev =>
