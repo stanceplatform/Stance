@@ -102,6 +102,19 @@ class ApiService {
     });
   }
 
+  async reportComment(commentId, { reason, description }) {
+    if (!commentId) throw new Error("commentId is required");
+    if (!reason?.trim()) throw new Error("reason is required");
+
+    return this.request(`/comments/${commentId}/report`, {
+      method: "POST",
+      body: JSON.stringify({
+        reason: reason.trim(),
+        description: (description || "").trim(),
+      }),
+    });
+  }
+
   async reportQuestion(questionId, { reason, description }) {
     if (!questionId) throw new Error("questionId is required");
     return this.request(`/questions/${questionId}/report`, {
