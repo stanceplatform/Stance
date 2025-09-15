@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { useCurrentQuestion } from "../../context/CurrentQuestionContext";
 
 const Header = ({
   onNotificationsClick,
@@ -14,6 +15,7 @@ const Header = ({
   const menuRef = useRef(null);
   const navigate = useNavigate();
   const { logout } = useAuth()
+  const { questionId } = useCurrentQuestion();
 
   useEffect(() => {
     const handler = (e) => {
@@ -111,8 +113,9 @@ const Header = ({
               >
                 <button
                   className="w-full text-left px-4 py-3 hover:bg-gray-100 text-sm"
-                  onClick={(e) => {
-                    navigate("/report");
+                  onClick={() => {
+                    const qs = questionId ? `?questionId=${questionId}` : "";
+                    navigate(`/report${qs}`);
                     setOpen(false);
                   }}
                 >

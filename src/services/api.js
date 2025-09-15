@@ -102,6 +102,14 @@ class ApiService {
     });
   }
 
+  async reportQuestion(questionId, { reason, description }) {
+    if (!questionId) throw new Error("questionId is required");
+    return this.request(`/questions/${questionId}/report`, {
+      method: 'POST',
+      body: JSON.stringify({ reason, description: description || '' }),
+    });
+  }
+
   // ===== Waitlist / Invites =====
   async requestInvite(email) {
     // POST /api/waitlist/join  -> body: { email, instituteName }
