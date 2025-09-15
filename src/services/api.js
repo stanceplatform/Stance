@@ -162,6 +162,17 @@ class ApiService {
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
   }
+
+  // ===== Feedback =====
+  async sendFeedback({ subject, message, type = "HELP" }) {
+    if (!message?.trim()) throw new Error("message is required");
+    if (!subject?.trim()) throw new Error("subject is required");
+
+    return this.request(`/feedback`, {
+      method: "POST",
+      body: JSON.stringify({ subject, message, type }),
+    });
+  }
 }
 
 export const apiService = new ApiService();
