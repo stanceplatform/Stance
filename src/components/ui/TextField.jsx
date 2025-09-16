@@ -1,5 +1,8 @@
-// components/ui/TextField.jsx
 import React, { useState } from "react";
+import { twMerge } from "tailwind-merge";
+
+// small helper so we can pass conditionals
+const cn = (...classes) => twMerge(classes.filter(Boolean).join(" "));
 
 const EyeOn = () => (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
@@ -16,12 +19,15 @@ const EyeOff = () => (
 );
 
 /**
- * Figma specs applied:
+ * Figma specs (defaults):
  * - Height: 56px (h-[56px])
  * - Radius: 16px (rounded-[16px])
  * - Border: 1px (border)
- * - Padding: top/bottom 12px (py-3), left/right 16px (px-4)
+ * - Padding: py-3 px-4
  * - Gap for icons: 8px (gap-2)
+ *
+ * Now supports class overrides via tailwind-merge:
+ * containerClass, labelClass, inputClass will be merged and override conflicts.
  */
 export default function TextField({
   id,
@@ -49,11 +55,14 @@ export default function TextField({
   const computedType = isPassword ? (showPw ? "text" : "password") : type;
 
   return (
-    <div className={`w-full ${containerClass}`}>
+    <div className={cn("w-full", containerClass)}>
       {label ? (
         <label
           htmlFor={id || name}
-          className={`block text-left text-[16px] leading-[20px] text-white mb-2 ${labelClass}`}
+          className={cn(
+            "block text-left text-[16px] leading-[20px] text-white mb-2",
+            labelClass
+          )}
         >
           {label}
         </label>
@@ -75,29 +84,29 @@ export default function TextField({
           inputMode={inputMode}
           disabled={disabled}
           required={required}
-          className={[
-            // Size + radius + padding (Figma)
+          className={cn(
+            // defaults
             "w-full h-[56px] rounded-[16px] px-4 py-3",
-            // Visuals
             "bg-white text-[#121212] placeholder:text-[#9CA3AF]",
-            "border border-[#D9D9D9]", // 1px border visible on white
+            "border border-[#D9D9D9]",
             "outline-none focus:ring-2 focus:ring-white/60 focus:border-white/80",
             "shadow-[0_1px_0_rgba(0,0,0,0.02)]",
-            // If there is an icon/endAdornment
-            startIcon ? "pl-10" : "",
-            (endIcon || isPassword) ? "pr-12" : "",
-            error ? "border-red-400" : "",
-            inputClass,
-          ].join(" ")}
+            // conditionals
+            startIcon && "pl-10",
+            (endIcon || isPassword) && "pr-12",
+            error && "border-red-400",
+            // overrides/extensions from props
+            inputClass
+          )}
           style={{ fontFamily: "Inter, system-ui, sans-serif" }}
         />
 
-        {/* Custom end icon (if provided and not password toggle) */}
         {!isPassword && endIcon ? (
-          <span className="pointer-events-none absolute right-3 text-gray-600">{endIcon}</span>
+          <span className="pointer-events-none absolute right-3 text-gray-600">
+            {endIcon}
+          </span>
         ) : null}
 
-        {/* Password toggle */}
         {isPassword ? (
           <button
             type="button"
@@ -111,7 +120,7 @@ export default function TextField({
       </div>
 
       {(error || helperText) && (
-        <p className={`mt-1 text-[13px] ${error ? "text-red-200" : "text-white/80"}`}>
+        <p className={cn("mt-1 text-[13px]", error ? "text-red-200" : "text-white/80")}>
           {error || helperText}
         </p>
       )}
