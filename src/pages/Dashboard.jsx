@@ -2,6 +2,7 @@ import React from "react";
 import Header from "../components/ui/Header";
 import Card from "../components/card/Card";
 import { CurrentQuestionProvider } from "../context/CurrentQuestionContext";
+import SuggestQuestion from "../components/card/SuggestQuestion";
 
 const Dashboard = () => {
   return (
@@ -15,7 +16,8 @@ const Dashboard = () => {
 
         {/* Card keeps its own layout/animations exactly the same */}
         <div className="relative z-0 h-full">
-          <Card />
+          {/* <Card /> */}
+          <SuggestQuestion />
         </div>
       </div>
     </CurrentQuestionProvider>

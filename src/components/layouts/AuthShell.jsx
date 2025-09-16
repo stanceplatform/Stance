@@ -16,9 +16,9 @@ const BackIcon = () => (
  * - footer?: ReactNode (optional)
  * - containerClass?: string (optional)
  */
-const AuthShell = ({ bgImage, showBack = false, onBack, children, footer = null, containerClass = '' }) => {
+const AuthShell = ({ bgColor = 'bg-purple-900', bgImage, showBack = false, onBack, children, footer = null, containerClass = '' }) => {
   return (
-    <main className={`mx-auto h-screen-dvh w-full max-w-[480px] bg-purple-900 ${containerClass} `}>
+    <main className={`mx-auto h-screen-dvh w-full max-w-[480px] ${bgColor} ${containerClass} `}>
       <section
         className="relative flex h-full flex-col bg-cover bg-center overflow-y-auto"
         style={{ backgroundImage: `url(${bgImage})` }}

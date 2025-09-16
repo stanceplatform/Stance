@@ -147,6 +147,15 @@ class ApiService {
     });
   }
 
+  async suggestQuestion(payload) {
+    // adjust base client if needed; should return { success, message, ... }
+    const res = await this.request("/suggestions/questions", {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+    return res;
+  }
+
   // ===== Waitlist / Invites =====
   async requestInvite(email) {
     // POST /api/waitlist/join  -> body: { email, instituteName }
