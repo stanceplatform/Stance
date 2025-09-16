@@ -25,14 +25,8 @@ export default function ForgotPassword() {
     try {
       const res = await apiService.forgotPassword(email.trim());
       setMsg(res?.message || 'A password reset link has been sent to your email.');
-    } catch (e) {
-      console.error('ForgotPassword error', e);
-      const status = e?.message?.includes('404') ? 404 : e?.response?.status;
-      if (status === 404) {
-        setErr('This email ID is not registered.');
-      } else {
-        setErr('Failed to send reset link. Try again.');
-      }
+    } catch (error) {
+      setErr(error.data?.message || error.data?.error || error.message || 'Failed to send reset link. Try again.');
     } finally {
       setLoading(false);
     }

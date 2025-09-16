@@ -49,7 +49,7 @@ const SendInvite = () => {
 
     setLoading(true);
     try {
-      const res = await apiService.sendInvite(email); // { success, message }
+      const res = await apiService.sendInvite(email);
       if (res?.success) {
         setOk(res?.message || 'Invite sent!');
         setEmail('');
@@ -57,8 +57,19 @@ const SendInvite = () => {
       } else {
         setErr(res?.message || 'Unable to send invite.');
       }
-    } catch (e) {
-      setErr(e?.message || 'Invite failed. Please try again.');
+    } catch (error) {
+      // Handle the enhanced error object
+      if (error.status && error.data) {
+        // Use the backend's error message if available
+        const errorMessage = error.data.message || error.data.error || error.message;
+        setErr(errorMessage || 'Invite failed. Please try again.');
+
+        // You can also access the status code if needed
+        console.error('API Error Status:', error.status);
+      } else {
+        // Fallback for non-API errors
+        setErr(error?.message || 'Invite failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -126,7 +137,7 @@ const SendInvite = () => {
         </div>
 
         {/* Messages */}
-        {err ? <div className="mt-3 text-center text-[13px] text-red-200">{err}</div> : null}
+        {/* {err ? <div className="mt-3 text-center text-[13px] text-red-200">{err}</div> : null} */}
         {ok ? <div className="mt-3 text-center text-[13px] text-green-200">{ok}</div> : null}
       </form>
     </AuthShell>

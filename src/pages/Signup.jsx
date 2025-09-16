@@ -81,8 +81,10 @@ const Signup = () => {
       } else {
         setErr(res?.message || 'Signup failed. Please try again.');
       }
-    } catch (e) {
-      setErr(e?.message || 'Signup failed. Please try again.');
+    } catch (error) {
+      // Extract error message from enhanced error object
+      const errorMessage = error.data?.message || error.data?.error || error.message;
+      setErr(errorMessage || 'Signup failed. Please try again.');
     } finally {
       setLoading(false);
     }

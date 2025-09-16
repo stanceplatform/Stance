@@ -1,4 +1,5 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+
 class ApiService {
   constructor() {
     this.baseURL = API_BASE_URL;
@@ -42,19 +43,42 @@ class ApiService {
     try {
       const response = await fetch(url, config);
 
-      // Optional: handle 401 -> clear token (comment out if you don’t want auto-logout)
-      if (response.status === 401) {
-        this.logout();
+      // Optional: handle 401 -> clear token (comment out if you don't want auto-logout)
+      // if (response.status === 401) {
+      //   this.logout();
+      // }
+
+      // Get the response data (whether success or error)
+      let responseData;
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        responseData = await response.json();
+      } else {
+        responseData = await response.text();
       }
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        // Create an error object with full response details
+        const error = new Error(response.statusText || `HTTP error! status: ${response.status}`);
+        error.status = response.status;
+        error.data = responseData;
+        throw error;
       }
 
-      return await response.json();
+      return responseData;
     } catch (error) {
       console.error(`API request failed: ${endpoint}`, error);
-      throw error;
+
+      // If it's already our enhanced error, just rethrow it
+      if (error.status && error.data) {
+        throw error;
+      }
+
+      // For other errors (network errors, etc.), wrap them in a similar structure
+      const enhancedError = new Error(error.message || 'Network request failed');
+      enhancedError.status = 0;
+      enhancedError.data = { message: error.message };
+      throw enhancedError;
     }
   }
 

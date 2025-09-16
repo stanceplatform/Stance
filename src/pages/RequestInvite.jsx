@@ -28,15 +28,15 @@ const RequestInvite = () => {
     }
     setLoading(true);
     try {
-      const res = await apiService.requestInvite(email); // { success, message }
+      const res = await apiService.requestInvite(email);
       if (res?.success) {
-        setOk(res?.message || "You’ve been added to the waitlist. We’ll notify you by email within 48 hours if your request is approved. Please keep an eye on your inbox.");
+        setOk(res?.message || "You've been added to the waitlist. We'll notify you by email within 48 hours if your request is approved. Please keep an eye on your inbox.");
         setEmail('');
       } else {
         setErr(res?.message || 'Unable to submit request.');
       }
-    } catch (e) {
-      setErr(e.message || 'Request failed. Please try again.');
+    } catch (error) {
+      setErr(error.data?.message || error.data?.error || error.message || 'Request failed. Please try again.');
     } finally {
       setLoading(false);
     }

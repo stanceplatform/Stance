@@ -38,14 +38,8 @@ export default function ResetPassword() {
       const res = await apiService.resetPassword(token, pw);
       setMsg(res?.message || 'Password updated successfully.');
       setTimeout(() => navigate('/login', { replace: true }), 1500);
-    } catch (e) {
-      console.error('ResetPassword error', e);
-      const status = e?.message?.includes('400') || e?.message?.includes('404') ? 400 : e?.response?.status;
-      if (status === 400 || status === 404) {
-        setErr('Invalid or expired reset link. Please request a new one.');
-      } else {
-        setErr('Failed to reset password. Try again.');
-      }
+    } catch (error) {
+      setErr(error.data?.message || error.data?.error || error.message || 'Failed to reset password. Try again.');
     } finally {
       setLoading(false);
     }
