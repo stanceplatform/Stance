@@ -181,11 +181,11 @@ export default function NotificationsPage() {
   };
 
   return (
-    <main className="flex overflow-hidden flex-col mx-auto w-full bg-white max-w-[480px] max-h-dvh">
+    <main className="flex overflow-hidden flex-col mx-auto w-full border bg-white max-w-[480px] min-h-dvh max-h-dvh">
       <NotifHeader />
       <NotificationList
-        // notifications={items}
-        notifications={notifications}
+        notifications={items}
+        // notifications={notifications}
         onItemClick={onItemClick}
         onLoadMore={onLoadMore}
         hasMore={hasMore}
