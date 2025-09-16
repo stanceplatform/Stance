@@ -28,11 +28,12 @@ const Login = () => {
       return;
     }
     try {
-      await login(form); // <-- call AuthContext.login (this updates state + localStorage)
+      await login(form);
       const to = location.state?.from?.pathname || '/dashboard';
       navigate(to, { replace: true });
-    } catch (e) {
-      setErr(e.message || 'Login failed');
+    } catch (error) {
+      // This will now show the exact API error message
+      setErr(error.message || 'Login failed');
     }
   };
 

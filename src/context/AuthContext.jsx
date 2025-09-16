@@ -24,15 +24,16 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const login = useCallback(async ({ usernameOrEmail, password }) => {
-        setLoading(true);
         try {
             // apiService.login persists token/user to localStorage
             const data = await apiService.login({ usernameOrEmail, password });
             setIsAuthenticated(!!localStorage.getItem('authToken'));
             try { setUser(JSON.parse(localStorage.getItem('user')) || null); } catch { setUser(null); }
             return data;
-        } finally {
-            setLoading(false);
+        } catch (error) {
+            // Extract and throw the exact error message from API response
+            const errorMessage = error.data?.message || error.data?.error || error.message;
+            throw new Error(errorMessage || 'Login failed. Please try again.');
         }
     }, []);
 
