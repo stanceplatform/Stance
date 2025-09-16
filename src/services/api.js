@@ -224,6 +224,11 @@ class ApiService {
       body: JSON.stringify({ subject, message, type }),
     });
   }
+
+  // ===== Notifications =====
+  async getNotifications(page = 0, size = 10) {
+    return this.request(`/notifications?page=${page}&size=${size}`);
+  }
 }
 
 export const apiService = new ApiService();
