@@ -16,8 +16,8 @@ const Dashboard = () => {
 
         {/* Card keeps its own layout/animations exactly the same */}
         <div className="relative z-0 h-full">
-          {/* <Card /> */}
-          <SuggestQuestion />
+          <Card />
+          {/* <SuggestQuestion /> */}
         </div>
       </div>
     </CurrentQuestionProvider>
