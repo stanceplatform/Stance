@@ -15,7 +15,9 @@ export default function ForgotPassword() {
   const [msg, setMsg] = useState('');
   const [err, setErr] = useState('');
 
-  const handleSend = async () => {
+  const handleSend = async (e) => {
+    if (e) e.preventDefault(); // Prevent default form submission behavior
+
     if (!email.trim()) {
       setErr('Please enter your registered email');
       return;
@@ -40,8 +42,7 @@ export default function ForgotPassword() {
       footer={
         <div className="px-6">
           <div className="flex justify-center">
-            <button type="button"
-              onClick={handleSend}
+            <button type="submit" // Changed to type="submit"
               disabled={loading}
               className='mx-auto w-[320px] max-w-full mb-5"'
             >
@@ -59,23 +60,24 @@ export default function ForgotPassword() {
       }
     >
       <div className="mb-6"><Logo /></div>
-
-      <div className="w-full max-w-[360px] pb-20">
-        <TextField
-          id="email"
-          label="Enter your registered email ID"
-          name="email"
-          type="email"
-          inputMode="email"
-          autoComplete="email"
-          placeholder="john@college.edu"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          error={err && !msg ? err : ''}
-        />
-        {msg ? <div className="mt-2 text-center text-[14px] text-green-200">{msg}</div> : null}
-        {/* {err && !msg ? <div className="mt-2 text-center text-[14px] text-red-200">{err}</div> : null} */}
-      </div>
+      <form onSubmit={handleSend} className='w-full mx-auto flex flex-col items-center'>
+        <div className="w-full max-w-[360px] pb-20">
+          <TextField
+            id="email"
+            label="Enter your registered email ID"
+            name="email"
+            type="email"
+            inputMode="email"
+            autoComplete="email"
+            placeholder="john@college.edu"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            error={err && !msg ? err : ''}
+          />
+          {msg ? <div className="mt-2 text-center text-[14px] text-green-200">{msg}</div> : null}
+          {/* {err && !msg ? <div className="mt-2 text-center text-[14px] text-red-200">{err}</div> : null} */}
+        </div>
+      </form>
     </AuthShell>
   );
 }
