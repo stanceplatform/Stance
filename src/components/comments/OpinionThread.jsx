@@ -138,21 +138,32 @@ function OpinionThread({ cardId, answerOptions, onNewComment }) {
         ref={listRef}
         className="flex-1 overflow-y-auto px-4 pt-2 pb-3 hide-scrollbar"
       >
-        <div className="flex flex-col w-full">
-          {opinions.map((c, idx) => {
-            const props = mapCommentToCardProps(c, idx);
-            return (
-              <OpinionCard
-                key={props.id}
-                {...props}
-                onLike={() => handleLike(props.id)}
-                onReport={(payload) => {
-                  console.log('Report payload', payload);
-                }}
-              />
-            );
-          })}
-        </div>
+        {opinions.length === 0 ? (
+          // Empty state (centered)
+          <div className="h-full w-full flex items-center justify-center">
+            <div className="text-center">
+              <p className="text-neutral-300 font-medium">No arguments yet</p>
+              <p className="text-neutral-500 text-sm mt-1">Be the first to share your view.</p>
+            </div>
+          </div>
+        ) : (
+          // Comments list
+          <div className="flex flex-col w-full">
+            {opinions.map((c, idx) => {
+              const props = mapCommentToCardProps(c, idx);
+              return (
+                <OpinionCard
+                  key={props.id}
+                  {...props}
+                  onLike={() => handleLike(props.id)}
+                  onReport={(payload) => {
+                    console.log('Report payload', payload);
+                  }}
+                />
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* INPUT area: fixed at bottom of drawer */}
