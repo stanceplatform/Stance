@@ -96,10 +96,19 @@ export default function OpinionCard({
           disabled={isLikeLoading}
           aria-label={isLikedByUser ? "Unlike" : "Like"}
         >
-          <FontAwesomeIcon
+          {isLikedByUser ?
+            <svg className={colorClass} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12 3c.33 0 .65.16.85.42l7.5 9.5c.51.64.06 1.58-.75 1.58H15v6a1 1 0 0 1-1 1H10a1 1 0 0 1-1-1v-6H4.4c-.81 0-1.26-.94-.75-1.58l7.5-9.5c.2-.26.52-.42.85-.42z" />
+            </svg>
+            :
+            <svg className={colorClass} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 4l7 9h-4v7h-6v-7H5l7-9z" />
+            </svg>
+          }
+          {/* <FontAwesomeIcon
             icon={isLikedByUser ? solidThumbsUp : regularThumbsUp}
             className={`${colorClass} w-6 h-6 transition-all duration-200 ${isLikedByUser ? "scale-110" : ""}`}
-          />
+          /> */}
         </button>
         <div className={`text-xs leading-5 ${colorClass}`}>{likeCount ?? 0}</div>
       </div>
