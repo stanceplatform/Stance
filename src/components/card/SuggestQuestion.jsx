@@ -92,7 +92,7 @@ const SuggestQuestion = ({ onNext, onPrevious }) => {
           type="submit"
           form="suggestQuestionForm"
           disabled={loading}
-          className="w-[320px] max-w-full"
+          className="w-full"
           onClick={(e) => e.stopPropagation()}
           onPointerDown={(e) => e.stopPropagation()} // extra safety for mobile
         >
@@ -111,15 +111,15 @@ const SuggestQuestion = ({ onNext, onPrevious }) => {
   );
 
   return (
-    <div className="relative min-h-screen" onClick={handlePageClick}>
+    <div className="relative " onClick={handlePageClick}>
       <AuthShell bgColor="bg-[#F0E224]" showBack={false} footer={footer}>
         <form
           id="suggestQuestionForm"
           ref={formRef}
           onSubmit={submit}
-          className="w-full max-w-[360px] pb-20"
+          className="w-full max-w-[360px] pb-12"
         >
-          <h1 className="font-intro font-[700] text-[28px] leading-[36px] mb-5 text-[#1B1B1B]">
+          <h1 className="font-intro font-[700] mt-20 text-[28px] leading-[36px] mb-5 text-[#1B1B1B]">
             Suggest a Question
           </h1>
 
@@ -147,9 +147,9 @@ const SuggestQuestion = ({ onNext, onPrevious }) => {
             labelClass="text-[#1B1B1B]"
             placeholder="Enter first option"
             value={form.option1}
+            inputClass="mb-3"
             onChange={onChange}
           />
-          <div className="h-3" />
           <TextField
             id="sq_option2"
             label="Option 2"
@@ -174,8 +174,8 @@ const SuggestQuestion = ({ onNext, onPrevious }) => {
       </AuthShell>
 
       {/* Optional visual hints */}
-      <div className="pointer-events-none fixed inset-y-0 left-0 w-1.5 bg-black/10" />
-      <div className="pointer-events-none fixed inset-y-0 right-0 w-1.5 bg-black/10" />
+      <div className="pointer-events-none fixed inset-y-0 left-0 w-1.5 bg-yellow/10" />
+      <div className="pointer-events-none fixed inset-y-0 right-0 w-1.5 bg-yellow/10" />
     </div>
   );
 };
