@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import OpinionCard from './OpinionCard';
 import OpinionForm from './OpinionForm';
 import {
@@ -8,12 +8,33 @@ import {
   unlikeComment
 } from '../../services/operations';
 
-function OpinionThread({ cardId, answerOptions }) {
+function OpinionThread({ cardId, answerOptions, onNewComment }) {
   const [opinions, setOpinions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [likeDebounce, setLikeDebounce] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // ref to the scrolling list
+  const listRef = useRef(null);
+
+  // util: prefer createdAt desc; fallback to id/timestamp or reverse
+  const sortNewestFirst = (arr = []) => {
+    if (!Array.isArray(arr)) return [];
+    const hasCreatedAt = arr.length && arr[0].createdAt;
+    if (hasCreatedAt) {
+      return [...arr].sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+      );
+    }
+    // fallback: if IDs carry time or just show last fetched first
+    return [...arr].reverse();
+  };
+
+  const scrollToTop = () => {
+    if (listRef.current) listRef.current.scrollTop = 0;
+  };
+
   // normalize each comment to OpinionCard props
   const mapCommentToCardProps = (c, index) => ({
     id: c.id,
@@ -21,18 +42,19 @@ function OpinionThread({ cardId, answerOptions }) {
     text: c.text,
     likeCount: c?.likes?.count ?? 0,
     isLikedByUser: !!c?.likes?.isLikedByCurrentUser,
-    // temporary: still alternating by index until backend sends stance info
     isEven: index % 2 === 0,
-    answerOptions: answerOptions,
-    selectedOptionId: c.answer?.selectedOptionId || null, // later: get from backend
+    answerOptions,
+    selectedOptionId: c.answer?.selectedOptionId || null,
   });
 
   const loadOpinions = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
-      const comments = await fetchCardComments(cardId); // already returns array
-      setOpinions(comments);
+      const comments = await fetchCardComments(cardId);
+      setOpinions(sortNewestFirst(comments));
+      // ensure we start at top whenever opening/refreshing
+      requestAnimationFrame(scrollToTop);
     } catch (err) {
       setError(err?.message || 'Failed to load comments');
     } finally {
@@ -49,7 +71,15 @@ function OpinionThread({ cardId, answerOptions }) {
       setIsSubmitting(true);
       setError(null);
       const addedComment = await postCommentOnCard(cardId, newOpinion.content);
-      setOpinions(prev => [...prev, addedComment]);
+
+      // put newest at the TOP
+      setOpinions(prev => [addedComment, ...prev]);
+
+      // bump parent counter (for "View Arguments (x)")
+      onNewComment?.();
+
+      // jump back to the TOP so user sees their comment
+      requestAnimationFrame(scrollToTop);
     } catch (err) {
       setError(err?.message || 'Failed to post comment');
     } finally {
@@ -86,7 +116,6 @@ function OpinionThread({ cardId, answerOptions }) {
         })
       );
 
-      // ✅ Call correct API depending on state
       const comment = opinions.find(c => c.id === commentId);
       if (comment?.likes?.isLikedByCurrentUser) {
         await unlikeComment(commentId);
@@ -98,14 +127,18 @@ function OpinionThread({ cardId, answerOptions }) {
     }
   };
 
-
   if (isLoading) return <div className="text-white">Loading...</div>;
   if (error) return <div className="text-red-500">Error: {error}</div>;
 
   return (
-    <section className="flex flex-col h-full">
-      <div className="flex flex-col flex-grow px-4 pt-2 pb-4 rounded-3xl bg-neutral-900">
-        <div className="flex overflow-y-auto flex-col w-full hide-scrollbar">
+    // occupy given height (from CommentDrawer) and manage internal scroll
+    <section className="flex h-full flex-col">
+      {/* LIST area: scrolls; input stays fixed */}
+      <div
+        ref={listRef}
+        className="flex-1 overflow-y-auto px-4 pt-2 pb-3 hide-scrollbar"
+      >
+        <div className="flex flex-col w-full">
           {opinions.map((c, idx) => {
             const props = mapCommentToCardProps(c, idx);
             return (
@@ -114,7 +147,6 @@ function OpinionThread({ cardId, answerOptions }) {
                 {...props}
                 onLike={() => handleLike(props.id)}
                 onReport={(payload) => {
-                  // later: call your API.
                   console.log('Report payload', payload);
                 }}
               />
@@ -123,11 +155,9 @@ function OpinionThread({ cardId, answerOptions }) {
         </div>
       </div>
 
-      <div className="flex bottom-0 left-0 right-0 p-4 pt-0">
-        <OpinionForm
-          onAddOpinion={addOpinion}
-          isSubmitting={isSubmitting}
-        />
+      {/* INPUT area: fixed at bottom of drawer */}
+      <div className="sticky bottom-0 left-0 right-0 bg-neutral-900 px-4 pb-4 pt-0">
+        <OpinionForm onAddOpinion={addOpinion} isSubmitting={isSubmitting} />
       </div>
     </section>
   );

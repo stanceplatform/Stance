@@ -22,6 +22,7 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
   const [userChoice, setUserChoice] = useState(initialChoice);
   const [currentAnswers, setCurrentAnswers] = useState(normalizedOptions);
   const [isVoting, setIsVoting] = useState(false);
+  const [commentCount, setCommentCount] = useState(question?.commentCount || 0);
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const drawerRef = useRef(null);
@@ -81,6 +82,10 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
     if (drawerRef.current && !drawerRef.current.contains(event.target)) {
       setIsDrawerOpen(false);
     }
+  };
+
+  const handleNewComment = () => {
+    setCommentCount(prev => prev + 1);
   };
 
   useEffect(() => {
@@ -154,14 +159,14 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
             }`}
         >
           {!hasVoted
-            ? `Arguments (${question.commentCount})`
-            : `View Arguments (${question.commentCount})`}
+            ? `Arguments (${commentCount})`
+            : `View Arguments (${commentCount})`}
         </button>
 
       </div>
 
       <div ref={drawerRef}>
-        <CommentDrawer isOpen={isDrawerOpen} onClose={toggleDrawer} cardId={question.id} answerOptions={currentAnswers} />
+        <CommentDrawer onNewComment={handleNewComment} isOpen={isDrawerOpen} onClose={toggleDrawer} cardId={question.id} answerOptions={currentAnswers} />
       </div>
     </section>
   );
