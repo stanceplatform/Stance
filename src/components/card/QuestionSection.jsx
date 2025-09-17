@@ -1,11 +1,11 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { AnimatePresence, motion } from 'framer-motion'; // ✅ NEW
+import { AnimatePresence, motion } from 'framer-motion';
 import { voteOnCard } from '../../services/operations';
 import CommentDrawer from '../comments/CommentDrawer';
 import ProgressBarWithLabels from '../charts/ProgressBar';
 
-function QuestionSection({ question, onVoteUpdate }) {
-  // normalize options for API #1/#2
+function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
+  // normalize options for API
   const normalizedOptions = question.answerOptions ?? question.answeroptions ?? [];
 
   // derive initial state from userResponse
@@ -21,7 +21,7 @@ function QuestionSection({ question, onVoteUpdate }) {
   const [hasVoted, setHasVoted] = useState(answered);
   const [userChoice, setUserChoice] = useState(initialChoice);
   const [currentAnswers, setCurrentAnswers] = useState(normalizedOptions);
-  const [isVoting, setIsVoting] = useState(false); // ✅ NEW
+  const [isVoting, setIsVoting] = useState(false);
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const drawerRef = useRef(null);
@@ -38,9 +38,7 @@ function QuestionSection({ question, onVoteUpdate }) {
     })();
 
     setCurrentAnswers(opts);
-    // ✅ Don't flip back to false if we've already voted locally
     setHasVoted(prev => prev || _answered);
-    // ✅ Keep existing choice if already set
     setUserChoice(prev => prev ?? _choice);
   }, [question]);
 
@@ -48,7 +46,7 @@ function QuestionSection({ question, onVoteUpdate }) {
   const handleVote = async (option, choiceNumber) => {
     if (hasVoted || isVoting) return;
     try {
-      setIsVoting(true); // ✅ prevent double taps
+      setIsVoting(true);
 
       const response = await voteOnCard(question.id, option.id);
 
@@ -59,11 +57,11 @@ function QuestionSection({ question, onVoteUpdate }) {
         response?.answeroptions ??
         currentAnswers;
 
-      setCurrentAnswers(updated);     // update tallies
+      setCurrentAnswers(updated);
       onVoteUpdate?.(question.id, updated);
 
-      setUserChoice(choiceNumber);    // remember which side the user chose
-      setHasVoted(true);              // ✅ triggers animated swap to ProgressBar
+      setUserChoice(choiceNumber);
+      setHasVoted(true);
     } catch (error) {
       console.error('Error voting:', error);
     } finally {
@@ -71,7 +69,13 @@ function QuestionSection({ question, onVoteUpdate }) {
     }
   };
 
-  const toggleDrawer = () => setIsDrawerOpen(v => !v);
+  const toggleDrawer = () => {
+    setIsDrawerOpen(v => {
+      const newVal = !v;
+      onDrawerToggle?.(newVal);
+      return newVal;
+    });
+  };
 
   const handleClickOutside = (event) => {
     if (drawerRef.current && !drawerRef.current.contains(event.target)) {
@@ -80,6 +84,7 @@ function QuestionSection({ question, onVoteUpdate }) {
   };
 
   useEffect(() => {
+    if (!isDrawerOpen) onDrawerToggle?.(false);
     if (isDrawerOpen) document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isDrawerOpen]);
@@ -125,7 +130,7 @@ function QuestionSection({ question, onVoteUpdate }) {
               </motion.div>
             ) : (
               <motion.div
-                key={`bar-${question.id}-${currentAnswers[0]?.percentage}-${currentAnswers[1]?.percentage}`} // ✅ re-animate when numbers change
+                key={`bar-${question.id}-${currentAnswers[0]?.percentage}-${currentAnswers[1]?.percentage}`}
                 {...fadeSlide}
                 className="w-full"
               >

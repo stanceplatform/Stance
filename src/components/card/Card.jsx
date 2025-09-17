@@ -16,7 +16,8 @@ const Card = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [nextBackgroundImage, setNextBackgroundImage] = useState(null);
   const [direction, setDirection] = useState('next');
-  const [showSuggestQuestion, setShowSuggestQuestion] = useState(false); // New state for showing suggest question
+  const [showSuggestQuestion, setShowSuggestQuestion] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const { setQuestionId } = useCurrentQuestion();
 
   useEffect(() => {
@@ -122,10 +123,13 @@ const Card = () => {
                 transition={{ duration: 0.5, ease: 'easeInOut' }}
               />
 
-              {/* top nav for next/prev (unchanged) */}
-              <CardNavigation onNext={handleNextQuestion} onPrevious={handlePreviousQuestion} />
-
-              {/* ⛔ removed <Header /> from here to Dashboard */}
+              {/* navigation */}
+              {!isDrawerOpen && (
+                <CardNavigation
+                  onNext={handleNextQuestion}
+                  onPrevious={handlePreviousQuestion}
+                />
+              )}
 
               {/* content */}
               <motion.div
@@ -137,6 +141,7 @@ const Card = () => {
                 <QuestionSection
                   question={questions[currentQuestionIndex]}
                   onVoteUpdate={updateQuestionOptions}
+                  onDrawerToggle={setIsDrawerOpen}
                 />
               </motion.div>
             </div>
