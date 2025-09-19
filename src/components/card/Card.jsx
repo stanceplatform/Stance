@@ -37,9 +37,22 @@ const Card = () => {
 
   const updateQuestionOptions = (questionId, newOptions) => {
     setQuestions(prev =>
-      prev.map(q => (q.id === questionId ? { ...q, answerOptions: newOptions } : q))
+      prev.map(q =>
+        q.id === questionId
+          ? {
+            ...q,
+            answerOptions: newOptions,
+            userResponse: {
+              ...q.userResponse,
+              answered: true,
+              selectedOptionId: newOptions.find(o => o.isSelected)?.id || q.userResponse?.selectedOptionId
+            }
+          }
+          : q
+      )
     );
   };
+
 
   const handleNextQuestion = () => {
     setDirection('next');

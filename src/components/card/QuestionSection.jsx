@@ -32,6 +32,7 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
     const opts = question.answerOptions ?? question.answeroptions ?? [];
     const _answered = Boolean(question.userResponse?.answered);
     const _selected = question.userResponse?.selectedOptionId ?? null;
+
     const _choice = (() => {
       if (!_selected) return null;
       const i = opts.findIndex(o => o.id === _selected);
@@ -39,8 +40,8 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
     })();
 
     setCurrentAnswers(opts);
-    setHasVoted(prev => prev || _answered);
-    setUserChoice(prev => prev ?? _choice);
+    setHasVoted(_answered);
+    setUserChoice(_choice);
   }, [question]);
 
 
