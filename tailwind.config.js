@@ -16,7 +16,7 @@ export default {
       },
       fontFamily: {
         inter: ['Inter', 'sans-serif'],
-        intro: ['Intro', 'sans-serif'],  // 👈 match the font-family name in @font-face 
+        intro: ['Intro', 'sans-serif'],
       },
       fontSize: {
         'responsive': 'clamp(2rem, 6vw + 1rem, 3rem)',
