@@ -79,7 +79,13 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
     });
   };
 
+  // ✅ Updated: ignore clicks originating from the Like sheet
   const handleClickOutside = (event) => {
+    // If the click/touch started inside any element of the like sheet, ignore it
+    if (event.target && event.target.closest && event.target.closest('[data-liked-by-sheet]')) {
+      return;
+    }
+
     if (drawerRef.current && !drawerRef.current.contains(event.target)) {
       setIsDrawerOpen(false);
     }
@@ -90,9 +96,18 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
   };
 
   useEffect(() => {
-    if (!isDrawerOpen) onDrawerToggle?.(false);
-    if (isDrawerOpen) document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    if (!isDrawerOpen) {
+      onDrawerToggle?.(false);
+      return;
+    }
+    // Capture phase to make behavior consistent on mobile too
+    document.addEventListener('mousedown', handleClickOutside, true);
+    document.addEventListener('touchstart', handleClickOutside, true);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside, true);
+      document.removeEventListener('touchstart', handleClickOutside, true);
+    };
   }, [isDrawerOpen]);
 
   // simple shared animation settings
@@ -141,10 +156,15 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
                 className="w-full"
               >
                 <ProgressBarWithLabels
-                  firstOptionPercentage={currentAnswers[0]?.percentage ?? 0}
+                  firstOptionPercentage={
+                    Number(currentAnswers[0]?.percentage ?? 0).toFixed(1)
+                  }
                   userChoice={userChoice || 1}
                   firstOptionText={currentAnswers[0]?.value ?? 'Option A'}
                   secondOptionText={currentAnswers[1]?.value ?? 'Option B'}
+                  secondOptionPercentage={
+                    Number(currentAnswers[1]?.percentage ?? 0).toFixed(1)
+                  }
                 />
               </motion.div>
             )}
@@ -167,7 +187,13 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
       </div>
 
       <div ref={drawerRef}>
-        <CommentDrawer onNewComment={handleNewComment} isOpen={isDrawerOpen} onClose={toggleDrawer} cardId={question.id} answerOptions={currentAnswers} />
+        <CommentDrawer
+          onNewComment={handleNewComment}
+          isOpen={isDrawerOpen}
+          onClose={toggleDrawer}
+          cardId={question.id}
+          answerOptions={currentAnswers}
+        />
       </div>
     </section>
   );

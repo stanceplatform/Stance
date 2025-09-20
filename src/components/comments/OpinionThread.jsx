@@ -1,3 +1,4 @@
+// OpinionThread.jsx
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import OpinionCard from './OpinionCard';
 import OpinionForm from './OpinionForm';
@@ -43,6 +44,7 @@ function OpinionThread({ cardId, answerOptions, onNewComment }) {
     text: c.text,
     likeCount: c?.likes?.count ?? 0,
     isLikedByUser: !!c?.likes?.isLikedByCurrentUser,
+    likedUsers: Array.isArray(c?.likes?.likedUsers) ? c.likes.likedUsers : null,
     isEven: index % 2 === 0,
     answerOptions,
     selectedOptionId: c.answer?.selectedOptionId || null,
@@ -101,28 +103,19 @@ function OpinionThread({ cardId, answerOptions, onNewComment }) {
       setError(null);
       setLikeDebounce(prev => ({ ...prev, [commentId]: Date.now() }));
 
-      setOpinions(prev =>
-        prev.map(c => {
-          if (c.id !== commentId) return c;
-          const currentlyLiked = !!c?.likes?.isLikedByCurrentUser;
-          const currentCount = Number(c?.likes?.count || 0);
-          return {
-            ...c,
-            likes: {
-              ...c.likes,
-              count: currentlyLiked ? Math.max(0, currentCount - 1) : currentCount + 1,
-              isLikedByCurrentUser: !currentlyLiked
-            }
-          };
-        })
-      );
+      // decide server call from current state (before change)
+      const current = opinions.find(c => c.id === commentId);
+      const wasLiked = !!current?.likes?.isLikedByCurrentUser;
 
-      const comment = opinions.find(c => c.id === commentId);
-      if (comment?.likes?.isLikedByCurrentUser) {
+      if (wasLiked) {
         await unlikeComment(commentId);
       } else {
         await likeComment(commentId);
       }
+
+      // ⬇️ REFRESH from backend to get authoritative likes & likedUsers
+      const comments = await fetchCardComments(cardId);
+      setOpinions(sortNewestFirst(comments));
     } catch (err) {
       setError(err?.message || 'Failed to like comment');
     }
