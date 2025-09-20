@@ -1,0 +1,41 @@
+{
+  "name": "Stance",
+  "short_name": "Stance",
+  "description": "Polls, opinions, and comments—fast.",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#75049F",
+  "icons": [
+    {
+      "src": "/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/logo-sm.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Vote now",
+      "short_name": "Vote",
+      "url": "/vote?source=shortcut",
+      "icons": [
+        { "src": "/logo-sm.svg", "sizes": "any", "type": "image/svg+xml" }
+      ]
+    },
+    {
+      "name": "My comments",
+      "short_name": "Comments",
+      "url": "/me/comments?source=shortcut",
+      "icons": [
+        { "src": "/logo-sm.svg", "sizes": "any", "type": "image/svg+xml" }
+      ]
+    }
+  ],
+  "handle_links": "preferred"
+}
