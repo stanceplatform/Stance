@@ -39,6 +39,7 @@ function OpinionThread({ cardId, answerOptions, onNewComment }) {
   const mapCommentToCardProps = (c, index) => ({
     id: c.id,
     username: c?.user?.username ?? 'unknown',
+    firstName: c?.user?.firstName ?? 'stanceuser',
     text: c.text,
     likeCount: c?.likes?.count ?? 0,
     isLikedByUser: !!c?.likes?.isLikedByCurrentUser,

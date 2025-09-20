@@ -17,6 +17,7 @@ function getTheme(selectedOptionId, answerOptions) {
 export default function OpinionCard({
   id, // comment id
   username,
+  firstName,
   text,
   likeCount,
   isLikedByUser,
@@ -73,7 +74,7 @@ export default function OpinionCard({
       {/* Left: content */}
       <div className={`flex flex-col flex-1 shrink self-start p-2 rounded-lg basis-0 ${colorBgClass}`}>
         <div className="flex items-center justify-between">
-          <h3 className={`text-[16px] leading-6 ${colorClass} text-left font-normal`}>{username}</h3>
+          <h3 className={`text-[16px] leading-6 ${colorClass} text-left font-normal`}>{firstName}</h3>
           {reported && (
             <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-neutral-700 text-neutral-200">
               Reported
