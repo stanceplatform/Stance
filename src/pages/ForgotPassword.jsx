@@ -16,6 +16,7 @@ export default function ForgotPassword() {
   const [err, setErr] = useState('');
 
   const handleSend = async (e) => {
+    console.log('handleSend called');
     if (e) e.preventDefault(); // Prevent default form submission behavior
 
     if (!email.trim()) {
@@ -42,7 +43,7 @@ export default function ForgotPassword() {
       footer={
         <div className="px-6">
           <div className="flex justify-center">
-            <button type="submit" // Changed to type="submit"
+            <button form="forgot-form" type="submit"
               disabled={loading}
               className='mx-auto w-[320px] max-w-full mb-5"'
             >
@@ -60,7 +61,7 @@ export default function ForgotPassword() {
       }
     >
       <div className="mb-6"><Logo /></div>
-      <form onSubmit={handleSend} className='w-full mx-auto flex flex-col items-center'>
+      <form id="forgot-form" onSubmit={handleSend} className='w-full mx-auto flex flex-col items-center'>
         <div className="w-full max-w-[360px] pb-20">
           <TextField
             id="email"
