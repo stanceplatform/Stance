@@ -3,11 +3,9 @@ import { AnimatePresence, motion } from 'framer-motion';
 
 const ProgressBarWithLabels = ({ firstOptionPercentage, userChoice, firstOptionText, secondOptionText }) => {
   const secondOptionPercentage = 100 - firstOptionPercentage;
-
-  // Ensure minimum width of 8% for visual consistency when one side is 0%
   const minWidth = 15;
-  const leftWidth = Math.max(firstOptionPercentage, firstOptionPercentage === 0 ? minWidth : firstOptionPercentage);
-  const rightWidth = Math.max(secondOptionPercentage, secondOptionPercentage === 0 ? minWidth : secondOptionPercentage);
+  const leftWidth = Math.max(firstOptionPercentage, firstOptionPercentage == 0 ? minWidth : firstOptionPercentage);
+  const rightWidth = Math.max(secondOptionPercentage, secondOptionPercentage == 0 ? minWidth : secondOptionPercentage);
 
   return (
     <div className="flex flex-col items-center w-full space-y-3 p-1">

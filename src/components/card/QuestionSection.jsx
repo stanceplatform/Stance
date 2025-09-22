@@ -4,6 +4,24 @@ import { voteOnCard } from '../../services/operations';
 import CommentDrawer from '../comments/CommentDrawer';
 import ProgressBarWithLabels from '../charts/ProgressBar';
 
+// put this near the top of the file
+const formatPct = (v) => {
+  if (v == null || v === '') return '0';
+  const num = Number(v);
+  if (Number.isNaN(num)) return '0';
+
+  const abs = Math.abs(num);
+  const intPart = Math.trunc(num);
+  const firstDecimal = Math.floor(abs * 10) % 10;         // digit right after decimal
+  const hasAnyFraction = Math.round((abs - Math.floor(abs)) * 100) !== 0;
+
+  // no fraction OR first decimal digit is 0 -> show integer only
+  if (!hasAnyFraction || firstDecimal === 0) return String(intPart);
+
+  // first decimal digit non-zero -> show up to 2 decimals
+  return num.toFixed(2);
+};
+
 function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
   // normalize options for API
   const normalizedOptions = question.answerOptions ?? question.answeroptions ?? [];
@@ -30,19 +48,19 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
   // keep in sync if parent swaps the question
   useEffect(() => {
     const opts = question.answerOptions ?? question.answeroptions ?? [];
+    setCurrentAnswers(opts); // keep options in sync
+
+    // Only initialize userChoice/hasVoted from server when loading a NEW question
     const _answered = Boolean(question.userResponse?.answered);
-    const _selected = question.userResponse?.selectedOptionId ?? null;
-
-    const _choice = (() => {
-      if (!_selected) return null;
+    if (_answered) {
+      const _selected = question.userResponse?.selectedOptionId ?? null;
       const i = opts.findIndex(o => o.id === _selected);
-      return i >= 0 ? i + 1 : null;
-    })();
+      setUserChoice(i >= 0 ? i + 1 : null);
+      setHasVoted(true);
+    }
 
-    setCurrentAnswers(opts);
-    setHasVoted(_answered);
-    setUserChoice(_choice);
-  }, [question]);
+  }, [question.id]);
+
 
 
   const handleVote = async (option, choiceNumber) => {
@@ -52,7 +70,6 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
 
       const response = await voteOnCard(question.id, option.id);
 
-      // normalize updated options from response
       const updated =
         response?.options ??
         response?.answerOptions ??
@@ -61,7 +78,6 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
 
       setCurrentAnswers(updated);
       onVoteUpdate?.(question.id, updated);
-
       setUserChoice(choiceNumber);
       setHasVoted(true);
     } catch (error) {
@@ -156,15 +172,11 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
                 className="w-full"
               >
                 <ProgressBarWithLabels
-                  firstOptionPercentage={
-                    Number(currentAnswers[0]?.percentage ?? 0).toFixed(1)
-                  }
-                  userChoice={userChoice || 1}
+                  firstOptionPercentage={formatPct(currentAnswers[0]?.percentage ?? 0)}
+                  userChoice={userChoice}
                   firstOptionText={currentAnswers[0]?.value ?? 'Option A'}
                   secondOptionText={currentAnswers[1]?.value ?? 'Option B'}
-                  secondOptionPercentage={
-                    Number(currentAnswers[1]?.percentage ?? 0).toFixed(1)
-                  }
+                  secondOptionPercentage={formatPct(currentAnswers[1]?.percentage ?? 0)}
                 />
               </motion.div>
             )}
