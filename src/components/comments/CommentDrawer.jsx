@@ -16,7 +16,7 @@ function CommentDrawer({ isOpen, onClose, cardId, answerOptions, onNewComment })
       </div>
 
       <div className="relative h-[60vh] flex flex-col">
-        <OpinionThread cardId={cardId} answerOptions={answerOptions} />
+        <OpinionThread cardId={cardId} answerOptions={answerOptions} onNewComment={onNewComment} />
       </div>
     </div>
   );
