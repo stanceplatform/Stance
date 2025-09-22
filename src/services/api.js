@@ -59,15 +59,14 @@ class ApiService {
 
     try {
       let response = await fetch(url, config);
-      let { parsed: data, contentType } = await this._parseResponse(response);
+      let { parsed: data } = await this._parseResponse(response);
 
       if (response.ok) return data;
 
-      // If 401, try refresh flow (unless we're already refreshing or hitting auth endpoints)
+      // 401 → try refresh (skip auth endpoints)
       if (response.status === 401 && this._canAttemptRefresh(endpoint)) {
         const refreshed = await this._ensureRefresh();
         if (refreshed) {
-          // retry original request with fresh token
           const retryConfig = {
             ...config,
             headers: {
@@ -80,37 +79,36 @@ class ApiService {
 
           if (retryResp.ok) return retryParsed.parsed;
 
-          // If retry still unauthorized => hard logout
+          // still unauthorized ⇒ hard logout + notify
           if (retryResp.status === 401) {
             this.logout();
+            if (typeof this.onUnauthorized === 'function') this.onUnauthorized();
           }
 
-          // throw retry error
-          const retryErr = new Error(retryResp.statusText || `HTTP error! status: ${retryResp.status}`);
-          retryErr.status = retryResp.status;
-          retryErr.data = retryParsed.parsed;
-          throw retryErr;
+          // ⬇️ throw *raw* backend payload (no Error.message)
+          throw { status: retryResp.status, data: retryParsed.parsed };
         } else {
           this.logout();
-          if (typeof this.onUnauthorized === 'function') this.onUnauthorized()
+          if (typeof this.onUnauthorized === 'function') this.onUnauthorized();
         }
       }
 
-      // non-OK and not handled by refresh
-      const err = new Error(response.statusText || `HTTP error! status: ${response.status}`);
-      err.status = response.status;
-      err.data = data;
-      throw err;
+      // ⬇️ throw *raw* backend payload (no Error.message)
+      throw { status: response.status, data };
     } catch (error) {
-      // network or thrown above
-      if (error.status && error.data) throw error;
+      // If we already have our structured {status, data}, just bubble it up
+      if (error && typeof error === 'object' && 'status' in error && 'data' in error) {
+        throw error;
+      }
 
-      const enhancedError = new Error(error.message || 'Network request failed');
-      enhancedError.status = 0;
-      enhancedError.data = { message: error.message };
-      throw enhancedError;
+      // Network/unknown error -> normalize without message spam
+      throw {
+        status: 0,
+        data: { message: error?.message || 'Network request failed' },
+      };
     }
   }
+
 
   _canAttemptRefresh(endpoint) {
     // avoid infinite loops when calling login/refresh endpoints

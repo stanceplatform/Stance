@@ -7,6 +7,8 @@ import CTAButton from '../components/ui/CTAButton';
 import apiService from '../services/api';
 import TextField from '../components/ui/TextField';
 import bg from '../assets/bg.svg';
+import { getApiErrorMessage } from '../utils/apiError';
+import toast from 'react-hot-toast';
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // light validation
 
@@ -63,7 +65,7 @@ const SendInvite = () => {
         // Use the backend's error message if available
         const errorMessage = error.data.message || error.data.error || error.message;
         setErr(errorMessage || 'Invite failed. Please try again.');
-
+        toast.error(getApiErrorMessage(error));
         // You can also access the status code if needed
         console.error('API Error Status:', error.status);
       } else {

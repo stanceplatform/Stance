@@ -3,6 +3,8 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { voteOnCard } from '../../services/operations';
 import CommentDrawer from '../comments/CommentDrawer';
 import ProgressBarWithLabels from '../charts/ProgressBar';
+import { getApiErrorMessage } from '../../utils/apiError';
+import toast from 'react-hot-toast';
 
 // put this near the top of the file
 const formatPct = (v) => {
@@ -12,7 +14,7 @@ const formatPct = (v) => {
 
   const abs = Math.abs(num);
   const intPart = Math.trunc(num);
-  const firstDecimal = Math.floor(abs * 10) % 10;         // digit right after decimal
+  const firstDecimal = Math.floor(abs * 10) % 10;
   const hasAnyFraction = Math.round((abs - Math.floor(abs)) * 100) !== 0;
 
   // no fraction OR first decimal digit is 0 -> show integer only
@@ -83,6 +85,7 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
       setHasVoted(true);
     } catch (error) {
       console.error('Error voting:', error);
+      toast.error(getApiErrorMessage(error));
     } finally {
       setIsVoting(false);
     }

@@ -12,7 +12,7 @@ const ProtectedRoute = ({ children }) => {
 
     // If not authenticated, bounce to login (or "/") and remember where they were going
     if (!isAuthenticated) {
-        return <Navigate to="/login" replace state={{ from: location }} />;
+        return <Navigate to="/" replace state={{ from: location }} />;
     }
     return children;
 };

@@ -1,4 +1,6 @@
 import apiService from './api.js';
+import { toast } from 'react-hot-toast';
+import { getApiErrorMessage } from '../utils/apiError';
 
 // Fallback to local data
 const loadFallbackData = async () => {
@@ -8,6 +10,7 @@ const loadFallbackData = async () => {
     return await response.json();
   } catch (error) {
     console.error('Fallback data load failed:', error);
+    toast.error(getApiErrorMessage(error));
     return [];
   }
 };
@@ -16,9 +19,9 @@ export const fetchAllCards = async () => {
   try {
     const response = await apiService.getQuestionsResponse(0, 10, 'DESC');
     return response || [];
-
   } catch (error) {
     console.error('API fetch failed, using fallback:', error);
+    toast.error(getApiErrorMessage(error));
     return await loadFallbackData();
   }
 };
@@ -30,6 +33,7 @@ export const fetchOpinions = async () => {
     return await response.json();
   } catch (error) {
     console.error('Error fetching opinions:', error);
+    toast.error(getApiErrorMessage(error));
     throw error;
   }
 };
@@ -40,6 +44,7 @@ export const fetchCardComments = async (questionId) => {
     return response.content || [];
   } catch (error) {
     console.error('Error fetching comments:', error);
+    toast.error(getApiErrorMessage(error));
     return [];
   }
 };
@@ -50,21 +55,7 @@ export const voteOnCard = async (questionId, answerOptionId) => {
     return response;
   } catch (error) {
     console.error('Error voting on card:', error);
-    throw error;
-  }
-};
-
-export const login = async (credentials) => {
-  try {
-    // TODO: Implement login API and set token
-    // const response = await apiService.request('/auth/login', {
-    //   method: 'POST',
-    //   body: JSON.stringify(credentials)
-    // });
-    // apiService.setToken(response.token);
-    return { success: true, token: 'mock-token' };
-  } catch (error) {
-    console.error('Login failed:', error);
+    toast.error(getApiErrorMessage(error));
     throw error;
   }
 };
@@ -74,6 +65,7 @@ export const likeComment = async (commentId) => {
     return await apiService.likeComment(commentId);
   } catch (error) {
     console.error('Error liking comment:', error);
+    toast.error(getApiErrorMessage(error));
     throw error;
   }
 };
@@ -82,7 +74,8 @@ export const unlikeComment = async (commentId) => {
   try {
     return await apiService.unlikeComment(commentId);
   } catch (error) {
-    console.error('Error liking comment:', error);
+    console.error('Error unliking comment:', error);
+    toast.error(getApiErrorMessage(error));
     throw error;
   }
 };
@@ -112,6 +105,7 @@ export const postCommentOnCard = async (questionId, commentText) => {
     return await apiService.addComment(questionId, commentText);
   } catch (error) {
     console.error('Error posting comment:', error);
+    toast.error(getApiErrorMessage(error));
     throw error;
   }
 };
