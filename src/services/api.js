@@ -91,8 +91,8 @@ class ApiService {
           retryErr.data = retryParsed.parsed;
           throw retryErr;
         } else {
-          // refresh failed => logout + throw original error
           this.logout();
+          if (typeof this.onUnauthorized === 'function') this.onUnauthorized()
         }
       }
 
@@ -152,10 +152,8 @@ class ApiService {
 
         if (!resp.ok) {
           // if refresh unauthorized, nuke tokens
-          if (resp.status === 401) {
-            this.setToken(null);
-            this.setRefreshToken(null);
-          }
+          this.setToken(null);
+          this.setRefreshToken(null);
           return false;
         }
 
