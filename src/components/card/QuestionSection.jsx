@@ -19,7 +19,8 @@ const formatPct = (v) => {
   if (!hasAnyFraction || firstDecimal === 0) return String(intPart);
 
   // first decimal digit non-zero -> show up to 2 decimals
-  return num.toFixed(2);
+  // return num.toFixed(2);
+  return num.toFixed(1);
 };
 
 function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
