@@ -8,7 +8,7 @@ import ThankYou from '../thankyou/ThankYou'
 import CardNavigation from './CardNavigation'
 import QuestionSection from './QuestionSection'
 import { useCurrentQuestion } from '../../context/CurrentQuestionContext'
-import SuggestQuestion from './SuggestQuestion'
+import ShareStanceThanks from '../thankyou/ShareStanceThanks'
 
 const SWIPE_THRESHOLD = 60;           // px needed to trigger a swipe
 const ANGLE_GUARD = 0.6;              // require mostly-horizontal: |dx| > 0.6*|dy|
@@ -156,7 +156,7 @@ const Card = () => {
           <div className="text-red-500">Error loading questions</div>
         </div>
       ) : showSuggestQuestion ? (
-        <SuggestQuestion onNext={handleNextQuestion} onPrevious={handlePreviousQuestion} />
+        <ShareStanceThanks onNext={handleNextQuestion} onPrevious={handlePreviousQuestion} />
       ) : questions.length > 0 ? (
         // touch-action: pan-y lets vertical page scroll while still allowing horizontal swipes we detect
         <div

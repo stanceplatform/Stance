@@ -19,6 +19,7 @@ import NeedHelpPage from './pages/NeedHelpPage';
 import CommunityGuidelinesPage from './pages/CommunityGuidelinesPage';
 import ResetPassword from './pages/ResetPassword';
 import ForgotPassword from './pages/ForgotPassword';
+import SuggestQuestion from './pages/SuggestQuestion';
 
 const AppRoutes = () => {
     return (
@@ -90,6 +91,14 @@ const AppRoutes = () => {
                             element={
                                 <ProtectedRoute>
                                     <ReportIssuePage />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/suggestquestion"
+                            element={
+                                <ProtectedRoute>
+                                    <SuggestQuestion />
                                 </ProtectedRoute>
                             }
                         />
