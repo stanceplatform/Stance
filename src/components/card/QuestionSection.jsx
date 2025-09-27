@@ -190,9 +190,9 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
         <button
           disabled={!hasVoted}
           onClick={toggleDrawer}
-          className={`gap-2 self-center px-4 py-2 mt-6 font-intro font-semibold text-base tracking-wide rounded-[40px] ${hasVoted
+          className={`gap-2 self-center px-4 py-2 mt-6 mb-1 font-inter font-medium text-base tracking-wide rounded-[40px] ${hasVoted
             ? "bg-[#F0E224] text-[#5B037C]"
-            : "bg-white bg-opacity-20 text-white"
+            : "text-white"
             }`}
         >
           {!hasVoted
