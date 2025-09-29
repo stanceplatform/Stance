@@ -1,115 +1,85 @@
-import React, { useMemo, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import apiService from "../services/api"; // adjust import to your path
+// pages/Help.jsx
+import React, { useRef, useState } from "react";
+import HeaderSecondary from "../components/ui/HeaderSecondary";
+import apiService from "../services/api";
 
-// Backend-allowed types
 const FEEDBACK_TYPES = [
   { value: "GENERAL_FEEDBACK", label: "General Feedback" },
   { value: "BUG_REPORT", label: "Bug Report" },
   { value: "FEATURE_REQUEST", label: "Feature Request" },
   { value: "COMPLAINT", label: "Complaint" },
 ];
+export default function Help() {
+  const formRef = useRef(null);
 
-export default function NeedHelpPage() {
-  const nav = useNavigate();
-  const [sp] = useSearchParams();
-
-  // Accept both ?questionId= and ?question-id=
-  const questionId = useMemo(() => {
-    const v = sp.get("questionId") ?? sp.get("question-id");
-    const n = Number(v);
-    return Number.isFinite(n) && n > 0 ? n : null;
-  }, [sp]);
-
-  // Form state
-  const [type, setType] = useState("GENERAL_FEEDBACK");
-  const [subject, setSubject] = useState(
-    questionId ? `Need help regarding question #${questionId}` : ""
-  );
+  const [type, setType] = useState(FEEDBACK_TYPES[0]);
+  const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [msg, setMsg] = useState("");
+  const [isError, setIsError] = useState(false);
 
-  // UX state
-  const [submitting, setSubmitting] = useState(false);
-  const [done, setDone] = useState(false);
-  const [error, setError] = useState("");
-
-  // Validation tracking
-  const [touched, setTouched] = useState({
-    subject: false,
-    message: false,
-  });
-  const [submitted, setSubmitted] = useState(false);
-
-  // Basic validation
-  const subjectOk = subject.trim().length >= 4;
-  const messageOk = message.trim().length >= 10;
-  const canSubmit = subjectOk && messageOk && !!type && !submitting;
-
-  const onSubmit = async (e) => {
+  const submit = async (e) => {
     e.preventDefault();
-    setSubmitted(true);
-    setError("");
+    setMsg("");
+    setIsError(false);
 
-    if (!canSubmit) return;
+    if (!subject.trim()) {
+      setMsg("Please enter a subject.");
+      setIsError(true);
+      return;
+    }
+    if (!message.trim()) {
+      setMsg("Please enter a message.");
+      setIsError(true);
+      return;
+    }
 
+    setLoading(true);
     try {
-      setSubmitting(true);
       await apiService.sendFeedback({
         subject: subject.trim(),
         message: message.trim(),
         type, // must match backend enum
       });
-      setDone(true);
+      setMsg("Thanks! Your feedback has been submitted.");
+      setIsError(false);
+      setSubject("");
       setMessage("");
-    } catch (err) {
-      console.error(err);
-      setError("Failed to submit your request. Please try again.");
+      setType(FEEDBACK_TYPES[0]);
+    } catch (error) {
+      const errText =
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        error?.message ||
+        "Request failed. Please try again.";
+      setMsg(errText);
+      setIsError(true);
     } finally {
-      setSubmitting(false);
+      setLoading(false);
     }
   };
 
   return (
-    <main className="min-h-screen w-full bg-neutral-900 text-white">
-      {/* Top bar */}
-      <header className="sticky top-0 z-10 bg-neutral-900/80 backdrop-blur border-b border-white/10">
-        <div className="mx-auto max-w-xl px-4 py-3 flex items-center gap-3">
-          <button
-            onClick={() => nav(-1)}
-            aria-label="Go back"
-            className="p-2 rounded-xl hover:bg-white/10"
-          >
-            <span className="text-xl leading-none">&larr;</span>
-          </button>
-          <h1 className="text-lg font-semibold">Need Help</h1>
-        </div>
-      </header>
+    <div className="mx-auto w-full max-w-[480px] bg-white min-h-screen">
+      <div className="relative w-full">
+        <HeaderSecondary />
+        <div className="overflow-y-auto px-4 pt-24">
+          <form ref={formRef} onSubmit={submit} className="w-full">
+            {/* Page Title */}
+            <h1 className="text-left font-intro font-[600] text-[32px] leading-[40px] text-[#707070] mb-6">
+              Help
+            </h1>
 
-      <div className="mx-auto max-w-xl px-4 py-6">
-        {done ? (
-          <div className="rounded-2xl border border-indigo-500/30 bg-indigo-500/10 p-4">
-            <p className="font-medium">
-              Thanks! We received your request. Our team will get back to you via email.
-            </p>
-            <button
-              onClick={() => nav(-1)}
-              className="mt-4 inline-flex items-center justify-center rounded-2xl bg-indigo-600 px-4 py-2 text-sm font-semibold hover:bg-indigo-500"
-            >
-              Done
-            </button>
-          </div>
-        ) : (
-          <form onSubmit={onSubmit} className="rounded-2xl border border-white/10 bg-white/5 p-5 text-left">
-            {/* TYPE */}
-            <div className="mb-4">
-              <label htmlFor="feedback-type" className="block text-sm text-white/80">
-                Type
-              </label>
+            {/* Type */}
+            <label className="block text-left mb-2 text-[16px] leading-[20px] font-medium text-[#707070]">
+              Type
+            </label>
+            <div className="relative mb-2">
               <select
-                id="feedback-type"
                 value={type}
                 onChange={(e) => setType(e.target.value)}
-                className="mt-2 w-full rounded-2xl bg-neutral-800/70 border border-white/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-600"
+                className="w-full h-[48px] rounded-xl px-4 pr-10 text-[16px] outline-none bg-white text-[#121212] border border-[#E5E5E5] focus:border-[#BDBDBD] appearance-none cursor-pointer"
               >
                 {FEEDBACK_TYPES.map((t) => (
                   <option key={t.value} value={t.value}>
@@ -117,82 +87,77 @@ export default function NeedHelpPage() {
                   </option>
                 ))}
               </select>
-              <p className="mt-1 text-xs text-white/50 text-left">
-                Choose what best describes your request.
-              </p>
+              {/* simple caret */}
+              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#121212]">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M10.0002 13.7501L4.16211 7.87514L5.22523 6.81326L10.0002 11.587L14.7752 6.81201L15.8384 7.87514L10.0002 13.7501Z" fill="black" />
+                </svg>
+              </span>
             </div>
-
-            {/* SUBJECT */}
-            <div className="mb-4">
-              <label htmlFor="feedback-subject" className="block text-sm text-white/80">
-                Subject
-              </label>
-              <input
-                id="feedback-subject"
-                type="text"
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
-                onBlur={() => setTouched((t) => ({ ...t, subject: true }))}
-                placeholder={
-                  questionId ? `Need help regarding question #${questionId}` : "Brief subject"
-                }
-                className="mt-2 w-full rounded-2xl bg-neutral-800/70 border border-white/10 px-3 py-2 text-sm placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-fuchsia-600"
-                required
-              />
-              {(touched.subject || submitted) && !subjectOk && (
-                <p className="mt-1 text-xs text-red-400 text-left">
-                  Subject must be at least 4 characters.
-                </p>
-              )}
-            </div>
-
-            {/* MESSAGE */}
-            <div>
-              <label htmlFor="feedback-message" className="block text-sm text-white/80">
-                Message
-              </label>
-              <textarea
-                id="feedback-message"
-                rows={6}
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                onBlur={() => setTouched((t) => ({ ...t, message: true }))}
-                placeholder="Describe the issue or request in detail…"
-                className="mt-2 w-full rounded-2xl bg-neutral-800/70 border border-white/10 p-3 text-sm placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-fuchsia-600"
-                required
-              />
-              {(touched.message || submitted) && !messageOk && (
-                <p className="mt-1 text-xs text-red-400 text-left">
-                  Message must be at least 10 characters.
-                </p>
-              )}
-            </div>
-
-            {error && <p className="mt-3 text-sm text-red-400 text-left">{error}</p>}
-
-            <p className="mt-4 text-xs text-white/60 text-left">
-              Our team will get back to you via email. Please ensure your account email is correct.
+            <p className="text-left mb-5 text-[15px] leading-[22px] font-medium text-[#707070]">
+              Choose what best describes your request.
             </p>
 
-            <div className="mt-6 flex items-center justify-end gap-3">
-              <button
-                type="button"
-                onClick={() => nav(-1)}
-                className="rounded-2xl border border-white/15 px-4 py-2 text-sm hover:bg-white/10"
+            {/* Subject */}
+            <label
+              htmlFor="fb_subject"
+              className="block text-left mb-2 text-[16px] leading-[20px] font-medium text-[#707070]"
+            >
+              Subject*
+            </label>
+            <input
+              id="fb_subject"
+              type="text"
+              placeholder="Brief subject"
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+              className="w-full mb-5 rounded-xl px-4 h-[48px] text-[16px] outline-none bg-white text-[#707070] placeholder:text-[#A3A3A3] border border-[#E5E5E5] focus:border-[#BDBDBD]"
+            />
+
+            {/* Message */}
+            <label
+              htmlFor="fb_message"
+              className="block text-left mb-2 text-[16px] leading-[20px] font-medium text-[#707070]"
+            >
+              Message*
+            </label>
+            <textarea
+              id="fb_message"
+              placeholder="Describe the issue or request in detail"
+              rows={4}
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              className="w-full mb-6 rounded-xl px-4 py-3 text-[16px] leading-6 outline-none bg-white text-[#707070] placeholder:text-[#A3A3A3] border border-[#E5E5E5] focus:border-[#BDBDBD]"
+            />
+
+            {/* Helper text (unchanged) */}
+            <p className="text-left text-[15px] leading-[22px] text-[#4E4E4E] mb-6">
+              Our team will get back to you via email. Please ensure your
+              account email is correct.
+            </p>
+
+            {/* Submit button (same UI) */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3 rounded-full bg-[#F0E224] text-[#5B037C] font-inter font-medium text-[18px] leading-[32px] shadow-sm disabled:opacity-60"
+            >
+              {loading ? "Submitting…" : "Submit"}
+            </button>
+
+            {/* Message */}
+            {msg ? (
+              <div
+                className={`mt-4 text-[15px] leading-6 ${isError ? "text-red-700" : "text-emerald-700"
+                  }`}
+                aria-live="polite"
               >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={!canSubmit}
-                className="rounded-2xl bg-fuchsia-700 px-5 py-2 text-sm font-semibold hover:bg-fuchsia-600 disabled:opacity-50"
-              >
-                {submitting ? "Submitting…" : "Submit"}
-              </button>
-            </div>
+                {msg}
+              </div>
+            ) : null}
           </form>
-        )}
+        </div>
       </div>
-    </main>
+    </div>
   );
 }
