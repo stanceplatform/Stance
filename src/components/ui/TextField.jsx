@@ -120,7 +120,7 @@ export default function TextField({
       </div>
 
       {(error || helperText) && (
-        <p className={cn("mt-1 text-[13px]", error ? "text-red-200" : "text-white/80")}>
+        <p className={cn("mt-1 text-[13px] break-words", error ? "text-red-200" : "text-white/80")}>
           {error || helperText}
         </p>
       )}

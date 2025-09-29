@@ -1,8 +1,8 @@
+// components/.../ReportComment.jsx
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFlag, faTimes } from "@fortawesome/free-solid-svg-icons";
-import apiService from "../../services/api"; // adjust if needed
+import apiService from "../../services/api";
+import HeaderSecondary from "../ui/HeaderSecondary"; // same header used on pages
 
 const REASONS = [
   { value: "spam", label: "Spam or misleading" },
@@ -10,7 +10,7 @@ const REASONS = [
   { value: "hate", label: "Hate speech" },
   { value: "violence", label: "Violence or threats" },
   { value: "misinfo", label: "Misinformation" },
-  { value: "privacy", label: "Personal data / doxxing" },
+  { value: "privacy", label: "Personal data/doxxing" },
   { value: "scam", label: "Scam or fraud" },
   { value: "other", label: "Other" },
 ];
@@ -20,14 +20,15 @@ export default function ReportComment({
   onClose,
   commentId,
   onSuccess,
-  onReport,
+  onReport, // (kept for compatibility)
 }) {
-  const [reason, setReason] = useState("spam");
+  const [reason, setReason] = useState("");
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
+  const [msg, setMsg] = useState("");
+  const [isError, setIsError] = useState(false);
 
-  // Lock background scroll while open
+  // lock scroll while open
   useEffect(() => {
     if (!open) return;
     const prev = document.documentElement.style.overflow;
@@ -35,34 +36,59 @@ export default function ReportComment({
     return () => { document.documentElement.style.overflow = prev; };
   }, [open]);
 
-  // ESC to close
+  // ESC closes
   useEffect(() => {
     const onKey = (e) => e.key === "Escape" && open && onClose?.();
     if (open) window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
-  // Reset when newly opened
+  // reset when open
   useEffect(() => {
     if (!open) return;
-    setReason("spam");
+    setReason("");
     setDescription("");
     setLoading(false);
-    setErrorMsg("");
+    setMsg("");
+    setIsError(false);
   }, [open]);
 
-  const handleSubmit = async () => {
-    setErrorMsg("");
-    if (!commentId) return setErrorMsg("Missing comment id.");
-    if (!reason?.trim()) return setErrorMsg("Please select a reason.");
+  const handleSubmit = async (e) => {
+    e?.preventDefault?.();
+    setMsg("");
+    setIsError(false);
+
+    if (!commentId) {
+      setMsg("Missing comment id.");
+      setIsError(true);
+      return;
+    }
+    if (!reason) {
+      setMsg("Please select a reason.");
+      setIsError(true);
+      return;
+    }
+    if (!description.trim()) {
+      setMsg("Please add more details.");
+      setIsError(true);
+      return;
+    }
+
     try {
       setLoading(true);
-      const payload = { reason, description: (description || "").trim() };
+      const payload = { reason, description: description.trim() };
+      // keep your existing endpoint
       const res = await apiService.reportComment(commentId, payload);
       onSuccess?.(res);
       onClose?.();
     } catch (err) {
-      setErrorMsg(err?.message || "Failed to submit report. Please try again.");
+      const errText =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        err?.message ||
+        "Failed to submit report. Please try again.";
+      setMsg(errText);
+      setIsError(true);
     } finally {
       setLoading(false);
     }
@@ -70,114 +96,96 @@ export default function ReportComment({
 
   if (!open) return null;
 
-  // Backdrop: close + block underlying clicks
-  const onBackdrop = (e) => {
-    e.stopPropagation();
-    onClose?.();
-  };
-
-  // Sheet: block bubbling to backdrop/underlay, but DO NOT preventDefault
-  const stopBubble = (e) => e.stopPropagation();
-
   return ReactDOM.createPortal(
-    <div className="fixed inset-0 z-[9999]" role="dialog" aria-modal="true">
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/50" onClick={onBackdrop} />
+    <div className="fixed inset-0 z-[9999] bg-white max-w-[480px] mx-auto">
+      {/* Page container (same as other pages) */}
+      <div className="mx-auto  min-h-screen bg-white relative">
+        {/* Purple header (same component you already use) */}
+        <HeaderSecondary onBack={onClose} />
 
-      {/* Positioner: bottom on mobile, centered on >=sm */}
-      <div className="absolute inset-0 flex items-end sm:items-center justify-center p-2 sm:p-4" onClick={onBackdrop}>
-        {/* Sheet (max 480px) */}
-        <div
-          className="
-            w-full max-w-[480px]
-            bg-neutral-900 border border-neutral-700
-            rounded-t-2xl sm:rounded-2xl
-            grid grid-rows-[auto,1fr,auto]
-            max-h-dvh overflow-hidden
-          "
-          style={{
-            paddingBottom: "env(safe-area-inset-bottom)",
-            paddingTop: "env(safe-area-inset-top)",
-          }}
-          onClick={stopBubble}
-          onMouseDown={stopBubble}
-          onTouchStart={stopBubble}
-        >
-          {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-800">
-            <div className="flex items-center gap-2">
-              <FontAwesomeIcon icon={faFlag} className="w-4 h-4 text-red-400" />
-              <h4 className="text-white text-base font-semibold">Report comment</h4>
-            </div>
-            <button
-              className="p-2 rounded-md hover:bg-neutral-800 text-neutral-300"
-              onClick={onClose}
-              aria-label="Close"
-              type="button"
-            >
-              <FontAwesomeIcon icon={faTimes} className="w-4 h-4" />
-            </button>
-          </div>
+        {/* Content */}
+        <div className="overflow-y-auto px-4 pt-24 pb-10">
+          <form onSubmit={handleSubmit} className="w-full">
+            {/* Title */}
+            <h1 className="text-left font-intro font-[600] text-[36px] leading-[48px] text-[#707070] mb-6">
+              Report comment
+            </h1>
 
-          {/* Body (scrolls) */}
-          <div className="px-4 py-3 overflow-y-auto overscroll-contain">
-            <p className="text-neutral-300 text-sm">
-              Select a reason. This won’t notify the author. We’ll review it.
+            {/* Subheading */}
+            <p className="text-left mb-4 text-[16px] leading-[20px] font-medium text-[#707070]">
+              Help us understand the issue
             </p>
 
-            <div className="mt-3 space-y-2 text-neutral-200">
+            {/* Reasons – match radio style used on question page:
+                unselected: grey ring #BEBEBE
+                selected: thick purple ring #BF24F9 + yellow dot #F0E224
+            */}
+            <div className="mb-6 space-y-3">
               {REASONS.map((r) => (
                 <label
                   key={r.value}
-                  className="flex items-center gap-2 p-2 rounded hover:bg-neutral-800 cursor-pointer"
+                  className="flex items-center gap-3 cursor-pointer select-none text-[#212121]"
                 >
                   <input
                     type="radio"
                     name={`report-reason-${commentId}`}
                     value={r.value}
                     checked={reason === r.value}
-                    onChange={() => setReason(r.value)}
-                    className="accent-neutral-400"
+                    onChange={(e) => setReason(e.target.value)}
+                    className="peer hidden"
                   />
-                  <span>{r.label}</span>
+                  {/* outer ring */}
+                  <span className="grid place-items-center h-5 w-5 rounded-full border-2 transition-all border-[#BEBEBE] peer-checked:border-[#BF24F9] peer-checked:border-[3px]">
+                    {/* inner yellow dot */}
+                    <span className="h-2.5 w-2.5 rounded-full bg-[#F0E224] transition-all duration-150 peer-checked:scale-100 peer-checked:opacity-100 scale-0 opacity-0" />
+                  </span>
+                  <span className="text-[16px] leading-6">{r.label}</span>
                 </label>
               ))}
             </div>
 
-            <div className="mt-3">
-              <textarea
-                className="w-full min-h-[120px] rounded-md bg-neutral-800 border border-neutral-700 p-2 text-neutral-100 placeholder-neutral-400"
-                placeholder="Tell us a bit more (optional)…"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
-            </div>
+            {/* Description */}
+            <label
+              htmlFor="rc_description"
+              className="block text-left mb-2 text-[16px] leading-[20px] font-medium text-[#707070]"
+            >
+              Description*
+            </label>
+            <textarea
+              id="rc_description"
+              placeholder="Add more details"
+              rows={4}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full mb-6 rounded-xl px-4 py-3 text-[16px] leading-6 outline-none bg-white text-[#707070] placeholder:text-[#A3A3A3] border border-[#E5E5E5] focus:border-[#BDBDBD]"
+            />
 
-            {errorMsg && <div className="mt-2 text-sm text-red-400">{errorMsg}</div>}
-            <div className="h-4" />
-          </div>
+            {/* Helper text */}
+            <p className="text-left text-[15px] leading-[22px] text-[#4E4E4E] mb-6">
+              Our team will get back to you via email. Please ensure your
+              account email is correct.
+            </p>
 
-          {/* Footer */}
-          <div className="px-4 py-3 border-t border-neutral-800 bg-neutral-900">
-            <div className="flex items-center justify-end gap-2">
-              <button
-                className="px-4 py-2 rounded-md bg-neutral-700 text-neutral-200 hover:bg-neutral-600"
-                onClick={onClose}
-                type="button"
-              >
-                Cancel
-              </button>
-              <button
-                className={`px-4 py-2 rounded-md text-white ${loading ? "opacity-70 cursor-not-allowed bg-red-600" : "bg-red-600 hover:bg-red-500"
+            {/* Submit */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3 rounded-full bg-[#F0E224] text-[#5B037C] font-inter font-medium text-[18px] leading-[32px] shadow-sm disabled:opacity-60"
+            >
+              {loading ? "Submitting…" : "Submit"}
+            </button>
+
+            {/* Message */}
+            {msg ? (
+              <div
+                className={`mt-4 text-[15px] leading-6 ${isError ? "text-red-700" : "text-emerald-700"
                   }`}
-                onClick={handleSubmit}
-                disabled={loading}
-                type="button"
+                aria-live="polite"
               >
-                {loading ? "Reporting…" : "Submit report"}
-              </button>
-            </div>
-          </div>
+                {msg}
+              </div>
+            ) : null}
+          </form>
         </div>
       </div>
     </div>,
