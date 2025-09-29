@@ -1,31 +1,39 @@
 // pages/Signup.jsx
-import React, { useMemo, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import AuthShell from '../components/layouts/AuthShell';
-import Logo from '../components/ui/Logo';
-import CTAButton from '../components/ui/CTAButton';
-import apiService from '../services/api';
-import TextField from '../components/ui/TextField'; // ✅ reuse
+import React, { useMemo, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import CTAButton from "../components/ui/CTAButton";
+import apiService from "../services/api";
+import TextField from "../components/ui/TextField";
 import bg from '../assets/bg.svg';
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-const Signup = () => {
+export default function Signup() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
 
-  // token from invite link
-  const tokenFromLink = useMemo(() => params.get('token') || '', [params]);
+  // from invite link
+  const tokenFromLink = useMemo(() => params.get("token") || "", [params]);
+
+  // optional prefill (doesn't change payload)
+  const emailFromLink = useMemo(() => params.get("email") || "", [params]);
+  const collegeFromLink = useMemo(
+    () => params.get("college") || "NITK Surathkal",
+    [params]
+  );
 
   const [form, setForm] = useState({
-    name: '',
-    alternateEmail: '',
-    password: '',
-    confirmPassword: '',
+    studentEmail: emailFromLink,
+    name: "",
+    alternateEmail: "",
+    password: "",
+    confirmPassword: "",
+    college: collegeFromLink,
   });
+
   const [loading, setLoading] = useState(false);
-  const [err, setErr] = useState('');
-  const [ok, setOk] = useState('');
+  const [err, setErr] = useState("");
+  const [ok, setOk] = useState("");
 
   const onChange = (e) => {
     const { name, value } = e.target;
@@ -34,27 +42,27 @@ const Signup = () => {
 
   const submit = async (e) => {
     e.preventDefault();
-    setErr('');
-    setOk('');
+    setErr("");
+    setOk("");
 
     if (!tokenFromLink) {
-      setErr('Signup link is missing or invalid.');
+      setErr("Signup link is missing or invalid.");
       return;
     }
     if (!form.name.trim()) {
-      setErr('Please enter your name.');
+      setErr("Please enter your name.");
       return;
     }
     if (!form.alternateEmail || !emailRegex.test(form.alternateEmail)) {
-      setErr('Please enter a valid alternate email.');
+      setErr("Please enter a valid alternate email.");
       return;
     }
     if (!form.password || form.password.length < 6) {
-      setErr('Password must be at least 6 characters.');
+      setErr("Password must be at least 6 characters.");
       return;
     }
     if (form.password !== form.confirmPassword) {
-      setErr('Passwords do not match.');
+      setErr("Passwords do not match.");
       return;
     }
 
@@ -63,7 +71,7 @@ const Signup = () => {
       const payload = {
         token: tokenFromLink,
         name: form.name.trim(),
-        collegeId: null,
+        collegeId: null, // keep as is (college is display-only here)
         alternateEmail: form.alternateEmail.trim(),
         password: form.password,
         confirmPassword: form.confirmPassword,
@@ -72,123 +80,164 @@ const Signup = () => {
       const res = await apiService.completeSignup(payload);
       if (res?.token) {
         apiService.setToken(res.token);
-        if (res?.refreshToken) localStorage.setItem('refreshToken', res.refreshToken);
+        if (res?.refreshToken)
+          localStorage.setItem("refreshToken", res.refreshToken);
         if (res?.id || res?.email || res?.username) {
-          localStorage.setItem('user', JSON.stringify({ id: res.id, email: res.email, username: res.username }));
+          localStorage.setItem(
+            "user",
+            JSON.stringify({
+              id: res.id,
+              email: res.email,
+              username: res.username,
+            })
+          );
         }
-        setOk('Signup completed!');
-        navigate('/dashboard');
+        setOk("Signup completed!");
+        navigate("/dashboard");
       } else {
-        setErr(res?.message || 'Signup failed. Please try again.');
+        setErr(res?.message || "Signup failed. Please try again.");
       }
     } catch (error) {
-      // Extract error message from enhanced error object
-      const errorMessage = error.data?.message || error.data?.error || error.message;
-      setErr(errorMessage || 'Signup failed. Please try again.');
+      const errorMessage =
+        error.data?.message || error.data?.error || error.message;
+      setErr(errorMessage || "Signup failed. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <AuthShell
-      bgImage={bg}
-      showBack
-      onBack={() => navigate(-1)}
-      footer={
-        <div className="px-6">
-          <div className="flex justify-center">
-            <button
-              type="submit"
-              form="completeSignupForm"
-              disabled={loading}
-              className="mx-auto w-[320px] max-w-full mb-5"
-            >
-              <CTAButton as="div" variant="primary">
-                <span className="font-intro font-[500] text-[22px] leading-[32px] tracking-[0.88px]">
-                  {loading ? 'Submitting…' : 'Submit'}
-                </span>
-              </CTAButton>
-            </button>
-          </div>
+    <div className="min-h-screen w-full">
+      {/* Purple background layer */}
+      <div className="relative min-h-screen w-full bg-cover bg-center" style={{ backgroundImage: `url(${bg})` }}>
+        {/* Top row with logo (no back button) */}
+        <div className="px-5 pt-6">
+          <img
+            src="/logo-white.svg"
+            alt="stance"
+            className="w-[98px]"
+            draggable="false"
+          />
         </div>
-      }
-    >
-      {/* Brand */}
-      <div className="mb-6">
-        <Logo />
+
+        {/* Main content */}
+        <div className="px-7 pb-8">
+          {/* Heading */}
+          <h1 className="mt-6 text-start mb-6 font-intro font-[600] text-[36px] leading-[48px] tracking-[0.5px] text-[#F0E224]">
+            Let’s get started!
+          </h1>
+
+          {/* Form (centered, narrow) */}
+          <form
+            id="completeSignupForm"
+            onSubmit={submit}
+            className="w-full"
+          >
+            {/* Student email* (display only) */}
+            <TextField
+              id="studentEmail"
+              label="Student email*"
+              name="studentEmail"
+              type="email"
+              inputMode="email"
+              autoComplete="email"
+              placeholder="your.name@college.edu"
+              value={form.studentEmail}
+              onChange={onChange}
+              inputClass="bg-white text-[#121212] placeholder:text-gray-500"
+            />
+
+            <div className="mt-4" />
+            <TextField
+              id="name"
+              label="Name*"
+              name="name"
+              type="text"
+              placeholder="Enter your name"
+              value={form.name}
+              onChange={onChange}
+              inputClass="bg-white text-[#121212] placeholder:text-gray-500"
+            />
+
+            <div className="mt-4" />
+            <TextField
+              id="college"
+              label="College*"
+              name="college"
+              type="text"
+              value={form.college}
+              onChange={onChange}
+              disabled
+              inputClass="bg-white text-[#121212] placeholder:text-gray-500 opacity-100"
+            />
+
+            <div className="mt-4" />
+            <TextField
+              id="alternateEmail"
+              label="Alternate email*"
+              name="alternateEmail"
+              type="email"
+              inputMode="email"
+              autoComplete="email"
+              placeholder="Enter email"
+              value={form.alternateEmail}
+              onChange={onChange}
+              inputClass="bg-white text-[#121212] placeholder:text-gray-500"
+            />
+
+            <div className="mt-4" />
+            <TextField
+              id="password"
+              label="Password*"
+              name="password"
+              type="password"
+              autoComplete="new-password"
+              placeholder="Enter password"
+              value={form.password}
+              onChange={onChange}
+              togglePassword
+              inputClass="bg-white text-[#121212] placeholder:text-gray-500"
+            />
+
+            <div className="mt-4" />
+            <TextField
+              id="confirmPassword"
+              label="Confirm Password*"
+              name="confirmPassword"
+              type="password"
+              autoComplete="new-password"
+              placeholder="Enter password"
+              value={form.confirmPassword}
+              onChange={onChange}
+              togglePassword
+              inputClass="bg-white text-[#121212] placeholder:text-gray-500"
+            />
+
+            {/* Errors / success */}
+            {err ? (
+              <div className="mt-3 text-[13px] text-red-200">{err}</div>
+            ) : null}
+            {ok ? (
+              <div className="mt-3 text-[13px] text-green-200">{ok}</div>
+            ) : null}
+
+            {/* Submit CTA */}
+            <div className="mt-6 mb-10">
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-[320px] max-w-full"
+              >
+                <CTAButton as="div" variant="primary">
+                  <span className="font-intro font-[500] text-[22px] leading-[32px] tracking-[0.88px]">
+                    {loading ? "Submitting…" : "Submit"}
+                  </span>
+                </CTAButton>
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
-
-      {/* Form */}
-      {/* 👇 leave extra bottom padding so the fixed footer never hides fields on short screens */}
-      <form id="completeSignupForm" onSubmit={submit} className="w-full max-w-[360px] pb-12">
-        <TextField
-          id="name"
-          label="Name*"
-          name="name"
-          type="text"
-          placeholder="Enter your name"
-          value={form.name}
-          onChange={onChange}
-        />
-
-        <div className="mt-4" />
-        <TextField
-          id="alternateEmail"
-          label="Alternate Email ID*"
-          name="alternateEmail"
-          type="email"
-          inputMode="email"
-          autoComplete="email"
-          placeholder="Enter alternate email"
-          value={form.alternateEmail}
-          onChange={onChange}
-        />
-
-        <div className="mt-4" />
-        <TextField
-          id="college"
-          label="College*"
-          name="college"
-          type="text"
-          placeholder="11"
-          value=""
-          onChange={() => { }}
-          disabled
-          inputClass="bg-white/70 text-[#121212]/70 placeholder:text-gray-500"
-        />
-
-        <div className="mt-4" />
-        <TextField
-          id="password"
-          label="Password*"
-          name="password"
-          type="password"
-          autoComplete="new-password"
-          placeholder="Enter password"
-          value={form.password}
-          onChange={onChange}
-          togglePassword
-        />
-
-        <div className="mt-4" />
-        <TextField
-          id="confirmPassword"
-          label="Confirm Password*"
-          name="confirmPassword"
-          type="password"
-          autoComplete="new-password"
-          placeholder="Confirm password"
-          value={form.confirmPassword}
-          onChange={onChange}
-          togglePassword
-        />
-
-        {err ? <div className="mt-3 text-center text-[13px] text-red-200">{err}</div> : null}
-        {ok ? <div className="mt-3 text-center text-[13px] text-green-200">{ok}</div> : null}
-      </form>
-    </AuthShell>
+    </div>
   );
-};
-
-export default Signup;
+}

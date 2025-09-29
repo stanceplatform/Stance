@@ -86,7 +86,7 @@ export default function TextField({
           required={required}
           className={cn(
             // defaults
-            "w-full h-[56px] rounded-[16px] px-4 py-3",
+            "w-full h-[56px] rounded-[8px] px-4 py-3",
             "bg-white text-[#121212] placeholder:text-[#9CA3AF]",
             "border border-[#D9D9D9]",
             "outline-none focus:ring-2 focus:ring-white/60 focus:border-white/80",
