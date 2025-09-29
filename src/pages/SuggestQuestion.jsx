@@ -1,28 +1,15 @@
 // pages/SuggestQuestion.jsx
 import React, { useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import AuthShell from "../components/layouts/AuthShell";
-import Logo from "../components/ui/Logo";
 import apiService from "../services/api";
-
-const BackChevron = () => (
-  <svg width="22" height="14" viewBox="0 0 22 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M21.4998 7.89989H4.17559L9.00409 12.7299L7.72984 14.0056L0.725586 6.99989L7.72984 -0.00585938L9.00409 1.26989L4.17559 6.09989H21.4998V7.89989Z" fill="white" />
-  </svg>
-);
+import HeaderSecondary from "../components/ui/HeaderSecondary";
 
 const SuggestQuestion = () => {
-  const navigate = useNavigate();
   const [form, setForm] = useState({ question: "", option1: "", option2: "" });
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState("");
   const [isError, setIsError] = useState(false);
   const formRef = useRef(null);
 
-  const handleBack = () => {
-    if (window.history.length > 1) navigate(-1);
-    else navigate("/dashboard", { replace: true });
-  };
 
   const onChange = (e) => {
     const { name, value } = e.target;
@@ -76,29 +63,7 @@ const SuggestQuestion = () => {
   return (
     <div className="mx-auto w-full max-w-[480px] bg-white min-h-screen">
       <div className="relative w-full">
-        {/* Purple header with back + logo (matches Figma) */}
-        <div className="fixed inset-x-0 top-0 z-50 max-w-[480px] mx-auto">
-          <div className="bg-[#9105C6] flex items-center px-4 py-5">
-            <button
-              type="button"
-              onClick={handleBack}
-              aria-label="Go back"
-              className="mr-3 p-2 -ml-2"
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M22.5001 12.8999H5.17583L10.0043 17.7299L8.73008 19.0056L1.72583 11.9999L8.73008 4.99414L10.0043 6.26989L5.17583 11.0999H22.5001V12.8999Z" fill="#F0E224" />
-              </svg>
-            </button>
-            <div className="">
-              <img
-                loading="lazy"
-                src="/logo-sm.svg"
-                alt="Logo"
-                className="object-contain z-20 shrink-0 self-stretch my-auto aspect-auto w-[98px]"
-              />
-            </div>
-          </div>
-        </div>
+        <HeaderSecondary />
         <div className="overflow-y-auto px-4 pt-24">
           {/* Form content */}
           <form
