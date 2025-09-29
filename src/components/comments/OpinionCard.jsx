@@ -6,12 +6,13 @@ import { faThumbsUp as solidThumbsUp, faFlag } from "@fortawesome/free-solid-svg
 import { marked } from "marked";
 import ReportComment from "./ReportCommentSheet"; // <-- keep your existing path
 import LikedBySheet from "./LikedBySheet";        // <-- NEW import (file above)
+import { color } from "framer-motion";
 
 function getTheme(selectedOptionId, answerOptions) {
   const firstId = answerOptions?.[0]?.id;
   const secondId = answerOptions?.[1]?.id;
-  if (selectedOptionId === firstId) return { text: "text-[#776F08]", bg: "bg-[#343104]" };
-  if (selectedOptionId === secondId) return { text: "text-[#5B037C]", bg: "bg-purple-900" };
+  if (selectedOptionId === firstId) return { text: "text-[#D2C40F]", bg: "bg-[#343104]", borderColor: "border-[#F0E224]" };
+  if (selectedOptionId === secondId) return { text: "text-[#DB83FC]", bg: "bg-[#280137]", borderColor: "border-[#BF24F9]" };
   return { text: "text-gray-300", bg: "bg-neutral-800" };
 }
 
@@ -54,7 +55,7 @@ export default function OpinionCard({
 
   useEffect(() => () => cancelLongPress(), []);
 
-  const { text: colorClass, bg: colorBgClass } = getTheme(selectedOptionId, answerOptions);
+  const { text: colorClass, bg: colorBgClass, borderColor } = getTheme(selectedOptionId, answerOptions);
 
   const handleLike = async () => {
     if (isLikeLoading) return;
@@ -68,7 +69,7 @@ export default function OpinionCard({
 
   return (
     <article
-      className="relative flex gap-1 py-1 w-full rounded-lg z-100 select-none"
+      className="relative w-full rounded-lg z-100 select-none mb-2"
       onTouchStart={startLongPress}
       onTouchEnd={cancelLongPress}
       onTouchMove={cancelLongPress}
@@ -77,72 +78,69 @@ export default function OpinionCard({
       onMouseLeave={cancelLongPress}
       onContextMenu={onContextMenu}
     >
-      {/* Left: content */}
-      <div className={`flex flex-col flex-1 shrink self-start p-2 rounded-lg basis-0 ${colorBgClass}`}>
+      {/* Card */}
+      <div className={`flex flex-col p-3 rounded-xl ${colorBgClass}`}>
+        {/* HEADER: name (left) + like badge (right) */}
         <div className="flex items-center justify-between">
-          <h3 className={`text-[16px] leading-6 ${colorClass} text-left font-normal`}>{firstName}</h3>
-          {reported && (
-            <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-neutral-700 text-neutral-200">
-              Reported
-            </span>
-          )}
+          <h3 className={`text-[16px] leading-6 ${colorClass} font-normal capitalize`}>
+            {firstName}
+          </h3>
+
+          {/* like badge -> count + up icon, centered */}
+          <button
+            type="button"
+            onClick={handleLike}
+            disabled={isLikeLoading}
+            aria-label={isLikedByUser ? "Unlike" : "Like"}
+            className={`inline-flex items-center justify-center gap-2 p-3 rounded-lg border bg-black/10
+                    ${isLikeLoading ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+                    text-white ${borderColor}`}
+          >
+            <span className="text-[15px] font-inter  leading-5">{likeCount ?? 0}</span>
+
+            {/* same icon you already use; you said you'll replace SVG manually */}
+            {/* {isLikedByUser ? (
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M12 3c.33 0 .65.16.85.42l7.5 9.5c.51.64.06 1.58-.75 1.58H15v6a1 1 0 0 1-1 1H10a1 1 0 0 1-1-1v-6H4.4c-.81 0-1.26-.94-.75-1.58l7.5-9.5c.2-.26.52-.42.85-.42z" />
+              </svg>
+            ) : (
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M12 4l7 9h-4v7h-6v-7H5l7-9z" />
+              </svg>
+            )} */}
+            {/* single up arrow icon */}
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M9.99816 3L15.8352 8.837L14.7732 9.9L10.7482 5.875L10.7502 16.156H9.25016L9.24816 5.875L5.22316 9.9L4.16016 8.837L9.99816 3Z" fill="white" />
+            </svg>
+          </button>
         </div>
 
+        {/* optional flag: Reported */}
+        {reported && (
+          <span className="mt-1 self-start text-xs px-2 py-0.5 rounded-full bg-neutral-700 text-neutral-200">
+            Reported
+          </span>
+        )}
+
+        {/* BODY: opinion text below header */}
         <div
-          className="mt-1 text-[1rem] leading-[24px] text-white text-left prose prose-invert max-w-none"
+          className="mt-2 text-[1rem] leading-[24px] text-white text-left prose prose-invert max-w-none"
           dangerouslySetInnerHTML={{ __html: marked(text || "", { breaks: true, gfm: true }) }}
         />
       </div>
 
-      {/* Right: like */}
-      <div className="flex flex-col items-center w-10">
-        <button
-          type="button"
-          className={`flex gap-2 items-center p-2 w-10 ${isLikeLoading ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
-          onClick={handleLike}
-          disabled={isLikeLoading}
-          aria-label={isLikedByUser ? "Unlike" : "Like"}
-        >
-          {isLikedByUser ?
-            <svg className={colorClass} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M12 3c.33 0 .65.16.85.42l7.5 9.5c.51.64.06 1.58-.75 1.58H15v6a1 1 0 0 1-1 1H10a1 1 0 0 1-1-1v-6H4.4c-.81 0-1.26-.94-.75-1.58l7.5-9.5c.2-.26.52-.42.85-.42z" />
-            </svg>
-            :
-            <svg className={colorClass} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M12 4l7 9h-4v7h-6v-7H5l7-9z" />
-            </svg>
-          }
-        </button>
-
-        {/* Like count -> opens 'Liked by' sheet (disabled if likedUsers is null/non-array) */}
-        <button
-          type="button"
-          className={`text-xs leading-5 ${colorClass} outline-none ${canOpenLikedBy ? "hover:underline focus:underline cursor-pointer" : "opacity-60"}`}
-          onClick={() => {
-            if (canOpenLikedBy) setShowLikedBy(true);
-          }}
-          disabled={!canOpenLikedBy}
-          aria-label="Show liked users"
-          aria-disabled={!canOpenLikedBy}
-        >
-          {likeCount ?? 0}
-        </button>
-      </div>
-
-      {/* Actions menu */}
+      {/* Actions menu (unchanged) */}
       {showActions && (
         <>
           <div
-            className="absolute right-10 top-2 bg-neutral-900 border border-neutral-700 rounded-xl shadow-xl overflow-hidden z-[95]"
+            className="absolute right-3 top-3 bg-neutral-900 border border-neutral-700 rounded-xl shadow-xl overflow-hidden z-[95]"
             role="menu"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               className="flex items-center gap-2 px-3 py-2 w-full text-left hover:bg-neutral-800 text-sm"
-              onClick={() => {
-                setShowActions(false);
-                setShowReport(true);
-              }}
+              onClick={() => { setShowActions(false); setShowReport(true); }}
             >
               <FontAwesomeIcon icon={faFlag} className="w-4 h-4 text-red-400" />
               <span className="text-neutral-200">Report</span>
@@ -158,24 +156,20 @@ export default function OpinionCard({
         </>
       )}
 
-      {/* Report drawer */}
+      {/* Drawers (unchanged) */}
       <ReportComment
         open={showReport}
         onClose={() => setShowReport(false)}
         commentId={id}
-        onReport={onReport /* optional override */}
-        onSuccess={() => {
-          setReported(true);
-          setTimeout(() => setReported(false), 2000);
-        }}
+        onReport={onReport}
+        onSuccess={() => { setReported(true); setTimeout(() => setReported(false), 2000); }}
       />
-
-      {/* Liked-by drawer */}
       <LikedBySheet
         open={showLikedBy}
         onClose={() => setShowLikedBy(false)}
-        users={Array.isArray(likedUsers) ? likedUsers : []} // guard against null
+        users={Array.isArray(likedUsers) ? likedUsers : []}
       />
     </article>
+
   );
 }
