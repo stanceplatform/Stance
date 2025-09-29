@@ -268,6 +268,11 @@ class ApiService {
     return this.request('/auth/reset-password', { method: 'POST', body: JSON.stringify({ token, password }) });
   }
 
+  async getMe() {
+    // GET /auth/me
+    return this.request('/auth/me', { method: 'GET' });
+  }
+
   // Feedback
   async sendFeedback({ subject, message, type = 'HELP' }) {
     if (!message?.trim()) throw new Error('message is required');
