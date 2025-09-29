@@ -149,7 +149,7 @@ const Header = ({
                   <button
                     className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-[#212121] text-sm"
                     onClick={() => {
-                      window.open("/guidelines", "_blank", "noopener,noreferrer");
+                      navigate("/guidelines");
                       setOpen(false);
                     }}
                   >

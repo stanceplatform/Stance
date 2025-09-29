@@ -67,7 +67,7 @@ export default function Help() {
         <div className="overflow-y-auto px-4 pt-24">
           <form ref={formRef} onSubmit={submit} className="w-full">
             {/* Page Title */}
-            <h1 className="text-left font-intro font-[600] text-[32px] leading-[40px] text-[#707070] mb-6">
+            <h1 className="text-left font-intro font-[600] text-[36px] leading-[48px] text-[#707070] mb-6">
               Help
             </h1>
 
