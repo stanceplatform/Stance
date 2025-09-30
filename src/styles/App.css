@@ -81,3 +81,30 @@ textarea {
 .nf-nice-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.5);
 }
+
+/* Placeholder for contenteditable */
+[contenteditable][data-placeholder]:empty::before {
+  content: attr(data-placeholder);
+  color: rgba(255, 255, 255, 0.45);
+  pointer-events: none;
+}
+
+/* Subtle white/translucent scrollbar (Firefox + WebKit) */
+.nf-nice-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.35) transparent;
+}
+.nf-nice-scrollbar::-webkit-scrollbar {
+  width: 10px;
+}
+.nf-nice-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.nf-nice-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.35);
+  border-radius: 9999px;
+  border: 2px solid rgba(255, 255, 255, 0.12);
+}
+.nf-nice-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}

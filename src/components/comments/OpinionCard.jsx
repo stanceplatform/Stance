@@ -66,7 +66,10 @@ export default function OpinionCard({
 
   // NEW: only allow opening the liked-by drawer if likedUsers is an array
   const canOpenLikedBy = Array.isArray(likedUsers);
-
+  marked.setOptions({
+    gfm: true,       // GitHub-flavored markdown
+    breaks: true,    // support line breaks
+  });
   return (
     <article
       className="relative w-full rounded-lg z-100 select-none mb-2"
@@ -126,7 +129,7 @@ export default function OpinionCard({
         {/* BODY: opinion text below header */}
         <div
           className="mt-2 text-[1rem] leading-[24px] text-white text-left prose prose-invert max-w-none"
-          dangerouslySetInnerHTML={{ __html: marked(text || "", { breaks: true, gfm: true }) }}
+          dangerouslySetInnerHTML={{ __html: marked.parse(text || "") }}
         />
       </div>
 
