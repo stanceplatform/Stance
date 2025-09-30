@@ -1,71 +1,69 @@
-// pages/ReportQuestion.jsx
-import React, { useMemo, useRef, useState } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
-import HeaderSecondary from "../components/ui/HeaderSecondary";
-import apiService from "../services/api";
+"use client"
 
-const REASONS = [
-  "Hurtful",
-  "Inappropriate content",
-  "Personal attack",
-  "Misinformation",
-  "Irrelevant to me",
-];
+// pages/ReportQuestion.jsx
+import { useMemo, useRef, useState } from "react"
+import { useSearchParams } from "react-router-dom"
+import HeaderSecondary from "../components/ui/HeaderSecondary"
+import apiService from "../services/api"
+import toast from "react-hot-toast"
+
+const REASONS = ["Hurtful", "Inappropriate content", "Personal attack", "Misinformation", "Irrelevant to me"]
 
 export default function ReportQuestion() {
-  const [sp] = useSearchParams();
-  const formRef = useRef(null);
+  const [sp] = useSearchParams()
+  const formRef = useRef(null)
 
-  const [reason, setReason] = useState("");
-  const [description, setDescription] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [msg, setMsg] = useState("");
-  const [isError, setIsError] = useState(false);
+  const [reason, setReason] = useState("")
+  const [description, setDescription] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [msg, setMsg] = useState("")
+  const [isError, setIsError] = useState(false)
 
   const questionId = useMemo(() => {
-    const v = sp.get("questionId") ?? sp.get("question-id");
-    const n = Number(v);
-    return Number.isFinite(n) && n > 0 ? n : null;
-  }, [sp]);
+    const v = sp.get("questionId") ?? sp.get("question-id")
+    const n = Number(v)
+    return Number.isFinite(n) && n > 0 ? n : null
+  }, [sp])
 
   const submit = async (e) => {
-    e.preventDefault();
-    setMsg("");
-    setIsError(false);
+    e.preventDefault()
+    setMsg("")
+    setIsError(false)
 
     if (!reason) {
-      setMsg("Please select a reason.");
-      setIsError(true);
-      return;
+      setMsg("Please select a reason.")
+      setIsError(true)
+      return
     }
     if (!description.trim()) {
-      setMsg("Please add more details.");
-      setIsError(true);
-      return;
+      setMsg("Please add more details.")
+      setIsError(true)
+      return
     }
 
-    setLoading(true);
+    setLoading(true)
     try {
       await apiService.reportQuestion(questionId, {
         reason,
         description: description.trim(),
-      });
-      setMsg("Thanks! Your report has been submitted.");
-      setIsError(false);
-      setDescription("");
-      setReason("");
+      })
+      setMsg("Your report has been submitted.")
+      toast.success("Your report has been submitted.")
+      setIsError(false)
+      setDescription("")
+      setReason("")
     } catch (error) {
       const errText =
         error?.response?.data?.message ||
         error?.response?.data?.error ||
         error?.message ||
-        "Request failed. Please try again.";
-      setMsg(errText);
-      setIsError(true);
+        "Request failed. Please try again."
+      setMsg(errText)
+      setIsError(true)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
     <div className="mx-auto w-full max-w-[480px] bg-white min-h-screen">
@@ -86,10 +84,7 @@ export default function ReportQuestion() {
             {/* Reasons (custom radio: yellow ring, purple filled when checked) */}
             <div className="mb-6 space-y-3">
               {REASONS.map((r) => (
-                <label
-                  key={r}
-                  className="flex items-center gap-3 cursor-pointer select-none text-[#212121]"
-                >
+                <label key={r} className="flex items-center gap-3 cursor-pointer select-none text-[#212121]">
                   <input
                     type="radio"
                     name="reason"
@@ -102,21 +97,21 @@ export default function ReportQuestion() {
                   {/* Outer ring */}
                   <span
                     className="grid place-items-center h-5 w-5 rounded-full border-2 transition-all
-                 border-[#BEBEBE] peer-checked:border-[#BF24F9] peer-checked:border-[3px]"
+                               border-[#BEBEBE]
+                               peer-checked:border-[#BF24F9] peer-checked:border-[3px]
+                               peer-checked:bg-[#BF24F9]
+                               peer-checked:[&>span]:scale-100 peer-checked:[&>span]:opacity-100"
                   >
-                    {/* Inner dot (yellow) */}
+                    {/* Inner dot */}
                     <span
                       className="h-2.5 w-2.5 rounded-full bg-[#F0E224] transition-all duration-150
-                   peer-checked:scale-100 peer-checked:opacity-100 scale-0 opacity-0"
+                                 scale-0 opacity-0"
                     />
                   </span>
 
                   <span className="text-[16px] leading-6">{r}</span>
                 </label>
               ))}
-
-
-
             </div>
 
             {/* Description */}
@@ -137,8 +132,7 @@ export default function ReportQuestion() {
 
             {/* Helper text (unchanged) */}
             <p className="text-left text-[15px] leading-[22px] text-[#4E4E4E] mb-6">
-              Our team will get back to you via email. Please ensure your
-              account email is correct.
+              Our team will get back to you via email. Please ensure your account email is correct.
             </p>
 
             {/* Submit button (same UI) */}
@@ -153,8 +147,7 @@ export default function ReportQuestion() {
             {/* Message */}
             {msg ? (
               <div
-                className={`mt-4 text-[15px] leading-6 ${isError ? "text-red-700" : "text-emerald-700"
-                  }`}
+                className={`mt-4 text-[15px] leading-6 ${isError ? "text-red-700" : "text-emerald-700"}`}
                 aria-live="polite"
               >
                 {msg}
@@ -164,5 +157,5 @@ export default function ReportQuestion() {
         </div>
       </div>
     </div>
-  );
+  )
 }

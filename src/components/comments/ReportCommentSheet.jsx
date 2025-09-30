@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 import apiService from "../../services/api";
 import HeaderSecondary from "../ui/HeaderSecondary"; // same header used on pages
+import toast from "react-hot-toast";
 
 const REASONS = [
   { value: "spam", label: "Spam or misleading" },
@@ -80,6 +81,7 @@ export default function ReportComment({
       // keep your existing endpoint
       const res = await apiService.reportComment(commentId, payload);
       onSuccess?.(res);
+      toast.success("Your report has been submitted.");
       onClose?.();
     } catch (err) {
       const errText =
@@ -135,9 +137,18 @@ export default function ReportComment({
                     className="peer hidden"
                   />
                   {/* outer ring */}
-                  <span className="grid place-items-center h-5 w-5 rounded-full border-2 transition-all border-[#BEBEBE] peer-checked:border-[#BF24F9] peer-checked:border-[3px]">
-                    {/* inner yellow dot */}
-                    <span className="h-2.5 w-2.5 rounded-full bg-[#F0E224] transition-all duration-150 peer-checked:scale-100 peer-checked:opacity-100 scale-0 opacity-0" />
+                  <span
+                    className="grid place-items-center h-5 w-5 rounded-full border-2 transition-all
+                               border-[#BEBEBE]
+                               peer-checked:border-[#BF24F9] peer-checked:border-[3px]
+                               peer-checked:bg-[#BF24F9]
+                               peer-checked:[&>span]:scale-100 peer-checked:[&>span]:opacity-100"
+                  >
+                    {/* Inner dot */}
+                    <span
+                      className="h-2.5 w-2.5 rounded-full bg-[#F0E224] transition-all duration-150
+                                 scale-0 opacity-0"
+                    />
                   </span>
                   <span className="text-[16px] leading-6">{r.label}</span>
                 </label>
