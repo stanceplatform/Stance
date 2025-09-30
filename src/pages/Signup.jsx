@@ -4,7 +4,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import CTAButton from "../components/ui/CTAButton";
 import apiService from "../services/api";
 import TextField from "../components/ui/TextField";
-import bg from '../assets/bg.svg';
+import bg from "../assets/bg.svg";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -32,12 +32,44 @@ export default function Signup() {
   });
 
   const [loading, setLoading] = useState(false);
-  const [err, setErr] = useState("");
+  const [err, setErr] = useState(""); // API/global errors
   const [ok, setOk] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({}); // field-level errors
 
   const onChange = (e) => {
     const { name, value } = e.target;
     setForm((s) => ({ ...s, [name]: value }));
+    setFieldErrors((fe) => ({ ...fe, [name]: "" })); // clear error on change
+  };
+
+  const validateForm = () => {
+    const errors = {};
+
+    if (!form.studentEmail || !emailRegex.test(form.studentEmail)) {
+      errors.studentEmail = "Please enter a valid student email.";
+    }
+    if (!form.name.trim()) {
+      errors.name = "Please enter your name.";
+    }
+    if (!form.college.trim()) {
+      errors.college = "Please enter your college.";
+    }
+    if (!form.alternateEmail || !emailRegex.test(form.alternateEmail)) {
+      errors.alternateEmail = "Please enter a valid alternate email.";
+    }
+    if (!form.password) {
+      errors.password = "Password is required.";
+    } else if (form.password.length < 6) {
+      errors.password = "Password must be at least 6 characters.";
+    }
+    if (!form.confirmPassword) {
+      errors.confirmPassword = "Please confirm your password.";
+    } else if (form.password !== form.confirmPassword) {
+      errors.confirmPassword = "Passwords do not match.";
+    }
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const submit = async (e) => {
@@ -45,24 +77,11 @@ export default function Signup() {
     setErr("");
     setOk("");
 
+    // validate all fields
+    if (!validateForm()) return;
+
     if (!tokenFromLink) {
       setErr("Signup link is missing or invalid.");
-      return;
-    }
-    if (!form.name.trim()) {
-      setErr("Please enter your name.");
-      return;
-    }
-    if (!form.alternateEmail || !emailRegex.test(form.alternateEmail)) {
-      setErr("Please enter a valid alternate email.");
-      return;
-    }
-    if (!form.password || form.password.length < 6) {
-      setErr("Password must be at least 6 characters.");
-      return;
-    }
-    if (form.password !== form.confirmPassword) {
-      setErr("Passwords do not match.");
       return;
     }
 
@@ -109,7 +128,10 @@ export default function Signup() {
   return (
     <div className="min-h-screen w-full">
       {/* Purple background layer */}
-      <div className="relative min-h-screen w-full bg-cover bg-center" style={{ backgroundImage: `url(${bg})` }}>
+      <div
+        className="relative min-h-screen w-full bg-cover bg-center"
+        style={{ backgroundImage: `url(${bg})` }}
+      >
         {/* Top row with logo (no back button) */}
         <div className="px-5 pt-6">
           <img
@@ -127,13 +149,8 @@ export default function Signup() {
             Let’s get started!
           </h1>
 
-          {/* Form (centered, narrow) */}
-          <form
-            id="completeSignupForm"
-            onSubmit={submit}
-            className="w-full"
-          >
-            {/* Student email* (display only) */}
+          {/* Form */}
+          <form id="completeSignupForm" onSubmit={submit} className="w-full">
             <TextField
               id="studentEmail"
               label="Student email*"
@@ -145,6 +162,7 @@ export default function Signup() {
               value={form.studentEmail}
               onChange={onChange}
               inputClass="bg-white text-[#121212] placeholder:text-gray-500"
+              error={fieldErrors.studentEmail}
             />
 
             <div className="mt-4" />
@@ -157,6 +175,7 @@ export default function Signup() {
               value={form.name}
               onChange={onChange}
               inputClass="bg-white text-[#121212] placeholder:text-gray-500"
+              error={fieldErrors.name}
             />
 
             <div className="mt-4" />
@@ -169,6 +188,7 @@ export default function Signup() {
               onChange={onChange}
               disabled
               inputClass="bg-white text-[#121212] placeholder:text-gray-500 opacity-100"
+              error={fieldErrors.college}
             />
 
             <div className="mt-4" />
@@ -183,6 +203,7 @@ export default function Signup() {
               value={form.alternateEmail}
               onChange={onChange}
               inputClass="bg-white text-[#121212] placeholder:text-gray-500"
+              error={fieldErrors.alternateEmail}
             />
 
             <div className="mt-4" />
@@ -197,6 +218,7 @@ export default function Signup() {
               onChange={onChange}
               togglePassword
               inputClass="bg-white text-[#121212] placeholder:text-gray-500"
+              error={fieldErrors.password}
             />
 
             <div className="mt-4" />
@@ -211,9 +233,10 @@ export default function Signup() {
               onChange={onChange}
               togglePassword
               inputClass="bg-white text-[#121212] placeholder:text-gray-500"
+              error={fieldErrors.confirmPassword}
             />
 
-            {/* Errors / success */}
+            {/* Global API errors / success */}
             {err ? (
               <div className="mt-3 text-[13px] text-red-200">{err}</div>
             ) : null}
