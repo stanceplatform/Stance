@@ -242,6 +242,16 @@ class ApiService {
       body: JSON.stringify({ token, name, collegeId: 11, alternateemail: alternateEmail, password, confirmPassword }),
     });
   }
+  async getInviteQuota() {
+    try {
+      const data = await this.request('/waitlist/invite-count', { method: 'GET' });
+      // API response looks like: { remainingInvites, totalInvites, usedInvites }
+      return { remaining: data?.remainingInvites ?? 0 };
+    } catch (err) {
+      // On error → treat as 0
+      return { remaining: 0 };
+    }
+  }
 
   // Auth
   async login({ usernameOrEmail, password }) {

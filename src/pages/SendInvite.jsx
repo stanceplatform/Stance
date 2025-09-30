@@ -21,19 +21,16 @@ const SendInvite = () => {
   const [ok, setOk] = useState('');
   const [invitesLeft, setInvitesLeft] = useState(2);
 
-  // Fetch remaining invite quota (optional)
+  // Fetch remaining invite quota
   useEffect(() => {
     let ignore = false;
     (async () => {
-      try {
-        const res = await apiService.getInviteQuota(); // { remaining: number }
-        if (!ignore && typeof res?.remaining === 'number') {
-          setInvitesLeft(res.remaining);
-        }
-      } catch {/* ignore */ }
+      const res = await apiService.getInviteQuota();
+      if (!ignore) setInvitesLeft(res.remaining);
     })();
     return () => { ignore = true; };
   }, []);
+
 
   const submit = async (e) => {
     if (e) e.preventDefault();
