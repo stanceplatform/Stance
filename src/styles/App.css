@@ -3,11 +3,10 @@
   margin: 0 auto;
   padding: 0rem;
   text-align: center;
-  font-family: 'Inter';
+  font-family: "Inter";
 }
-body{
+body {
   background-color: #1d1e22;
-
 }
 
 .logo {
@@ -48,6 +47,37 @@ body{
 
 /* Add this to your global CSS file */
 .custom-gradient {
-  background: linear-gradient(to bottom, transparent 0%, rgba(232, 229, 229, 0.1) 60%, black 100%);
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(232, 229, 229, 0.1) 60%,
+    black 100%
+  );
 }
 
+/* Smooth height animation (already set via Tailwind utility, here as safety) */
+textarea {
+  transition: height 150ms ease-out;
+}
+
+/* Subtle white/translucent scrollbar */
+.nf-nice-scrollbar {
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: rgba(255, 255, 255, 0.35) transparent; /* Firefox */
+}
+
+/* Chromium/WebKit */
+.nf-nice-scrollbar::-webkit-scrollbar {
+  width: 10px;
+}
+.nf-nice-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.nf-nice-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.35);
+  border-radius: 9999px;
+  border: 2px solid rgba(255, 255, 255, 0.12); /* creates translucent ring look */
+}
+.nf-nice-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
