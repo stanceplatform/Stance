@@ -145,6 +145,30 @@ const Card = () => {
     }
   }
 
+  // encodes spaces and any unsafe chars, but won't mangle query/host
+  const toSafeBg = (u) => {
+    if (!u) return "";
+    try {
+      // If it's already a valid absolute URL, this normalizes spaces -> %20
+      return new URL(u).href;
+    } catch {
+      // Fallback for relative or slightly malformed URLs
+      return encodeURI(u);
+    }
+  };
+
+  useEffect(() => {
+    if (questionsData?.length) {
+      setQuestions(
+        questionsData.map(q => ({
+          ...q,
+          backgroundImageUrl: toSafeBg(q.backgroundImageUrl),
+        }))
+      );
+    }
+  }, [questionsData]);
+
+
   return (
     <div className="flex overflow-hidden flex-col mx-auto w-full max-w-[480px] max-h-screen-dvh relative">
       {loading ? (
@@ -161,7 +185,7 @@ const Card = () => {
         // touch-action: pan-y lets vertical page scroll while still allowing horizontal swipes we detect
         <div
           className="relative flex flex-col w-full h-screen-svh bg-center bg-cover"
-          style={{ backgroundImage: `url(${questions[currentQuestionIndex]?.backgroundImageUrl})`, touchAction: 'pan-y' }}
+          style={{ backgroundImage: `url("${toSafeBg(questions[currentQuestionIndex]?.backgroundImageUrl)}")`, touchAction: 'pan-y' }}
           onTouchStart={onTouchStart}
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
@@ -171,7 +195,7 @@ const Card = () => {
             key={`bg-next-${currentQuestionIndex}`}
             className="absolute inset-0"
             style={{
-              backgroundImage: `url(${nextBackgroundImage})`,
+              backgroundImage: nextBackgroundImage ? `url("${toSafeBg(nextBackgroundImage)}")` : "none",
               backgroundSize: 'cover',
               backgroundPosition: 'center',
             }}
