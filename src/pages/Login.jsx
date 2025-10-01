@@ -54,7 +54,7 @@ const Login = () => {
                 as="div"
                 variant="primary"
               >
-                <span className="font-intro font-[500] text-[22px] leading-[32px] tracking-[0.88px]">
+                <span className="font-inter font-[500] text-[18px] leading-[32px] tracking-[0.88px] text-[#5B037C]">
                   {loading ? 'Logging in…' : 'Login'}
                 </span>
               </CTAButton>
@@ -97,7 +97,7 @@ const Login = () => {
           containerClass="mt-0"
         />
 
-        <div className="mt-2 text-center">
+        <div className="mt-4 text-center">
           <Link
             to="/forgot-password"
             className="text-[16px] leading-[24px] text-white/90 underline-offset-2 hover:underline"

@@ -12,7 +12,7 @@ const Landing = () => {
             bgImage={bg}
             footer={
                 <div className="py-3 max-w-[300px] mx-auto">
-                    <p className="text-center text-[13px] leading-[16px] text-[#E9B4FD]">
+                    <p className="text-center font-inter text-[13px] font-normal leading-[16px] text-[#E9B4FD]">
                         By proceeding, I agree to Stance’s{' '}
                         <Link to="/privacy" className="underline">
                             Privacy Statement
@@ -33,18 +33,18 @@ const Landing = () => {
 
             {/* Headline */}
             <h1 className="text-center font-intro text-[36px] leading-[48px] font-[600] text-[#F0E224]">
-                Safe space for your<br />opinions
+                Safe space for your opinions
             </h1>
 
             {/* CTAs */}
-            <div className="mt-6 w-full space-y-3">
+            <div className="mt-10 w-full space-y-3">
                 <div className="mb-5">
                     <Link to="/login" className="no-underline">
                         <CTAButton
                             as="div"
                             variant="primary"
                         >
-                            <span className="font-intro font-[500] text-[22px] leading-[32px] tracking-[0.88px]">
+                            <span className="font-inter font-[500] text-[18px] leading-[32px] tracking-[0.88px] text-[#5B037C]">
                                 Login
                             </span>
                         </CTAButton>
@@ -57,7 +57,7 @@ const Landing = () => {
                             as="div"
                             variant="secondary"
                         >
-                            <span className="font-intro font-[500] text-[22px] leading-[32px] tracking-[0.88px]">
+                            <span className="font-inter font-[500] text-[18px] leading-[32px] tracking-[0.88px] text-white">
                                 Request Invite
                             </span>
                         </CTAButton>
@@ -67,7 +67,7 @@ const Landing = () => {
                 <div className="pt-1 text-center">
                     <Link
                         to="/forgot-password"
-                        className="text-[16px] leading-[24px] text-white/90 hover:underline"
+                        className="font-inter text-[16px] leading-[24px] text-white hover:underline"
                     >
                         Forgot password?
                     </Link>

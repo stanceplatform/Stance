@@ -140,17 +140,17 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
 
   return (
     <section className="w-full">
-      <div className="absolute bottom-0 flex flex-col justify-end w-full p-4">
-        <h2 className="text-responsive text-left font-normal text-white leading-responsive mt-5">
+      <div className="absolute bottom-0 flex flex-col justify-end w-full p-4 z-10">
+        <h2 className="text-responsive text-left font-intro font-normal text-white leading-responsive mt-5">
           {question.question}
         </h2>
 
         <div className="flex mt-6 w-full">
           <AnimatePresence mode="wait" initial={false}>
             {!hasVoted ? (
-              <motion.div key="options" {...fadeSlide} className="flex w-full font-intro">
+              <motion.div key="options" {...fadeSlide} className="flex w-full font-inter">
                 <button
-                  className="relative flex-1 shrink gap-2 self-stretch mx-3 px-4 py-3 h-full text-left font-semibold text-[22px] tracking-wide leading-8 whitespace-wrap bg-[#F0E224] rounded-md text-[#121212] max-w-xs disabled:opacity-60"
+                  className="relative flex-1 shrink gap-2 self-stretch mx-3 px-4 py-3 h-full text-left font-medium text-[22px] tracking-wide leading-8 whitespace-wrap bg-[#F0E224] rounded-md text-[#121212] max-w-xs disabled:opacity-60"
                   aria-label={currentAnswers[0]?.value ?? 'Option A'}
                   onClick={() => currentAnswers[0] && handleVote(currentAnswers[0], 1)}
                   disabled={!currentAnswers[0] || isVoting}
@@ -160,7 +160,7 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
                 </button>
 
                 <button
-                  className="relative flex-1 shrink gap-2 self-stretch mx-3 px-3 py-2 h-full text-right font-semibold text-[22px] text-white tracking-wide leading-8 whitespace-wrap bg-[#9105C6] rounded-md max-w-xs disabled:opacity-60"
+                  className="relative flex-1 shrink gap-2 self-stretch mx-3 px-3 py-2 h-full text-right font-medium text-[22px] text-white tracking-wide leading-8 whitespace-wrap bg-[#9105C6] rounded-md max-w-xs disabled:opacity-60"
                   aria-label={currentAnswers[1]?.value ?? 'Option B'}
                   onClick={() => currentAnswers[1] && handleVote(currentAnswers[1], 2)}
                   disabled={!currentAnswers[1] || isVoting}
@@ -190,7 +190,7 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
         <button
           disabled={!hasVoted}
           onClick={toggleDrawer}
-          className={`gap-2 self-center px-4 py-2 mt-6 mb-1 font-inter font-medium text-base tracking-wide rounded-[40px] ${hasVoted
+          className={`gap-2 self-center px-4 py-2 mt-6 mb-2 font-inter font-medium text-base tracking-wide rounded-[40px] ${hasVoted
             ? "bg-[#F0E224] text-[#5B037C]"
             : "text-white"
             }`}

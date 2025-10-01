@@ -19,7 +19,7 @@ export default {
         intro: ['Intro', 'sans-serif'],
       },
       fontSize: {
-        'responsive': 'clamp(2rem, 6vw + 1rem, 3rem)',
+        'responsive': 'clamp(40px, 10vw, 44px)',
       },
       lineHeight: {
         'responsive': 'clamp(1.25rem, 8vw + 1rem, 4rem)',
