@@ -151,7 +151,7 @@ function OpinionForm({ onAddOpinion }) {
   return (
     <form onSubmit={handleSubmit} className="flex gap-2 justify-center items-start pt-3 w-full rounded-lg">
       {/* Toolbar */}
-      <div className="flex flex-col items-center self-center">
+      {/* <div className="flex flex-col items-center self-center">
         <button
           type="button"
           onClick={toggleBold}
@@ -160,7 +160,7 @@ function OpinionForm({ onAddOpinion }) {
         >
           <span className="font-bold">B</span>
         </button>
-      </div>
+      </div> */}
 
       {/* Editor */}
       <div
