@@ -16,6 +16,23 @@ function getTheme(selectedOptionId, answerOptions) {
   return { text: "text-gray-300", bg: "bg-neutral-800" };
 }
 
+// theme helpers (you already have getTheme for card; this is just for the LIKE PILL)
+const getLikePillTheme = (selectedOptionId, answerOptions) => {
+  const firstId = answerOptions?.[0]?.id;   // yellow theme
+  const secondId = answerOptions?.[1]?.id;  // purple theme
+
+  if (selectedOptionId === firstId) {
+    // yellow pill like in screenshot (dark text + dark arrow)
+    return { likedBg: "bg-[#F0E224]", likedText: "text-[#1A1A1A]" };
+  }
+  if (selectedOptionId === secondId) {
+    // purple pill like in screenshot (white text + white arrow)
+    return { likedBg: "bg-[#BF24F9]", likedText: "text-white" };
+  }
+  // fallback
+  return { likedBg: "bg-white", likedText: "text-[#1A1A1A]" };
+};
+
 export default function OpinionCard({
   id,
   username,
@@ -55,7 +72,8 @@ export default function OpinionCard({
 
   useEffect(() => () => cancelLongPress(), []);
 
-  const { text: colorClass, bg: colorBgClass, borderColor } = getTheme(selectedOptionId, answerOptions);
+  const { likedBg, likedText } = getLikePillTheme(selectedOptionId, answerOptions);
+  const { borderColor, text: colorClass, bg: colorBgClass } = getTheme(selectedOptionId, answerOptions);
 
   const handleLike = async () => {
     if (isLikeLoading) return;
@@ -85,7 +103,7 @@ export default function OpinionCard({
       <div className={`flex flex-col p-3 rounded-xl ${colorBgClass}`}>
         {/* HEADER: name (left) + like badge (right) */}
         <div className="flex items-center justify-between">
-          <h3 className={`text-[16px] leading-6 ${colorClass} font-normal capitalize`}>
+          <h3 className={`text-[15px] leading-6 ${colorClass} font-normal capitalize`}>
             {firstName}
           </h3>
 
@@ -95,28 +113,29 @@ export default function OpinionCard({
             onClick={handleLike}
             disabled={isLikeLoading}
             aria-label={isLikedByUser ? "Unlike" : "Like"}
-            className={`inline-flex items-center justify-center gap-2 p-3 rounded-lg border bg-black/10
-                    ${isLikeLoading ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
-                    text-white ${borderColor}`}
+            className={[
+              "inline-flex items-center px-3 py-2 rounded-lg border",
+              isLikeLoading ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
+              // when NOT liked -> keep exactly your current styling
+              !isLikedByUser && `bg-black/10 text-white ${borderColor} flex-row gap-2`,
+              // when liked -> flip direction + themed fill pill
+              isLikedByUser && `${likedBg} ${likedText} border-transparent gap-2`,
+            ].join(" ")}
           >
-            <span className="text-[15px] font-inter  leading-5">{likeCount ?? 0}</span>
+            <span className="text-[15px] font-inter leading-5">{likeCount ?? 0}</span>
 
-            {/* same icon you already use; you said you'll replace SVG manually */}
-            {/* {isLikedByUser ? (
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M12 3c.33 0 .65.16.85.42l7.5 9.5c.51.64.06 1.58-.75 1.58H15v6a1 1 0 0 1-1 1H10a1 1 0 0 1-1-1v-6H4.4c-.81 0-1.26-.94-.75-1.58l7.5-9.5c.2-.26.52-.42.85-.42z" />
-              </svg>
-            ) : (
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M12 4l7 9h-4v7h-6v-7H5l7-9z" />
-              </svg>
-            )} */}
-            {/* single up arrow icon */}
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M9.99816 3L15.8352 8.837L14.7732 9.9L10.7482 5.875L10.7502 16.156H9.25016L9.24816 5.875L5.22316 9.9L4.16016 8.837L9.99816 3Z" fill="white" />
+            {/* arrow inherits current text color via currentColor */}
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="currentColor"        // 👈 important so arrow matches text color (white on purple, dark on yellow)
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path d="M9.99816 3L15.8352 8.837L14.7732 9.9L10.7482 5.875L10.7502 16.156H9.25016L9.24816 5.875L5.22316 9.9L4.16016 8.837L9.99816 3Z" />
             </svg>
           </button>
+
         </div>
 
         {/* optional flag: Reported */}

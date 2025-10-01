@@ -140,7 +140,7 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
 
   return (
     <section className="w-full">
-      <div className="absolute bottom-0 flex flex-col justify-end w-full p-4 z-10">
+      <div className="absolute bottom-0 flex flex-col justify-end w-full p-4">
         <h2 className="text-responsive text-left font-intro font-normal text-white leading-responsive mt-5">
           {question.question}
         </h2>
