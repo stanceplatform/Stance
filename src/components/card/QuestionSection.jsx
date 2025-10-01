@@ -139,13 +139,13 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
   };
 
   return (
-    <section className="w-full">
-      <div className="absolute bottom-0 flex flex-col justify-end w-full p-4">
-        <h2 className="text-responsive text-left font-intro font-normal text-white leading-responsive mt-5">
+    <section className="w-full ">
+      <div className="absolute bottom-0 flex flex-col justify-end w-full p-4 custom-gradient ">
+        <h2 className="text-responsive text-left font-intro font-normal text-white leading-responsive mt-5 z-0">
           {question.question}
         </h2>
 
-        <div className="flex mt-6 w-full">
+        <div className="flex mt-6 w-full z-10">
           <AnimatePresence mode="wait" initial={false}>
             {!hasVoted ? (
               <motion.div key="options" {...fadeSlide} className="flex w-full font-inter">
@@ -173,7 +173,7 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
               <motion.div
                 key={`bar-${question.id}-${currentAnswers[0]?.percentage}-${currentAnswers[1]?.percentage}`}
                 {...fadeSlide}
-                className="w-full"
+                className="w-full z-10"
               >
                 <ProgressBarWithLabels
                   firstOptionPercentage={formatPct(currentAnswers[0]?.percentage ?? 0)}
@@ -190,7 +190,7 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
         <button
           disabled={!hasVoted}
           onClick={toggleDrawer}
-          className={`gap-2 self-center px-4 py-2 mt-6 mb-2 font-inter font-medium text-base tracking-wide rounded-[40px] ${hasVoted
+          className={`gap-2 self-center px-4 py-2 mt-6 mb-2 font-inter font-medium text-base tracking-wide rounded-[40px] z-10 ${hasVoted
             ? "bg-[#F0E224] text-[#5B037C]"
             : "text-white"
             }`}
