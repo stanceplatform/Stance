@@ -1,12 +1,24 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom';
 
-const HeaderSecondary = () => {
+const HeaderSecondary = ({ onBack }) => {
   const navigate = useNavigate();
 
+  // your existing page logic
+  const defaultBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate("/dashboard", { replace: true });
+    }
+  };
+
   const handleBack = () => {
-    if (window.history.length > 1) navigate(-1);
-    else navigate("/dashboard", { replace: true });
+    if (typeof onBack === "function") {
+      onBack();
+    } else {
+      defaultBack();
+    }
   };
 
   return (
