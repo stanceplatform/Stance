@@ -245,14 +245,14 @@ export default function Signup() {
             ) : null}
 
             {/* Submit CTA */}
-            <div className="mt-6 mb-10">
+            <div className="mt-6 mb-5">
               <button
                 type="submit"
                 disabled={loading}
                 className="w-[320px] max-w-full"
               >
                 <CTAButton as="div" variant="primary">
-                  <span className="font-intro font-[500] text-[22px] leading-[32px] tracking-[0.88px]">
+                  <span className="font-inter font-[500] text-[18px] leading-[32px] tracking-[0.88px]">
                     {loading ? "Submitting…" : "Submit"}
                   </span>
                 </CTAButton>

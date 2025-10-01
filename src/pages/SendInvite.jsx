@@ -96,7 +96,7 @@ const SendInvite = () => {
                 variant="primary"
               >
                 {/* Figma-like button text sizing */}
-                <span className="font-intro font-[600] text-[20px] leading-[28px] tracking-[0.5px]">
+                <span className="font-inter font-[500] text-[18px] leading-[32px] tracking-[0.5px]">
                   {loading ? 'Inviting…' : 'Send Invite'}
                 </span>
               </CTAButton>
@@ -114,7 +114,7 @@ const SendInvite = () => {
       </div>
 
       {/* Form */}
-      <form id="sendInviteForm" onSubmit={submit} className="w-full max-w-[360px] pb-20 mt-2">
+      <form id="sendInviteForm" onSubmit={submit} className="w-full max-w-[360px] pb-16 mt-2">
         <TextField
           id="studentInviteEmail"
           label="Email"
@@ -129,7 +129,7 @@ const SendInvite = () => {
         />
 
         {/* “invites remaining” copy (matches figma placement) */}
-        <div className="mt-2 text-center">
+        <div className="mt-3 text-center">
           <span className="text-white font-intro text-[16px] leading-[24px]">
             {invitesLeft !== null ? `${invitesLeft} invites remaining` : ''}
           </span>

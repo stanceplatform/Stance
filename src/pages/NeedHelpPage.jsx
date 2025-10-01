@@ -140,7 +140,7 @@ export default function Help() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 rounded-full bg-[#F0E224] text-[#5B037C] font-inter font-medium text-[18px] leading-[32px] shadow-sm disabled:opacity-60"
+              className="w-full mb-5 py-3 rounded-full bg-[#F0E224] text-[#5B037C] font-inter font-medium text-[18px] leading-[32px] shadow-sm disabled:opacity-60"
             >
               {loading ? "Submitting…" : "Submit"}
             </button>

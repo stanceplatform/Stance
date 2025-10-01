@@ -54,7 +54,7 @@ const RequestInvite = () => {
             className="mx-auto w-[320px] max-w-full mb-5"
           >
             <CTAButton as="div" variant="secondary">
-              <span className="font-intro font-[500] text-[22px] leading-[32px] tracking-[0.88px]">
+              <span className="font-inter font-[500] text-[18px] leading-[32px] tracking-[0.88px]">
                 {loading ? 'Requesting…' : 'Request Invite'}
               </span>
             </CTAButton>
