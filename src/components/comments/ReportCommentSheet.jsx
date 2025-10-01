@@ -101,12 +101,12 @@ export default function ReportComment({
   return ReactDOM.createPortal(
     <div className="fixed inset-0 z-[9999] bg-white max-w-[480px] mx-auto">
       {/* Page container (same as other pages) */}
-      <div className="mx-auto  min-h-screen bg-white relative">
+      <div className="mx-auto h-dvh bg-white relative flex flex-col">
         {/* Purple header (same component you already use) */}
         <HeaderSecondary onBack={onClose} />
 
         {/* Content */}
-        <div className="overflow-y-auto px-4 pt-24 pb-10">
+        <div className="flex-1 overflow-y-auto px-4 pt-24 pb-10">
           <form onSubmit={handleSubmit} className="w-full">
             {/* Title */}
             <h1 className="text-left font-intro font-[600] text-[36px] leading-[48px] text-[#707070] mb-6">
