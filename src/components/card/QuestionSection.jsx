@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { voteOnCard } from '../../services/operations';
 import CommentDrawer from '../comments/CommentDrawer';
@@ -17,19 +17,13 @@ const formatPct = (v) => {
   const firstDecimal = Math.floor(abs * 10) % 10;
   const hasAnyFraction = Math.round((abs - Math.floor(abs)) * 100) !== 0;
 
-  // no fraction OR first decimal digit is 0 -> show integer only
   if (!hasAnyFraction || firstDecimal === 0) return String(intPart);
-
-  // first decimal digit non-zero -> show up to 2 decimals
-  // return num.toFixed(2);
   return num.toFixed(1);
 };
 
 function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
-  // normalize options for API
   const normalizedOptions = question.answerOptions ?? question.answeroptions ?? [];
 
-  // derive initial state from userResponse
   const answered = Boolean(question.userResponse?.answered);
   const selectedOptionId = question.userResponse?.selectedOptionId ?? null;
 
@@ -48,12 +42,17 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const drawerRef = useRef(null);
 
-  // keep in sync if parent swaps the question
+  // ✅ calculate total stances
+  const totalStances = useMemo(() => {
+    const a = Number(currentAnswers?.[0]?.votes ?? 0);
+    const b = Number(currentAnswers?.[1]?.votes ?? 0);
+    return a + b;
+  }, [currentAnswers]);
+
   useEffect(() => {
     const opts = question.answerOptions ?? question.answeroptions ?? [];
-    setCurrentAnswers(opts); // keep options in sync
+    setCurrentAnswers(opts);
 
-    // Only initialize userChoice/hasVoted from server when loading a NEW question
     const _answered = Boolean(question.userResponse?.answered);
     if (_answered) {
       const _selected = question.userResponse?.selectedOptionId ?? null;
@@ -61,10 +60,7 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
       setUserChoice(i >= 0 ? i + 1 : null);
       setHasVoted(true);
     }
-
   }, [question.id]);
-
-
 
   const handleVote = async (option, choiceNumber) => {
     if (hasVoted || isVoting) return;
@@ -99,13 +95,10 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
     });
   };
 
-  // ✅ Updated: ignore clicks originating from the Like sheet
   const handleClickOutside = (event) => {
-    // If the click/touch started inside any element of the like sheet, ignore it
     if (event.target && event.target.closest && event.target.closest('[data-liked-by-sheet]')) {
       return;
     }
-
     if (drawerRef.current && !drawerRef.current.contains(event.target)) {
       setIsDrawerOpen(false);
     }
@@ -120,7 +113,6 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
       onDrawerToggle?.(false);
       return;
     }
-    // Capture phase to make behavior consistent on mobile too
     document.addEventListener('mousedown', handleClickOutside, true);
     document.addEventListener('touchstart', handleClickOutside, true);
 
@@ -130,7 +122,6 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
     };
   }, [isDrawerOpen]);
 
-  // simple shared animation settings
   const fadeSlide = {
     initial: { opacity: 0, y: 10 },
     animate: { opacity: 1, y: 0 },
@@ -182,6 +173,12 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
                   secondOptionText={currentAnswers[1]?.value ?? 'Option B'}
                   secondOptionPercentage={formatPct(currentAnswers[1]?.percentage ?? 0)}
                 />
+                {/* ✅ Show total stances */}
+                <div className="mt-2 w-full text-center">
+                  <span className="font-inter text-white text-base">
+                    {totalStances} Stances
+                  </span>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>

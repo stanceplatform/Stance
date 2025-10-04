@@ -50,8 +50,9 @@ body {
   background: linear-gradient(
     to bottom,
     transparent 0%,
-    rgba(232, 229, 229, 0.1) 60%,
-    black 100%
+    /* start fully transparent at the top */ rgba(0, 0, 0, 0.4) 40%,
+    /* smooth fade begins around mid */ rgba(0, 0, 0, 0.7) 70%,
+    /* darker by 70% height */ black 95% /* fully black by ~85% */
   );
 }
 
