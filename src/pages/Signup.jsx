@@ -5,12 +5,14 @@ import CTAButton from "../components/ui/CTAButton";
 import apiService from "../services/api";
 import TextField from "../components/ui/TextField";
 import bg from "../assets/bg.svg";
+import { useAuth } from "../context/AuthContext";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function Signup() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
+  const { authenticateWithTokens } = useAuth();
 
   // ----- Prefill from invite link -----
   const tokenFromLink = useMemo(() => params.get("token") || "", [params]);
@@ -91,41 +93,31 @@ export default function Signup() {
     setOk("");
 
     if (!validateForm()) return;
-
-    if (!tokenFromLink) {
-      setErr("Signup link is missing or invalid.");
-      return;
-    }
+    if (!tokenFromLink) { setErr("Signup link is missing or invalid."); return; }
 
     setLoading(true);
     try {
       const payload = {
         token: tokenFromLink,
         name: form.name.trim(),
-        collegeId: String(instituteIdFromLink || ""), // send instituteId as collegeId
+        collegeId: String(instituteIdFromLink || ""), // from query
         alternateEmail: form.alternateEmail.trim(),
         password: form.password,
         confirmPassword: form.confirmPassword,
       };
 
       const res = await apiService.completeSignup(payload);
+
       if (res?.token) {
-        apiService.setToken(res.token);
-        if (res?.refreshToken) localStorage.setItem("refreshToken", res.refreshToken);
-        if (res?.id || res?.email || res?.username) {
-          localStorage.setItem(
-            "user",
-            JSON.stringify({ id: res.id, email: res.email, username: res.username })
-          );
-        }
+        // ✅ bootstrap session from tokens and hydrate /auth/me
+        await authenticateWithTokens({ token: res.token, refreshToken: res.refreshToken });
         setOk("Signup completed!");
         navigate("/dashboard");
       } else {
         setErr(res?.message || "Signup failed. Please try again.");
       }
     } catch (error) {
-      const errorMessage =
-        error?.data?.message || error?.data?.error || error?.message;
+      const errorMessage = error?.data?.message || error?.data?.error || error?.message;
       setErr(errorMessage || "Signup failed. Please try again.");
     } finally {
       setLoading(false);

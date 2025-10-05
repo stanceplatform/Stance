@@ -62,6 +62,15 @@ export const AuthProvider = ({ children }) => {
         persistUser(null);
     }, []);
 
+    // NEW: use this after signup (or any time you receive fresh tokens)
+    const authenticateWithTokens = useCallback(async ({ token, refreshToken }) => {
+        if (token) apiService.setToken(token);
+        if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
+        setIsAuthenticated(true);
+        const me = await fetchMe();  // hydrate user
+        return me;
+    }, [fetchMe]);
+
     // keep multiple tabs/windows in sync
     useEffect(() => {
         const onStorage = (e) => {
@@ -94,7 +103,7 @@ export const AuthProvider = ({ children }) => {
     }, [fetchMe]);
 
     return (
-        <AuthContext.Provider value={{ isAuthenticated, user, login, logout, loading, fetchMe }}>
+        <AuthContext.Provider value={{ isAuthenticated, user, login, logout, loading, fetchMe, authenticateWithTokens }}>
             {children}
         </AuthContext.Provider>
     );
