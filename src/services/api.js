@@ -236,12 +236,21 @@ class ApiService {
   async sendInvite(email) {
     return this.request('/waitlist/invite', { method: 'POST', body: JSON.stringify({ email }) });
   }
+  // services/api.js (only the completeSignup method shown)
   async completeSignup({ token, name, collegeId, alternateEmail, password, confirmPassword }) {
     return this.request('/waitlist/complete-signup', {
       method: 'POST',
-      body: JSON.stringify({ token, name, collegeId: 11, alternateemail: alternateEmail, password, confirmPassword }),
+      body: JSON.stringify({
+        token,
+        name,
+        collegeId,
+        alternateEmail,
+        password,
+        confirmPassword,
+      }),
     });
   }
+
   async getInviteQuota() {
     try {
       const data = await this.request('/waitlist/invite-count', { method: 'GET' });

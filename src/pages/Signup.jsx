@@ -12,14 +12,22 @@ export default function Signup() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
 
-  // from invite link
+  // ----- Prefill from invite link -----
   const tokenFromLink = useMemo(() => params.get("token") || "", [params]);
-
-  // optional prefill (doesn't change payload)
   const emailFromLink = useMemo(() => params.get("email") || "", [params]);
-  const collegeFromLink = useMemo(
-    () => params.get("college") || "NITK Surathkal",
+
+  // Support both ?institute=<name> & ?instituteId=<id>
+  const instituteNameFromLink = useMemo(() => params.get("institute") || "", [params]);
+  const instituteIdFromLink = useMemo(
+    () => params.get("instituteId") || params.get("collegeId") || "",
     [params]
+  );
+
+  // What to display in the "College" field:
+  // If name present -> show name, else fall back to ID
+  const collegeDisplay = useMemo(
+    () => (instituteNameFromLink ? instituteNameFromLink : instituteIdFromLink),
+    [instituteNameFromLink, instituteIdFromLink]
   );
 
   const [form, setForm] = useState({
@@ -28,18 +36,18 @@ export default function Signup() {
     alternateEmail: "",
     password: "",
     confirmPassword: "",
-    college: collegeFromLink,
+    college: collegeDisplay || "", // locked display-only field
   });
 
   const [loading, setLoading] = useState(false);
-  const [err, setErr] = useState(""); // API/global errors
+  const [err, setErr] = useState("");
   const [ok, setOk] = useState("");
-  const [fieldErrors, setFieldErrors] = useState({}); // field-level errors
+  const [fieldErrors, setFieldErrors] = useState({});
 
   const onChange = (e) => {
     const { name, value } = e.target;
     setForm((s) => ({ ...s, [name]: value }));
-    setFieldErrors((fe) => ({ ...fe, [name]: "" })); // clear error on change
+    setFieldErrors((fe) => ({ ...fe, [name]: "" }));
   };
 
   const validateForm = () => {
@@ -51,8 +59,13 @@ export default function Signup() {
     if (!form.name.trim()) {
       errors.name = "Please enter your name.";
     }
+    // College is prefilled & locked, still ensure it's present
     if (!form.college.trim()) {
-      errors.college = "Please enter your college.";
+      errors.college = "College is required.";
+    }
+    // Require instituteId because backend needs collegeId
+    if (!instituteIdFromLink) {
+      errors.college = "Missing collegeId in invite link.";
     }
     if (!form.alternateEmail || !emailRegex.test(form.alternateEmail)) {
       errors.alternateEmail = "Please enter a valid alternate email.";
@@ -77,7 +90,6 @@ export default function Signup() {
     setErr("");
     setOk("");
 
-    // validate all fields
     if (!validateForm()) return;
 
     if (!tokenFromLink) {
@@ -90,7 +102,7 @@ export default function Signup() {
       const payload = {
         token: tokenFromLink,
         name: form.name.trim(),
-        collegeId: null, // keep as is (college is display-only here)
+        collegeId: String(instituteIdFromLink || ""), // send instituteId as collegeId
         alternateEmail: form.alternateEmail.trim(),
         password: form.password,
         confirmPassword: form.confirmPassword,
@@ -99,16 +111,11 @@ export default function Signup() {
       const res = await apiService.completeSignup(payload);
       if (res?.token) {
         apiService.setToken(res.token);
-        if (res?.refreshToken)
-          localStorage.setItem("refreshToken", res.refreshToken);
+        if (res?.refreshToken) localStorage.setItem("refreshToken", res.refreshToken);
         if (res?.id || res?.email || res?.username) {
           localStorage.setItem(
             "user",
-            JSON.stringify({
-              id: res.id,
-              email: res.email,
-              username: res.username,
-            })
+            JSON.stringify({ id: res.id, email: res.email, username: res.username })
           );
         }
         setOk("Signup completed!");
@@ -118,7 +125,7 @@ export default function Signup() {
       }
     } catch (error) {
       const errorMessage =
-        error.data?.message || error.data?.error || error.message;
+        error?.data?.message || error?.data?.error || error?.message;
       setErr(errorMessage || "Signup failed. Please try again.");
     } finally {
       setLoading(false);
@@ -127,30 +134,21 @@ export default function Signup() {
 
   return (
     <div className="min-h-screen w-full">
-      {/* Purple background layer */}
       <div
         className="relative min-h-screen w-full bg-cover bg-center"
         style={{ backgroundImage: `url(${bg})` }}
       >
-        {/* Top row with logo (no back button) */}
         <div className="px-5 pt-6">
-          <img
-            src="/logo-white.svg"
-            alt="stance"
-            className="w-[98px]"
-            draggable="false"
-          />
+          <img src="/logo-white.svg" alt="stance" className="w-[98px]" draggable="false" />
         </div>
 
-        {/* Main content */}
         <div className="px-7 pb-8">
-          {/* Heading */}
           <h1 className="mt-6 text-start mb-6 font-intro font-[600] text-[36px] leading-[48px] tracking-[0.5px] text-[#F0E224]">
             Let’s get started!
           </h1>
 
-          {/* Form */}
           <form id="completeSignupForm" onSubmit={submit} className="w-full">
+            {/* Student Email (locked) */}
             <TextField
               id="studentEmail"
               label="Student email*"
@@ -161,7 +159,8 @@ export default function Signup() {
               placeholder="your.name@college.edu"
               value={form.studentEmail}
               onChange={onChange}
-              inputClass="bg-white text-[#121212] placeholder:text-gray-500"
+              disabled
+              inputClass="bg-white text-[#121212] placeholder:text-gray-500 opacity-100"
               error={fieldErrors.studentEmail}
             />
 
@@ -179,6 +178,7 @@ export default function Signup() {
             />
 
             <div className="mt-4" />
+            {/* College (locked; shows institute name or ID) */}
             <TextField
               id="college"
               label="College*"
@@ -236,21 +236,11 @@ export default function Signup() {
               error={fieldErrors.confirmPassword}
             />
 
-            {/* Global API errors / success */}
-            {err ? (
-              <div className="mt-3 text-[13px] text-red-200">{err}</div>
-            ) : null}
-            {ok ? (
-              <div className="mt-3 text-[13px] text-green-200">{ok}</div>
-            ) : null}
+            {err ? <div className="mt-3 text-[13px] text-red-200">{err}</div> : null}
+            {ok ? <div className="mt-3 text-[13px] text-green-200">{ok}</div> : null}
 
-            {/* Submit CTA */}
             <div className="mt-6 mb-5">
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-[320px] max-w-full"
-              >
+              <button type="submit" disabled={loading} className="w-[320px] max-w-full">
                 <CTAButton as="div" variant="primary">
                   <span className="font-inter font-[500] text-[18px] leading-[32px] tracking-[0.88px]">
                     {loading ? "Submitting…" : "Submit"}
