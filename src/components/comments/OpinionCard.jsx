@@ -106,36 +106,37 @@ export default function OpinionCard({
           <h3 className={`text-[15px] leading-6 ${colorClass} font-normal capitalize`}>
             {firstName}
           </h3>
+          <div className="flex items-center gap-3">
+            <span className="text-[15px] font-inter font-normal leading-5 text-white">{likeCount ?? 0}</span>
 
-          {/* like badge -> count + up icon, centered */}
-          <button
-            type="button"
-            onClick={handleLike}
-            disabled={isLikeLoading}
-            aria-label={isLikedByUser ? "Unlike" : "Like"}
-            className={[
-              "inline-flex items-center px-3 py-2 rounded-lg border",
-              isLikeLoading ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
-              // when NOT liked -> keep exactly your current styling
-              !isLikedByUser && `bg-black/10 text-white ${borderColor} flex-row gap-2`,
-              // when liked -> flip direction + themed fill pill
-              isLikedByUser && `${likedBg} ${likedText} border-transparent gap-2`,
-            ].join(" ")}
-          >
-            <span className="text-[15px] font-inter leading-5">{likeCount ?? 0}</span>
-
-            {/* arrow inherits current text color via currentColor */}
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 20 20"
-              fill="currentColor"        // 👈 important so arrow matches text color (white on purple, dark on yellow)
-              xmlns="http://www.w3.org/2000/svg"
+            {/* like badge -> count + up icon, centered */}
+            <button
+              type="button"
+              onClick={handleLike}
+              disabled={isLikeLoading}
+              aria-label={isLikedByUser ? "Unlike" : "Like"}
+              className={[
+                "inline-flex items-center px-2 py-2 rounded-lg border",
+                isLikeLoading ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
+                // when NOT liked -> keep exactly your current styling
+                !isLikedByUser && `bg-black/10 text-white ${borderColor} flex-row gap-2`,
+                // when liked -> flip direction + themed fill pill
+                isLikedByUser && `${likedBg} ${likedText} border-transparent gap-2`,
+              ].join(" ")}
             >
-              <path d="M9.99816 3L15.8352 8.837L14.7732 9.9L10.7482 5.875L10.7502 16.156H9.25016L9.24816 5.875L5.22316 9.9L4.16016 8.837L9.99816 3Z" />
-            </svg>
-          </button>
 
+              {/* arrow inherits current text color via currentColor */}
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="currentColor"        // 👈 important so arrow matches text color (white on purple, dark on yellow)
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path d="M9.99816 3L15.8352 8.837L14.7732 9.9L10.7482 5.875L10.7502 16.156H9.25016L9.24816 5.875L5.22316 9.9L4.16016 8.837L9.99816 3Z" />
+              </svg>
+            </button>
+          </div>
         </div>
 
         {/* optional flag: Reported */}
