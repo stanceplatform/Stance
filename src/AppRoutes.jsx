@@ -21,6 +21,7 @@ import ResetPassword from './pages/ResetPassword';
 import ForgotPassword from './pages/ForgotPassword';
 import SuggestQuestion from './pages/SuggestQuestion';
 import ReportQuestion from './pages/ReportQuestion';
+import Terms from './pages/Terms';
 
 const AppRoutes = () => {
     return (
@@ -116,6 +117,10 @@ const AppRoutes = () => {
                         <Route
                             path="/guidelines"
                             element={<CommunityGuidelinesPage />}
+                        />
+                        <Route
+                            path="/terms-conditions"
+                            element={<Terms />}
                         />
                         <Route path="/forgot-password" element={<ForgotPassword />} />
                         <Route path="/reset-password" element={<ResetPassword />} />
