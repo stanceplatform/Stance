@@ -14,12 +14,9 @@ const Landing = () => {
                 <div className="py-3 max-w-[300px] mx-auto">
                     <p className="text-center font-inter text-[13px] font-normal leading-[16px] text-[#E9B4FD]">
                         By proceeding, I agree to Stance’s{' '}
-                        <Link to="/privacy" className="underline">
-                            Privacy Statement
-                        </Link>{' '}
-                        and{' '}
-                        <Link to="/terms" className="underline">
-                            Terms of Service
+                        <br />
+                        <Link to="/terms-conditions" className="underline">
+                            Terms & Conditions
                         </Link>
                         .
                     </p>

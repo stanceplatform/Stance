@@ -45,17 +45,16 @@ export default function ShareStanceThanks({
       {/* Centered content */}
       <div className="flex-1 flex flex-col items-center justify-center px-6">
         <h1 className="text-center font-intro font-[500] text-[44px] leading-[56px] tracking-[0.88px] text-[#9105C6]">
-          Thanks for
+          Thanks!
           <br />
-          sharing your
-          <br />
-          stance!
+          You're all caught up
         </h1>
 
+        <p className="mt-6 text-center font-inter font-[700] text-[20px] leading-[32px] text-[#565006]">
+          Got a question for your community?
+        </p>
         <p className="mt-6 text-center font-inter font-[400] text-[20px] leading-[32px] text-[#565006]">
-          Have a new topic to share idea?
-          <br />
-          Let us know!
+          Suggest one — if it’s selected, we’ll post it anonymously for debate.
         </p>
       </div>
 
@@ -68,7 +67,7 @@ export default function ShareStanceThanks({
             onClick={handleSuggest}
             className="w-full max-w-[360px] mx-auto h-12 rounded-full bg-[#9105C6] text-[#F5EC70] font-inter font-[500] text-[18px] leading-[32px] shadow-md active:shadow-sm"
           >
-            Suggest a Topic
+            Suggest a question
           </button>
 
           {/* Navigation row: Previous | Next */}
