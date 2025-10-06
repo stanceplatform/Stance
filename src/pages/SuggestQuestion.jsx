@@ -98,13 +98,13 @@ const SuggestQuestion = () => {
               htmlFor="sq_option1"
               className="block text-left mb-2 text-[14px] leading-[20px] font-medium text-[#707070]"
             >
-              Yellow Option*
+              Option 1
             </label>
             <input
               id="sq_option1"
               name="option1"
               type="text"
-              placeholder="Brief subject"
+              placeholder="Enter Option 1"
               value={form.option1}
               onChange={onChange}
               className="w-full mb-5 rounded-xl px-4 h-[48px] text-[16px] outline-none bg-white text-[#707070] placeholder:text-[#A3A3A3] border border-[#E5E5E5] focus:border-[#BDBDBD]"
@@ -115,13 +115,13 @@ const SuggestQuestion = () => {
               htmlFor="sq_option2"
               className="block text-left mb-2 text-[14px] leading-[20px] font-medium text-[#707070]"
             >
-              Purple option*
+              Option 2
             </label>
             <input
               id="sq_option2"
               name="option2"
               type="text"
-              placeholder="Brief subject"
+              placeholder="Enter Option 2"
               value={form.option2}
               onChange={onChange}
               className="w-full mb-6 rounded-xl px-4 h-[48px] text-[16px] outline-none bgwhite text-[#1B1B1B] placeholder:text-[#A3A3A3] border border-[#E5E5E5] focus:border-[#BDBDBD]"
@@ -129,8 +129,7 @@ const SuggestQuestion = () => {
 
             {/* Helper text */}
             <p className="text-left text-[14px] leading-[22px] text-[#4E4E4E] mb-6">
-              Our team will get back to you via email. Please ensure your account
-              email is correct.
+              If your suggested question is selected, we’ll post it anonymously for debate
             </p>
 
             {/* Submit */}
