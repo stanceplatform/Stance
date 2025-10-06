@@ -5,6 +5,16 @@ function OpinionForm({ onAddOpinion }) {
   const editorRef = useRef(null);
   const [html, setHtml] = useState("");
 
+  // ---- Config ----
+  const MAX_CHARS = 400;
+
+  // Get plain visible text from sanitized HTML (counts what the user sees)
+  const getVisibleText = (h) => {
+    const div = document.createElement("div");
+    div.innerHTML = h.replace(/<br\s*\/?>/gi, "\n");
+    return (div.textContent || "").replace(/\u00A0/g, " ");
+  };
+
   // --- Auto-resize (1..4 lines) ---
   const resize = () => {
     const el = editorRef.current;
@@ -32,9 +42,40 @@ function OpinionForm({ onAddOpinion }) {
   };
 
   const onKeyDown = (e) => {
+    // Bold hotkey
     if ((e.ctrlKey || e.metaKey) && (e.key === "b" || e.key === "B")) {
       e.preventDefault();
       toggleBold();
+      return;
+    }
+
+    // Character limit guard for typing
+    const el = editorRef.current;
+    if (!el) return;
+
+    const allowedNavKeys = [
+      "Backspace",
+      "Delete",
+      "ArrowLeft",
+      "ArrowRight",
+      "ArrowUp",
+      "ArrowDown",
+      "Home",
+      "End",
+      "Tab",
+    ];
+
+    // If key inserts characters (single char) or is Enter, enforce limit
+    const willInsert =
+      (!e.ctrlKey && !e.metaKey && e.key.length === 1) || e.key === "Enter";
+
+    if (
+      willInsert &&
+      !allowedNavKeys.includes(e.key) &&
+      getVisibleText(el.innerHTML).length >= MAX_CHARS
+    ) {
+      e.preventDefault();
+      toast.error(`Maximum ${MAX_CHARS} characters allowed`);
     }
   };
 
@@ -84,20 +125,66 @@ function OpinionForm({ onAddOpinion }) {
     } catch { }
   };
 
+  // Truncate text to MAX_CHARS while keeping plain text count;
+  // returns sanitized HTML that reflects the truncated plain text
+  const truncateToLimit = (cleanHtml) => {
+    const plain = getVisibleText(cleanHtml);
+    if (plain.length <= MAX_CHARS) return cleanHtml;
+
+    // Build truncated plain text
+    const truncatedPlain = plain.slice(0, MAX_CHARS);
+
+    // Replace editor content with truncated plain text (drops formatting beyond limit)
+    // Keeps earlier formatting as-is (we only apply this when exceeding).
+    const safeDiv = document.createElement("div");
+    // Preserve line breaks
+    safeDiv.textContent = truncatedPlain;
+    let htmlWithBreaks = safeDiv.innerHTML.replace(/\n/g, "<br>");
+
+    // NOTE: We intentionally do not try to partially preserve <strong> tags
+    // at the cut point to avoid broken markup inside contentEditable.
+    return htmlWithBreaks;
+  };
+
   const onInput = () => {
-    const raw = editorRef.current?.innerHTML || "";
-    const clean = sanitizeHtml(raw);
+    const el = editorRef.current;
+    if (!el) return;
+
+    const raw = el.innerHTML || "";
+    let clean = sanitizeHtml(raw);
+
+    // Enforce limit after sanitizing
+    const visible = getVisibleText(clean);
+    if (visible.length > MAX_CHARS) {
+      clean = truncateToLimit(clean);
+      el.innerHTML = clean;
+      placeCaretAtEnd(el);
+      toast.error(`Maximum ${MAX_CHARS} characters allowed`);
+    }
+
     if (clean !== raw) {
-      editorRef.current.innerHTML = clean;
-      placeCaretAtEnd(editorRef.current);
+      el.innerHTML = clean;
+      placeCaretAtEnd(el);
     }
     if (clean !== html) setHtml(clean);
   };
 
   const onPaste = (e) => {
     e.preventDefault();
-    const text = (e.clipboardData || window.clipboardData).getData("text");
-    document.execCommand("insertText", false, text);
+    const el = editorRef.current;
+    if (!el) return;
+
+    const existing = getVisibleText(el.innerHTML);
+    const pasteText = (e.clipboardData || window.clipboardData).getData("text");
+
+    const remaining = Math.max(0, MAX_CHARS - existing.length);
+    if (remaining <= 0) {
+      toast.error(`Maximum ${MAX_CHARS} characters allowed`);
+      return;
+    }
+
+    const toInsert = pasteText.slice(0, remaining);
+    document.execCommand("insertText", false, toInsert);
   };
 
   // HTML -> Markdown (**bold** + \n)
@@ -106,10 +193,9 @@ function OpinionForm({ onAddOpinion }) {
       // line breaks
       .replace(/<br\s*\/?>/gi, "\n")
       // normalize <strong>…</strong> to **…** with trimmed inner text.
-      // leading/trailing spaces are moved OUTSIDE the **...**
       .replace(/<strong>(.*?)<\/strong>/gis, (_, inner) => {
-        const leading = (inner.match(/^\s*/)?.[0]) || "";
-        const trailing = (inner.match(/\s*$/)?.[0]) || "";
+        const leading = inner.match(/^\s*/)?.[0] || "";
+        const trailing = inner.match(/\s*$/)?.[0] || "";
         const core = inner.trim();
         return `${leading}**${core}**${trailing}`;
       })
@@ -121,7 +207,6 @@ function OpinionForm({ onAddOpinion }) {
     return md;
   };
 
-  // ✅ Your requested style: delegate to parent onAddOpinion(newOpinion)
   const handleSubmit = (e) => {
     e.preventDefault();
     const content = htmlToMarkdown(html).trim();
@@ -129,13 +214,12 @@ function OpinionForm({ onAddOpinion }) {
 
     const maybePromise = onAddOpinion?.({
       author: "Anonymous",
-      content,              // <-- parent uses this to post
+      content,
       likes: 0,
       avatarSrc:
         "https://cdn.builder.io/api/v1/image/assets/TEMP/33a5dea577ac14e31cec813fd4a4b43ff2ab5237f0420b782d586ab5e3cc90f9?placeholderIfAbsent=true&apiKey=9667f82c7e1b4746ad9299d82be6adf4",
     });
 
-    // Show toast if parent fails (without changing drawer UI)
     if (maybePromise && typeof maybePromise.catch === "function") {
       maybePromise.catch(() => toast.error("Failed to send argument"));
     }
@@ -150,18 +234,6 @@ function OpinionForm({ onAddOpinion }) {
 
   return (
     <form onSubmit={handleSubmit} className="flex gap-2 justify-center items-start pt-3 w-full rounded-lg">
-      {/* Toolbar */}
-      {/* <div className="flex flex-col items-center self-center">
-        <button
-          type="button"
-          onClick={toggleBold}
-          className="px-2 py-1 rounded-md border border-neutral-700 text-white/90 hover:bg-white/10"
-          title="Bold (Ctrl/Cmd + B)"
-        >
-          <span className="font-bold">B</span>
-        </button>
-      </div> */}
-
       {/* Editor */}
       <div
         ref={editorRef}
@@ -175,7 +247,7 @@ function OpinionForm({ onAddOpinion }) {
         onPaste={onPaste}
         className={[
           "flex-1 shrink px-4 py-3 my-auto text-base leading-6 tracking-wide",
-          "rounded-lg border border-solid min-w-[240px] text-white text-start",
+          "rounded-lg border border-solid min-w=[240px] text-white text-start",
           "bg-[#3A3A3A] border-neutral-700",
           "resize-none transition-[height] duration-150 ease-out",
           "nf-nice-scrollbar",
