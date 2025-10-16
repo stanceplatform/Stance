@@ -1,0 +1,101 @@
+{
+  "content": [
+    {
+      "id": 6,
+      "question": "India is greate?",
+      "answerOptions": [
+        {
+          "id": 7,
+          "value": "Yes",
+          "percentage": 100
+        },
+        {
+          "id": 8,
+          "value": "No",
+          "percentage": 0
+        }
+      ],
+      "backgroundImageUrl": "https://stance-images-bucket.s3.ap-south-1.amazonaws.com/images/eca492d7-bdfd-47b0-9b15-cf417e1af85f_leetcode.png",
+      "commentCount": 0
+    },
+    {
+      "id": 5,
+      "question": "Which fintech product do you prefer for savings?",
+      "answerOptions": [
+        {
+          "id": 5,
+          "value": "High-Yield Savings Account",
+          "percentage": 0
+        },
+        {
+          "id": 6,
+          "value": "Fixed Deposit",
+          "percentage": 100
+        }
+      ],
+      "backgroundImageUrl": "https://stance-images-bucket.s3.ap-south-1.amazonaws.com/images/eca492d7-bdfd-47b0-9b15-cf417e1af85f_leetcode.png",
+      "commentCount": 5
+    },
+    {
+      "id": 4,
+      "question": "Which feature is most important to you in a mobile banking app?",
+      "answerOptions": [
+        {
+          "id": 3,
+          "value": "Ease of Use",
+          "percentage": 100
+        },
+        {
+          "id": 4,
+          "value": "Security",
+          "percentage": 0
+        }
+      ],
+      "backgroundImageUrl": "https://stance-images-bucket.s3.ap-south-1.amazonaws.com/images/eca492d7-bdfd-47b0-9b15-cf417e1af85f_leetcode.png",
+      "commentCount": 0
+    },
+    {
+      "id": 3,
+      "question": "What's your favorite programming language?",
+      "answerOptions": [
+        {
+          "id": 1,
+          "value": "Java",
+          "percentage": 0
+        },
+        {
+          "id": 2,
+          "value": "Python",
+          "percentage": 100
+        }
+      ],
+      "backgroundImageUrl": "https://stance-images-bucket.s3.ap-south-1.amazonaws.com/images/eca492d7-bdfd-47b0-9b15-cf417e1af85f_leetcode.png",
+      "commentCount": 2
+    }
+  ],
+  "pageable": {
+    "pageNumber": 0,
+    "pageSize": 10,
+    "sort": {
+      "empty": true,
+      "sorted": false,
+      "unsorted": true
+    },
+    "offset": 0,
+    "unpaged": false,
+    "paged": true
+  },
+  "last": true,
+  "totalElements": 4,
+  "totalPages": 1,
+  "first": true,
+  "size": 10,
+  "number": 0,
+  "sort": {
+    "empty": true,
+    "sorted": false,
+    "unsorted": true
+  },
+  "numberOfElements": 4,
+  "empty": false
+}

@@ -19,18 +19,29 @@ export default function Signup() {
   const emailFromLink = useMemo(() => params.get("email") || "", [params]);
 
   // Support both ?institute=<name> & ?instituteId=<id>
-  const instituteNameFromLink = useMemo(() => params.get("institute") || "", [params]);
+  const instituteNameFromLink = useMemo(
+    () => (params.get("institute") || "").trim(),
+    [params]
+  );
   const instituteIdFromLink = useMemo(
-    () => params.get("instituteId") || params.get("collegeId") || "",
+    () =>
+      (params.get("instituteId") || params.get("collegeId") || "").trim(),
     [params]
   );
 
-  // What to display in the "College" field:
-  // If name present -> show name, else fall back to ID
-  const collegeDisplay = useMemo(
-    () => (instituteNameFromLink ? instituteNameFromLink : instituteIdFromLink),
-    [instituteNameFromLink, instituteIdFromLink]
-  );
+  // Should we show the College field?
+  // Show only if we have a non-empty name OR a valid id not equal to "-1"
+  const showCollege = useMemo(() => {
+    if (instituteNameFromLink) return true;
+    if (instituteIdFromLink && instituteIdFromLink !== "-1") return true;
+    return false;
+  }, [instituteNameFromLink, instituteIdFromLink]);
+
+  // What to display in the "College" field (when shown)
+  const collegeDisplay = useMemo(() => {
+    if (!showCollege) return "";
+    return instituteNameFromLink || instituteIdFromLink;
+  }, [showCollege, instituteNameFromLink, instituteIdFromLink]);
 
   const [form, setForm] = useState({
     studentEmail: emailFromLink,
@@ -38,7 +49,7 @@ export default function Signup() {
     alternateEmail: "",
     password: "",
     confirmPassword: "",
-    college: collegeDisplay || "", // locked display-only field
+    college: collegeDisplay, // display-only when shown
   });
 
   const [loading, setLoading] = useState(false);
@@ -61,13 +72,14 @@ export default function Signup() {
     if (!form.name.trim()) {
       errors.name = "Please enter your name.";
     }
-    // College is prefilled & locked, still ensure it's present
-    if (!form.college.trim()) {
-      errors.college = "College is required.";
-    }
-    // Require instituteId because backend needs collegeId
-    if (!instituteIdFromLink) {
-      errors.college = "Missing collegeId in invite link.";
+    // College is required ONLY when it is shown
+    if (showCollege) {
+      if (!form.college.trim()) {
+        errors.college = "College is required.";
+      }
+      if (!instituteIdFromLink || instituteIdFromLink === "-1") {
+        errors.college = "Missing valid collegeId in invite link.";
+      }
     }
     if (!form.alternateEmail || !emailRegex.test(form.alternateEmail)) {
       errors.alternateEmail = "Please enter a valid alternate email.";
@@ -93,31 +105,40 @@ export default function Signup() {
     setOk("");
 
     if (!validateForm()) return;
-    if (!tokenFromLink) { setErr("Signup link is missing or invalid."); return; }
+    if (!tokenFromLink) {
+      setErr("Signup link is missing or invalid.");
+      return;
+    }
 
     setLoading(true);
     try {
+      // Build payload; include collegeId only when College is shown/valid
       const payload = {
         token: tokenFromLink,
         name: form.name.trim(),
-        collegeId: String(instituteIdFromLink || ""), // from query
         alternateEmail: form.alternateEmail.trim(),
         password: form.password,
         confirmPassword: form.confirmPassword,
+        ...(showCollege && instituteIdFromLink && instituteIdFromLink !== "-1"
+          ? { collegeId: String(instituteIdFromLink) }
+          : {}),
       };
 
       const res = await apiService.completeSignup(payload);
 
       if (res?.token) {
-        // ✅ bootstrap session from tokens and hydrate /auth/me
-        await authenticateWithTokens({ token: res.token, refreshToken: res.refreshToken });
+        await authenticateWithTokens({
+          token: res.token,
+          refreshToken: res.refreshToken,
+        });
         setOk("Signup completed!");
         navigate("/dashboard");
       } else {
         setErr(res?.message || "Signup failed. Please try again.");
       }
     } catch (error) {
-      const errorMessage = error?.data?.message || error?.data?.error || error?.message;
+      const errorMessage =
+        error?.data?.message || error?.data?.error || error?.message;
       setErr(errorMessage || "Signup failed. Please try again.");
     } finally {
       setLoading(false);
@@ -131,7 +152,12 @@ export default function Signup() {
         style={{ backgroundImage: `url(${bg})` }}
       >
         <div className="px-5 pt-6">
-          <img src="/logo-white.svg" alt="stance" className="w-[98px]" draggable="false" />
+          <img
+            src="/logo-white.svg"
+            alt="stance"
+            className="w-[98px]"
+            draggable="false"
+          />
         </div>
 
         <div className="px-7 pb-8">
@@ -169,19 +195,23 @@ export default function Signup() {
               error={fieldErrors.name}
             />
 
-            <div className="mt-4" />
-            {/* College (locked; shows institute name or ID) */}
-            <TextField
-              id="college"
-              label="College*"
-              name="college"
-              type="text"
-              value={form.college}
-              onChange={onChange}
-              disabled
-              inputClass="bg-white text-[#121212] placeholder:text-gray-500 opacity-100"
-              error={fieldErrors.college}
-            />
+            {/* College (only when present/valid in link) */}
+            {showCollege && (
+              <>
+                <div className="mt-4" />
+                <TextField
+                  id="college"
+                  label="College*"
+                  name="college"
+                  type="text"
+                  value={form.college}
+                  onChange={onChange}
+                  disabled
+                  inputClass="bg-white text-[#121212] placeholder:text-gray-500 opacity-100"
+                  error={fieldErrors.college}
+                />
+              </>
+            )}
 
             <div className="mt-4" />
             <TextField
