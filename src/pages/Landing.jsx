@@ -1,25 +1,77 @@
+// pages/Landing.jsx
 import React from 'react';
-import Footer from '../components/ui/Footer';
-import GoogleSignIn from '../components/auth/GoogleSignIn';
-import Header from '../components/ui/Header';
-import Logo from '../components/ui/Logo'; 
+import { Link } from 'react-router-dom';
+import AuthShell from '../components/layouts/AuthShell';
+import Logo from '../components/ui/Logo';
+import CTAButton from '../components/ui/CTAButton';
+import bg from '../assets/bg.svg';
 
 const Landing = () => {
     return (
-        <main className="flex flex-col mx-auto w-full bg-purple-900 max-w-[480px] h-screen">
-            <section
-                className="flex relative flex-col items-center w-full h-screen bg-cover bg-center"
-                style={{
-                    backgroundImage: `url('https://cdn.builder.io/api/v1/image/assets/TEMP/977014e26f9df71355ad12e5ce2a5a8568fe42a193f8ee2cde09a383dbc74ffc?placeholderIfAbsent=true&apiKey=9667f82c7e1b4746ad9299d82be6adf4')`
-                }}
-            >
-                <Header />
+        <AuthShell
+            bgImage={bg}
+            footer={
+                <div className="py-3 max-w-[300px] mx-auto">
+                    <p className="text-center font-inter text-[13px] font-normal leading-[16px] text-[#E9B4FD]">
+                        By proceeding, I agree to Stance’s{' '}
+                        <br />
+                        <Link to="/terms-conditions" className="underline">
+                            Terms & Conditions
+                        </Link>
+                        .
+                    </p>
+                </div>
+            }
+        >
+            {/* Logo */}
+            <div className="mb-6">
                 <Logo />
-                <GoogleSignIn />
-                <Footer />
-            </section>
-        </main>
-    )
-}
+            </div>
 
-export default Landing
+            {/* Headline */}
+            <h1 className="text-center font-intro text-[36px] leading-[48px] font-[600] text-[#F0E224]">
+                Safe space for your opinions
+            </h1>
+
+            {/* CTAs */}
+            <div className="mt-10 w-full space-y-3">
+                <div className="mb-5">
+                    <Link to="/login" className="no-underline">
+                        <CTAButton
+                            as="div"
+                            variant="primary"
+                        >
+                            <span className="font-inter font-[500] text-[18px] leading-[32px] tracking-[0.88px] text-[#5B037C]">
+                                Login
+                            </span>
+                        </CTAButton>
+                    </Link>
+                </div>
+
+                <div>
+                    <Link to="/request-invite" className="no-underline">
+                        <CTAButton
+                            as="div"
+                            variant="secondary"
+                        >
+                            <span className="font-inter font-[500] text-[18px] leading-[32px] tracking-[0.88px] text-white">
+                                Request Invite
+                            </span>
+                        </CTAButton>
+                    </Link>
+                </div>
+
+                <div className="pt-1 text-center">
+                    <Link
+                        to="/forgot-password"
+                        className="font-inter text-[16px] leading-[24px] text-white hover:underline"
+                    >
+                        Forgot password?
+                    </Link>
+                </div>
+            </div>
+        </AuthShell>
+    );
+};
+
+export default Landing;

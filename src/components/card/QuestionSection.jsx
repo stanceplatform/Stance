@@ -1,97 +1,212 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { voteOnCard } from '../../services/operations';
 import CommentDrawer from '../comments/CommentDrawer';
 import ProgressBarWithLabels from '../charts/ProgressBar';
+import { getApiErrorMessage } from '../../utils/apiError';
+import toast from 'react-hot-toast';
 
-function QuestionSection({ question, onVoteUpdate }) {
-  const hasExistingVotes = question.answerOptions.some(option => option.percentage > 0);
-  const [hasVoted, setHasVoted] = useState(hasExistingVotes);
+// put this near the top of the file
+const formatPct = (v) => {
+  if (v == null || v === '') return '0';
+  const num = Number(v);
+  if (Number.isNaN(num)) return '0';
+
+  const abs = Math.abs(num);
+  const intPart = Math.trunc(num);
+  const firstDecimal = Math.floor(abs * 10) % 10;
+  const hasAnyFraction = Math.round((abs - Math.floor(abs)) * 100) !== 0;
+
+  if (!hasAnyFraction || firstDecimal === 0) return String(intPart);
+  return num.toFixed(1);
+};
+
+function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
+  const normalizedOptions = question.answerOptions ?? question.answeroptions ?? [];
+
+  const answered = Boolean(question.userResponse?.answered);
+  const selectedOptionId = question.userResponse?.selectedOptionId ?? null;
+
+  const initialChoice = (() => {
+    if (!selectedOptionId) return null;
+    const idx = normalizedOptions.findIndex(o => o.id === selectedOptionId);
+    return idx >= 0 ? idx + 1 : null;
+  })();
+
+  const [hasVoted, setHasVoted] = useState(answered);
+  const [userChoice, setUserChoice] = useState(initialChoice);
+  const [currentAnswers, setCurrentAnswers] = useState(normalizedOptions);
+  const [isVoting, setIsVoting] = useState(false);
+  const [commentCount, setCommentCount] = useState(question?.commentCount || 0);
+
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [userChoice, setUserChoice] = useState(null);
-  const [currentAnswers, setCurrentAnswers] = useState(question.answerOptions);
   const drawerRef = useRef(null);
 
+  // ✅ calculate total stances
+  const totalStances = useMemo(() => {
+    const a = Number(currentAnswers?.[0]?.votes ?? 0);
+    const b = Number(currentAnswers?.[1]?.votes ?? 0);
+    return a + b;
+  }, [currentAnswers]);
+
+  useEffect(() => {
+    const opts = question.answerOptions ?? question.answeroptions ?? [];
+    setCurrentAnswers(opts);
+
+    const _answered = Boolean(question.userResponse?.answered);
+    if (_answered) {
+      const _selected = question.userResponse?.selectedOptionId ?? null;
+      const i = opts.findIndex(o => o.id === _selected);
+      setUserChoice(i >= 0 ? i + 1 : null);
+      setHasVoted(true);
+    }
+  }, [question.id]);
+
   const handleVote = async (option, choiceNumber) => {
-    if (!hasVoted) {
-      try {
-        const response = await voteOnCard(question.id, option.id);
-        
-        // Update the local state with new percentages from API response
-        if (response.options) {
-          setCurrentAnswers(response.options);
-          onVoteUpdate?.(question.id, response.options);
-        }
-        
-        setHasVoted(true);
-        setUserChoice(choiceNumber);
-      } catch (error) {
-        console.error('Error voting:', error);
-      }
+    if (hasVoted || isVoting) return;
+    try {
+      setIsVoting(true);
+
+      const response = await voteOnCard(question.id, option.id);
+
+      const updated =
+        response?.options ??
+        response?.answerOptions ??
+        response?.answeroptions ??
+        currentAnswers;
+
+      setCurrentAnswers(updated);
+      onVoteUpdate?.(question.id, updated);
+      setUserChoice(choiceNumber);
+      setHasVoted(true);
+    } catch (error) {
+      console.error('Error voting:', error);
+      toast.error(getApiErrorMessage(error));
+    } finally {
+      setIsVoting(false);
     }
   };
 
   const toggleDrawer = () => {
-    setIsDrawerOpen(!isDrawerOpen);
+    setIsDrawerOpen(v => {
+      const newVal = !v;
+      onDrawerToggle?.(newVal);
+      return newVal;
+    });
   };
 
   const handleClickOutside = (event) => {
+    if (event.target && event.target.closest && event.target.closest('[data-liked-by-sheet]')) {
+      return;
+    }
     if (drawerRef.current && !drawerRef.current.contains(event.target)) {
       setIsDrawerOpen(false);
     }
   };
 
+  const handleNewComment = () => {
+    setCommentCount(prev => prev + 1);
+  };
+
   useEffect(() => {
-    if (isDrawerOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    } else {
-      document.removeEventListener('mousedown', handleClickOutside);
+    if (!isDrawerOpen) {
+      onDrawerToggle?.(false);
+      return;
     }
+    document.addEventListener('mousedown', handleClickOutside, true);
+    document.addEventListener('touchstart', handleClickOutside, true);
+
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside, true);
+      document.removeEventListener('touchstart', handleClickOutside, true);
     };
   }, [isDrawerOpen]);
-// bg-[linear-gradient(180deg,transparent,rgba(0,0,0,1))]
+
+  const fadeSlide = {
+    initial: { opacity: 0, y: 10 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -10 },
+    transition: { duration: 0.25, ease: 'easeInOut' },
+  };
+
   return (
-    <section className=" w-full">
-      <div className="absolute bottom-0 flex flex-col justify-end w-full  p-4  "> 
-        <h2 className="text-responsive text-left font-normal text-white leading-responsive mt-5">
+    <section className="w-full ">
+      <div className="absolute bottom-0 flex flex-col justify-end w-full p-4 custom-gradient ">
+        <h2 className="text-responsive text-left font-intro font-normal text-white leading-responsive mt-5 z-0">
           {question.question}
         </h2>
-        <div className="flex mt-6 w-full">
-          {!hasVoted ? (
-            <>
-              <button
-                className="relative flex-1 shrink gap-2 self-stretch mx-3 px-3 py-2 h-full text-left text-2xl tracking-wide leading-8 whitespace-wrap bg-yellow-400 rounded-md text-neutral-900 max-w-xs"
-                aria-label="Yes"
-                onClick={() => handleVote(question.answerOptions[0], 1)}
+
+        <div className="flex mt-6 w-full z-10">
+          <AnimatePresence mode="wait" initial={false}>
+            {!hasVoted ? (
+              <motion.div key="options" {...fadeSlide} className="flex w-full font-inter">
+                <button
+                  className="relative flex-1 shrink gap-2 self-stretch mx-3 px-4 py-3 h-full text-left font-medium text-[22px] tracking-wide leading-8 whitespace-wrap bg-[#F0E224] rounded-md text-[#121212] max-w-xs disabled:opacity-60"
+                  aria-label={currentAnswers[0]?.value ?? 'Option A'}
+                  onClick={() => currentAnswers[0] && handleVote(currentAnswers[0], 1)}
+                  disabled={!currentAnswers[0] || isVoting}
+                >
+                  {currentAnswers[0]?.value ?? 'Option A'}
+                  <span className="absolute right-[-10px] top-[50%] translate-y-[-20%] w-0 h-0 border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent border-l-[10px] border-l-[#F0E224]"></span>
+                </button>
+
+                <button
+                  className="relative flex-1 shrink gap-2 self-stretch mx-3 px-3 py-2 h-full text-right font-medium text-[22px] text-white tracking-wide leading-8 whitespace-wrap bg-[#9105C6] rounded-md max-w-xs disabled:opacity-60"
+                  aria-label={currentAnswers[1]?.value ?? 'Option B'}
+                  onClick={() => currentAnswers[1] && handleVote(currentAnswers[1], 2)}
+                  disabled={!currentAnswers[1] || isVoting}
+                >
+                  {currentAnswers[1]?.value ?? 'Option B'}
+                  <span className="absolute left-[-10px] top-[50%] translate-y-[-80%] w-0 h-0 border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent border-r-[10px] border-r-[#9105C6]"></span>
+                </button>
+              </motion.div>
+            ) : (
+              <motion.div
+                key={`bar-${question.id}-${currentAnswers[0]?.percentage}-${currentAnswers[1]?.percentage}`}
+                {...fadeSlide}
+                className="w-full z-10"
               >
-                {question.answerOptions[0].value}
-                <span className="absolute right-[-10px] top-[50%] translate-y-[-80%] w-0 h-0 border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent border-l-[10px] border-l-yellow-400"></span>
-              </button>
-              <button
-                className="relative flex-1 shrink gap-2 self-stretch mx-3 px-3 py-2 h-full text-right text-2xl text-white tracking-wide leading-8 whitespace-wrap bg-purple-700 rounded-md text-neutral-900 max-w-xs"
-                aria-label="No"
-                onClick={() => handleVote(question.answerOptions[1], 2)}
-              >
-                {question.answerOptions[1].value}
-                <span className="absolute left-[-10px] top-[50%] translate-y-[-20%] w-0 h-0 border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent border-r-[10px] border-r-purple-700"></span>
-              </button>
-            </>
-          ) : (
-            <ProgressBarWithLabels 
-              firstOptionPercentage={currentAnswers[0].percentage} 
-              userChoice={userChoice || 1}
-              firstOptionText={currentAnswers[0].value}
-              secondOptionText={currentAnswers[1].value}
-            />
-          )}
+                <ProgressBarWithLabels
+                  firstOptionPercentage={formatPct(currentAnswers[0]?.percentage ?? 0)}
+                  userChoice={userChoice}
+                  firstOptionText={currentAnswers[0]?.value ?? 'Option A'}
+                  secondOptionText={currentAnswers[1]?.value ?? 'Option B'}
+                  secondOptionPercentage={formatPct(currentAnswers[1]?.percentage ?? 0)}
+                />
+                {/* ✅ Show total stances */}
+                <div className="mt-2 w-full text-center">
+                  <span className="font-inter text-white text-base">
+                    {totalStances} Stances
+                  </span>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-        <button onClick={toggleDrawer} className="gap-2 self-center px-4 py-2 mt-6 text-base tracking-wide text-white bg-white bg-opacity-20 rounded-[40px]">
-          {hasVoted ? `Add Comment (${question.commentCount})` : `Comments (${question.commentCount})`}
+
+        <button
+          disabled={!hasVoted}
+          onClick={toggleDrawer}
+          className={`gap-2 self-center px-4 py-2 mt-6 mb-2 font-inter font-medium text-base tracking-wide rounded-[40px] z-10 ${hasVoted
+            ? "bg-[#F0E224] text-[#5B037C]"
+            : "text-white"
+            }`}
+        >
+          {!hasVoted
+            ? `Arguments (${commentCount})`
+            : `View Arguments (${commentCount})`}
         </button>
+
       </div>
+
       <div ref={drawerRef}>
-        <CommentDrawer isOpen={isDrawerOpen} onClose={toggleDrawer} cardId={question.id} />
+        <CommentDrawer
+          onNewComment={handleNewComment}
+          isOpen={isDrawerOpen}
+          onClose={toggleDrawer}
+          cardId={question.id}
+          answerOptions={currentAnswers}
+        />
       </div>
     </section>
   );

@@ -1,0 +1,59 @@
+/* fonts.css */
+@font-face {
+  font-family: "Intro";
+  src: url("/fonts/IntroThinAlt.woff2") format("woff2"),
+    url("/fonts/IntroThinAlt.woff") format("woff");
+  font-weight: 100;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Intro";
+  src: url("/fonts/IntroLightAlt.woff2") format("woff2"),
+    url("/fonts/IntroLightAlt.woff") format("woff");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Intro";
+  src: url("/fonts/IntroRegularAlt.woff2") format("woff2"),
+    url("/fonts/IntroRegularAlt.woff") format("woff");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Intro";
+  src: url("/fonts/IntroBookAlt.woff2") format("woff2"),
+    url("/fonts/IntroBookAlt.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Intro";
+  src: url("/fonts/IntroBoldAlt.woff2") format("woff2"),
+    url("/fonts/IntroBoldAlt.woff") format("woff");
+  font-weight: 700; /* bold */
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Intro";
+  src: url("/fonts/IntroBlackAlt.woff2") format("woff2"),
+    url("/fonts/IntroBlackAlt.woff") format("woff");
+  font-weight: 900; /* black */
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Optional: prevent fake bold/italic when a weight/style is missing */
+html {
+  font-synthesis: none;
+}
