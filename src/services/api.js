@@ -217,6 +217,12 @@ class ApiService {
     });
   }
 
+  // Delete a comment
+  async deleteComment(commentId) {
+    if (!commentId) throw new Error('commentId is required');
+    return this.request(`/comments/${commentId}`, { method: 'DELETE' });
+  }
+
   async reportQuestion(questionId, { reason, description }) {
     if (!questionId) throw new Error('questionId is required');
     return this.request(`/questions/${questionId}/report`, {
