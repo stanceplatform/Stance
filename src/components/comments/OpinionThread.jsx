@@ -6,7 +6,8 @@ import {
   fetchCardComments,
   postCommentOnCard,
   likeComment,
-  unlikeComment
+  unlikeComment,
+  apiService
 } from '../../services/operations';
 
 function OpinionThread({ cardId, answerOptions, onNewComment }) {
@@ -39,6 +40,7 @@ function OpinionThread({ cardId, answerOptions, onNewComment }) {
   // normalize each comment to OpinionCard props
   const mapCommentToCardProps = (c, index) => ({
     id: c.id,
+    userId: c?.user?.id ?? null,
     username: c?.user?.username ?? 'unknown',
     firstName: c?.user?.firstName ?? 'stanceuser',
     text: c.text,
@@ -121,6 +123,11 @@ function OpinionThread({ cardId, answerOptions, onNewComment }) {
     }
   };
 
+  const handleDelete = async (commentId) => {
+    await apiService.deleteComment(commentId);
+    await loadOpinions();
+  };
+
   if (isLoading) return <div className="text-white">Loading...</div>;
   if (error) return <div className="text-red-500">Error: {error}</div>;
 
@@ -153,6 +160,7 @@ function OpinionThread({ cardId, answerOptions, onNewComment }) {
                   onReport={(payload) => {
                     console.log('Report payload', payload);
                   }}
+                  onDelete={handleDelete}
                 />
               );
             })}

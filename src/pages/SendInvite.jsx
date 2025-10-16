@@ -19,18 +19,23 @@ const SendInvite = () => {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState('');
   const [ok, setOk] = useState('');
-  const [invitesLeft, setInvitesLeft] = useState(2);
+  const [invitesLeft, setInvitesLeft] = useState(null);
 
-  // Fetch remaining invite quota
-  useEffect(() => {
-    let ignore = false;
-    (async () => {
+  // Helper: fetch remaining invite quota
+  const refreshQuota = async () => {
+    try {
       const res = await apiService.getInviteQuota();
-      if (!ignore) setInvitesLeft(res.remaining);
-    })();
-    return () => { ignore = true; };
-  }, []);
+      setInvitesLeft(res?.remaining ?? null);
+    } catch (e) {
+      // keep old value, but log/notify if needed
+      console.error('Failed to fetch invite quota', e);
+    }
+  };
 
+  // Initial quota fetch
+  useEffect(() => {
+    refreshQuota();
+  }, []);
 
   const submit = async (e) => {
     if (e) e.preventDefault();
@@ -49,30 +54,31 @@ const SendInvite = () => {
     setLoading(true);
     try {
       const res = await apiService.sendInvite(email);
+
       if (res?.success) {
         setOk(res?.message || 'Invite sent!');
         setEmail('');
-        setInvitesLeft((n) => (typeof n === 'number' ? Math.max(0, n - 1) : n));
+        // IMPORTANT: refetch the true count from server
+        await refreshQuota();
       } else {
-        setErr(res?.message || 'Unable to send invite.');
+        const msg = res?.message || 'Unable to send invite.';
+        setErr(msg);
       }
     } catch (error) {
-      // Handle the enhanced error object
       if (error.status && error.data) {
-        // Use the backend's error message if available
         const errorMessage = error.data.message || error.data.error || error.message;
         setErr(errorMessage || 'Invite failed. Please try again.');
         toast.error(getApiErrorMessage(error));
-        // You can also access the status code if needed
         console.error('API Error Status:', error.status);
       } else {
-        // Fallback for non-API errors
         setErr(error?.message || 'Invite failed. Please try again.');
+        toast.error(error?.message || 'Invite failed. Please try again.');
       }
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <AuthShell
