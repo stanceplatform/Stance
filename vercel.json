@@ -1,12 +1,6 @@
 {
   "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "http://stance.ap-south-1.elasticbeanstalk.com/api/:path*"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
+    { "source": "/api/:path*", "destination": "/api/proxy?path=:path*" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

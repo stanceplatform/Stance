@@ -107,6 +107,9 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
   const handleNewComment = () => {
     setCommentCount(prev => prev + 1);
   };
+  const handleDeleteComment = () => {
+    setCommentCount(prev => prev - 1);
+  };
 
   useEffect(() => {
     if (!isDrawerOpen) {
@@ -202,6 +205,7 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
       <div ref={drawerRef}>
         <CommentDrawer
           onNewComment={handleNewComment}
+          onRemoveComment={handleDeleteComment}
           isOpen={isDrawerOpen}
           onClose={toggleDrawer}
           cardId={question.id}
