@@ -10,7 +10,7 @@ import {
   apiService
 } from '../../services/operations';
 
-function OpinionThread({ cardId, answerOptions, onNewComment }) {
+function OpinionThread({ cardId, answerOptions, onNewComment, onRemoveComment }) {
   const [opinions, setOpinions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -126,6 +126,7 @@ function OpinionThread({ cardId, answerOptions, onNewComment }) {
   const handleDelete = async (commentId) => {
     await apiService.deleteComment(commentId);
     await loadOpinions();
+    onRemoveComment?.();
   };
 
   if (isLoading) return <div className="text-white">Loading...</div>;

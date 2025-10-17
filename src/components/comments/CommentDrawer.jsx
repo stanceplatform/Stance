@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import OpinionThread from './OpinionThread';
 
-function CommentDrawer({ isOpen, onClose, cardId, answerOptions, onNewComment }) {
+function CommentDrawer({ isOpen, onClose, cardId, answerOptions, onNewComment, onRemoveComment }) {
   return (
     <div className={`fixed z-10 mx-auto inset-x-0 bottom-0 transition-transform transform ${isOpen ? 'translate-y-0' : 'translate-y-full'} bg-neutral-900 rounded-t-3xl max-w-[480px]`}>
       <div className="flex justify-between items-center py-5">
@@ -16,7 +16,7 @@ function CommentDrawer({ isOpen, onClose, cardId, answerOptions, onNewComment })
       </div>
 
       <div className="relative h-[60vh] flex flex-col">
-        <OpinionThread cardId={cardId} answerOptions={answerOptions} onNewComment={onNewComment} />
+        <OpinionThread cardId={cardId} answerOptions={answerOptions} onNewComment={onNewComment} onRemoveComment={onRemoveComment} />
       </div>
     </div>
   );
