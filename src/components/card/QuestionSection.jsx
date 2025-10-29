@@ -135,16 +135,16 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
   return (
     <section className="w-full ">
       <div className="absolute bottom-0 flex flex-col justify-end w-full p-4 custom-gradient ">
-        <h2 className="text-responsive text-left font-intro font-normal text-white leading-responsive mt-5 z-0">
+        <h2 className="text-responsive text-left font-intro font-normal text-white leading-[56px] mt-5 z-0">
           {question.question}
         </h2>
 
-        <div className="flex mt-6 w-full z-10">
+        <div className="flex w-full z-10">
           <AnimatePresence mode="wait" initial={false}>
             {!hasVoted ? (
-              <motion.div key="options" {...fadeSlide} className="flex w-full font-inter">
+              <motion.div key="options" {...fadeSlide} className="flex w-full mt-6 font-inter">
                 <button
-                  className="relative flex-1 shrink gap-2 self-stretch mx-3 px-4 py-3 h-full text-left font-medium text-[22px] tracking-wide leading-8 whitespace-wrap bg-[#F0E224] rounded-md text-[#121212] max-w-xs disabled:opacity-60"
+                  className="relative flex-1 shrink gap-2 self-stretch mx-3 px-3 py-2 h-full text-left font-medium text-[22px] tracking-wide leading-8 whitespace-wrap bg-[#F0E224] rounded-md text-[#121212] max-w-xs disabled:opacity-60"
                   aria-label={currentAnswers[0]?.value ?? 'Option A'}
                   onClick={() => currentAnswers[0] && handleVote(currentAnswers[0], 1)}
                   disabled={!currentAnswers[0] || isVoting}
@@ -177,7 +177,7 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
                   secondOptionPercentage={formatPct(currentAnswers[1]?.percentage ?? 0)}
                 />
                 {/* ✅ Show total stances */}
-                <div className="mt-2 w-full text-center">
+                <div className="mt-4 w-full text-center">
                   <span className="font-inter text-white text-base">
                     {totalStances} Stances
                   </span>

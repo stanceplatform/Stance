@@ -20,12 +20,12 @@ const ProgressBarWithLabels = ({ firstOptionPercentage, userChoice, firstOptionT
       {/* Answer Labels */}
       <div className="flex justify-between w-full">
         <div className="text-left">
-          <p className="text-white font-inter font-medium text-[22px] leading-7">{firstOptionText}</p>
-          {userChoice === 1 && <p className="text-white text-[10px] leading-3">(your stance)</p>}
+          <p className="text-white font-inter font-medium text-[22px] leading-[30px]">{firstOptionText}</p>
+          {userChoice === 1 && <p className="text-white text-[10px] font-medium mt-1 leading-3">(your stance)</p>}
         </div>
         <div className="text-right">
-          <p className="text-white font-inter font-medium text-[22px] leading-7">{secondOptionText}</p>
-          {userChoice === 2 && <p className="text-white text-[10px] leading-3">(your stance)</p>}
+          <p className="text-white font-inter font-medium text-[22px] leading-[30px]">{secondOptionText}</p>
+          {userChoice === 2 && <p className="text-white text-[10px] font-medium mt-1 leading-3">(your stance)</p>}
         </div>
       </div>
 
