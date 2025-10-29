@@ -48,11 +48,11 @@ body {
 /* Add this to your global CSS file */
 .custom-gradient {
   background: linear-gradient(
-    to bottom,
-    transparent 0%,
-    /* start fully transparent at the top */ rgba(0, 0, 0, 0.4) 40%,
-    /* smooth fade begins around mid */ rgba(0, 0, 0, 0.7) 70%,
-    /* darker by 70% height */ black 95% /* fully black by ~85% */
+    180deg,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.6) 55%,
+    rgba(0, 0, 0, 0.85) 85%,
+    #000 100%
   );
 }
 
