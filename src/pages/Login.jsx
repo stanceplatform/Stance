@@ -5,6 +5,7 @@ import AuthShell from '../components/layouts/AuthShell';
 import Logo from '../components/ui/Logo';
 import CTAButton from '../components/ui/CTAButton';
 import TextField from '../components/ui/TextField';
+import GoogleAuthButton from '../components/auth/GoogleAuthButton';
 import bg from '../assets/bg.svg';
 import { useAuth } from '../context/AuthContext';
 
@@ -70,6 +71,11 @@ const Login = () => {
 
       {/* Form */}
       <form id="loginForm" onSubmit={submit} className="w-full max-w-[360px] pb-20">
+        {/* Google Login button */}
+        <div className="mb-5">
+          <GoogleAuthButton mode="login" onError={setErr} />
+        </div>
+
         <div className="mb-5">
           <TextField
             id="usernameOrEmail"

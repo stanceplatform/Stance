@@ -1,19 +1,22 @@
 // pages/Landing.jsx
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import AuthShell from '../components/layouts/AuthShell';
 import Logo from '../components/ui/Logo';
 import CTAButton from '../components/ui/CTAButton';
+import GoogleAuthButton from '../components/auth/GoogleAuthButton';
 import bg from '../assets/bg.svg';
 
 const Landing = () => {
+    const [error, setError] = useState('');
+
     return (
         <AuthShell
             bgImage={bg}
             footer={
                 <div className="py-3 max-w-[300px] mx-auto">
                     <p className="text-center font-inter text-[13px] font-normal leading-[16px] text-[#E9B4FD]">
-                        By proceeding, I agree to Stance’s{' '}
+                        By proceeding, I agree to Stance's{' '}
                         <br />
                         <Link to="/terms-conditions" className="underline">
                             Terms & Conditions
@@ -48,6 +51,11 @@ const Landing = () => {
                     </Link>
                 </div>
 
+                {/* Google Sign up button */}
+                <div className="mb-5">
+                    <GoogleAuthButton mode="signup" onError={setError} />
+                </div>
+
                 <div>
                     <Link to="/request-invite" className="no-underline">
                         <CTAButton
@@ -69,6 +77,12 @@ const Landing = () => {
                         Forgot password?
                     </Link>
                 </div>
+
+                {error && (
+                    <div className="mt-3 text-center text-[14px] text-red-200">
+                        {error}
+                    </div>
+                )}
             </div>
         </AuthShell>
     );

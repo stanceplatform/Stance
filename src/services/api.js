@@ -316,6 +316,22 @@ class ApiService {
     return this.request('/auth/me', { method: 'GET' });
   }
 
+  async oauth2Callback({ provider, code, email, name, profilePicture, providerId }) {
+    const data = await this.request('/auth/oauth2/callback', {
+      method: 'POST',
+      body: JSON.stringify({ provider, code, email, name, profilePicture, providerId }),
+    });
+
+    if (data?.token) this.setToken(data.token);
+    if (data?.refreshToken) this.setRefreshToken(data.refreshToken);
+
+    if (data?.id || data?.email || data?.username) {
+      localStorage.setItem('user', JSON.stringify({ id: data.id, email: data.email, username: data.username }));
+    }
+
+    return data;
+  }
+
   // Feedback
   async sendFeedback({ subject, message, type = 'HELP' }) {
     if (!message?.trim()) throw new Error('message is required');
