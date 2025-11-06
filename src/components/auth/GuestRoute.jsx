@@ -11,9 +11,9 @@ const GuestRoute = ({ children }) => {
     return <div className="text-center text-white">Checking session…</div>;
   }
 
-  // already logged in -> go to dashboard
+  // already logged in -> go to dashboard (root)
   if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/" replace />;
   }
 
   // not logged in -> show the page

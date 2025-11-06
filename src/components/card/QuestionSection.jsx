@@ -5,6 +5,8 @@ import CommentDrawer from '../comments/CommentDrawer';
 import ProgressBarWithLabels from '../charts/ProgressBar';
 import { getApiErrorMessage } from '../../utils/apiError';
 import toast from 'react-hot-toast';
+import { useAuth } from '../../context/AuthContext';
+import LoginSignupModal from '../auth/LoginSignupModal';
 
 // put this near the top of the file
 const formatPct = (v) => {
@@ -23,6 +25,7 @@ const formatPct = (v) => {
 
 function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
   const normalizedOptions = question.answerOptions ?? question.answeroptions ?? [];
+  const { isAuthenticated } = useAuth();
 
   const answered = Boolean(question.userResponse?.answered);
   const selectedOptionId = question.userResponse?.selectedOptionId ?? null;
@@ -40,6 +43,7 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
   const [commentCount, setCommentCount] = useState(question?.commentCount || 0);
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const drawerRef = useRef(null);
 
   // ✅ calculate total stances
@@ -64,6 +68,13 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
 
   const handleVote = async (option, choiceNumber) => {
     if (hasVoted || isVoting) return;
+    
+    // Check if user is authenticated
+    if (!isAuthenticated) {
+      setShowLoginModal(true);
+      return;
+    }
+
     try {
       setIsVoting(true);
 
@@ -212,6 +223,11 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
           answerOptions={currentAnswers}
         />
       </div>
+
+      <LoginSignupModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+      />
     </section>
   );
 }

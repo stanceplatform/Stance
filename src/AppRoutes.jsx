@@ -29,9 +29,15 @@ const AppRoutes = () => {
             <AuthProvider>
                 <Router>
                     <Routes>
-                        {/* Guest-only */}
+                        {/* Dashboard - accessible without login */}
                         <Route
                             path="/"
+                            element={<Dashboard />}
+                        />
+
+                        {/* Guest-only */}
+                        <Route
+                            path="/auth"
                             element={
                                 <GuestRoute>
                                     <Landing />

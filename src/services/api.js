@@ -181,6 +181,24 @@ class ApiService {
     return this.request(`/questions/list?page=${page}&size=${size}&sort=${sort}`);
   }
 
+  // Public questions endpoint (no authentication required)
+  async getQuestionsPublic(page = 0, size = 10) {
+    // Make request without Authorization header
+    const url = `${this.baseURL}/questions?page=${page}&size=${size}`;
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        accept: '*/*',
+      },
+    });
+    const data = await this._parseResponse(response);
+    if (!response.ok) {
+      throw { status: response.status, data: data.parsed };
+    }
+    return data.parsed;
+  }
+
   async voteOnQuestion(questionId, answerOptionId) {
     return this.request(`/questions/${questionId}/vote`, {
       method: 'POST',

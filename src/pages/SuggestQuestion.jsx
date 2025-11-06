@@ -2,12 +2,16 @@
 import React, { useRef, useState } from "react";
 import apiService from "../services/api";
 import HeaderSecondary from "../components/ui/HeaderSecondary";
+import { useAuth } from "../context/AuthContext";
+import LoginSignupModal from "../components/auth/LoginSignupModal";
 
 const SuggestQuestion = () => {
+  const { isAuthenticated } = useAuth();
   const [form, setForm] = useState({ question: "", option1: "", option2: "" });
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState("");
   const [isError, setIsError] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const formRef = useRef(null);
 
 
@@ -29,6 +33,12 @@ const SuggestQuestion = () => {
     e.preventDefault();
     setMsg("");
     setIsError(false);
+
+    // Check if user is authenticated
+    if (!isAuthenticated) {
+      setShowLoginModal(true);
+      return;
+    }
 
     const v = validate();
     if (v) {
@@ -154,6 +164,11 @@ const SuggestQuestion = () => {
           </form>
         </div>
       </div>
+
+      <LoginSignupModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+      />
     </div>
   );
 };

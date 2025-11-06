@@ -1,6 +1,8 @@
 // components/thankyou/ShareStanceThanks.jsx
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import LoginSignupModal from "../auth/LoginSignupModal";
 
 /**
  * ShareStanceThanks
@@ -19,8 +21,16 @@ export default function ShareStanceThanks({
   className = "",
 }) {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   const handleSuggest = () => {
+    // Check if user is authenticated
+    if (!isAuthenticated) {
+      setShowLoginModal(true);
+      return;
+    }
+
     if (onSuggest) return onSuggest();
     navigate("/suggestquestion"); // same tab
   };
@@ -104,6 +114,11 @@ export default function ShareStanceThanks({
           </div>
         </div>
       </div>
+
+      <LoginSignupModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+      />
     </div>
   );
 }
