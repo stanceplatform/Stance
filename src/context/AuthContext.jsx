@@ -56,6 +56,20 @@ export const AuthProvider = ({ children }) => {
         }
     }, [fetchMe]);
 
+    const loginWithGoogle = useCallback(async ({ provider, code, email, name, profilePicture, providerId }) => {
+        try {
+            // only persists tokens, not user (same pattern as regular login)
+            await apiService.oauth2Callback({ provider, code, email, name, profilePicture, providerId });
+            setIsAuthenticated(true);
+            // now fetch the *real* user
+            const me = await fetchMe();
+            return me;
+        } catch (error) {
+            const errorMessage = error.data?.message || error.data?.error || error.message;
+            throw new Error(errorMessage || 'Google login failed. Please try again.');
+        }
+    }, [fetchMe]);
+
     const logout = useCallback(() => {
         apiService.logout(); // clears tokens + user
         setIsAuthenticated(false);
@@ -65,7 +79,7 @@ export const AuthProvider = ({ children }) => {
     // NEW: use this after signup (or any time you receive fresh tokens)
     const authenticateWithTokens = useCallback(async ({ token, refreshToken }) => {
         if (token) apiService.setToken(token);
-        if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
+        if (refreshToken) apiService.setRefreshToken(refreshToken);
         setIsAuthenticated(true);
         const me = await fetchMe();  // hydrate user
         return me;
@@ -103,7 +117,7 @@ export const AuthProvider = ({ children }) => {
     }, [fetchMe]);
 
     return (
-        <AuthContext.Provider value={{ isAuthenticated, user, login, logout, loading, fetchMe, authenticateWithTokens }}>
+        <AuthContext.Provider value={{ isAuthenticated, user, login, loginWithGoogle, logout, loading, fetchMe, authenticateWithTokens }}>
             {children}
         </AuthContext.Provider>
     );

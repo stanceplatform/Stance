@@ -2,42 +2,53 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../../context/AuthContext';
-import apiService from '../../services/api';
+import { decodeJWT } from '../../utils/jwt';
 
 const LoginSignupModal = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
-  const { authenticateWithTokens } = useAuth();
+  const { loginWithGoogle } = useAuth();
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   if (!isOpen) return null;
 
   const handleGoogleSuccess = async (credentialResponse) => {
+    setLoading(true);
+    setError(null);
     try {
-      setError(null);
-      // Send the credential to backend for verification
-      // Note: Update this endpoint if your backend uses a different path
-      const response = await apiService.request('/auth/google', {
-        method: 'POST',
-        body: JSON.stringify({ credential: credentialResponse.credential }),
+      // Decode the JWT credential to get user info
+      const decoded = decodeJWT(credentialResponse.credential);
+
+      if (!decoded) {
+        throw new Error('Failed to decode Google credential');
+      }
+
+      // Extract user information from decoded JWT
+      const email = decoded.email || '';
+      const name = decoded.name || '';
+      const profilePicture = decoded.picture || '';
+      const providerId = decoded.sub || '';
+      const code = credentialResponse.credential; // Using credential as code
+
+      // Use the same loginWithGoogle function as GoogleAuthButton
+      await loginWithGoogle({
+        provider: 'google',
+        code: code,
+        email: email,
+        name: name,
+        profilePicture: profilePicture,
+        providerId: providerId,
       });
 
-      if (response?.token) {
-        await authenticateWithTokens({
-          token: response.token,
-          refreshToken: response.refreshToken,
-        });
-        onClose();
-      } else {
-        setError('Sign in failed. Please try again.');
-      }
+      // Close modal and navigate to dashboard
+      onClose();
+      navigate('/dashboard', { replace: true });
     } catch (error) {
       console.error('Google Sign In error:', error);
-      // If endpoint doesn't exist yet, show a helpful message
-      if (error?.status === 404) {
-        setError('Google sign in is not yet configured. Please use Sign up or Log in.');
-      } else {
-        setError(error?.data?.message || error?.message || 'Sign in failed. Please try again.');
-      }
+      const errorMessage = error?.message || 'Sign in failed. Please try again.';
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -94,6 +105,7 @@ const LoginSignupModal = ({ isOpen, onClose }) => {
             text="signup_with"
             locale="en"
             width="100%"
+            disabled={loading}
           />
         </div>
 

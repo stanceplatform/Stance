@@ -332,6 +332,17 @@ class ApiService {
     return data;
   }
 
+  async updateUserCollege(collegeId) {
+    return this.request('/auth/update-college', {
+      method: 'POST',
+      body: JSON.stringify({ collegeId }),
+    });
+  }
+
+  async getColleges() {
+    return this.request('/institutes', { method: 'GET' });
+  }
+
   // Feedback
   async sendFeedback({ subject, message, type = 'HELP' }) {
     if (!message?.trim()) throw new Error('message is required');
