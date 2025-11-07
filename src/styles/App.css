@@ -109,3 +109,14 @@ textarea {
 .nf-nice-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.5);
 }
+
+/* pill */
+.google-btn .nsm7Bb-HzV7m-LgbsSe.JGcpL-RbRzK {
+  height: 54px;
+  border-radius: 40px;
+}
+/* rectangle */
+.google-btn .nsm7Bb-HzV7m-LgbsSe {
+  height: 54px;
+  border-radius: 8px;
+}

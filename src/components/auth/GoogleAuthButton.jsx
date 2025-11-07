@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { GoogleLogin } from '@react-oauth/google';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import apiService from '../../services/api';
 import { decodeJWT } from '../../utils/jwt';
@@ -8,10 +8,14 @@ import CollegeSelectionModal from './CollegeSelectionModal';
 
 const GoogleAuthButton = ({ mode = 'signup', onError }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { loginWithGoogle } = useAuth();
   const [loading, setLoading] = useState(false);
   const [showCollegeModal, setShowCollegeModal] = useState(false);
   const [pendingAuth, setPendingAuth] = useState(null);
+
+  // Determine shape based on route
+  const shape = location.pathname.includes('/login') ? 'rectangular' : 'pill';
 
   const handleSuccess = async (credentialResponse) => {
     setLoading(true);
@@ -133,15 +137,14 @@ const GoogleAuthButton = ({ mode = 'signup', onError }) => {
   return (
     <>
       <div className="w-full max-w-[360px] mx-auto">
-        <div className="[&>div]:w-full [&>div>div]:w-full [&>div>div]:rounded-[12px] [&>div>div]:shadow-sm">
+        <div className="google-btn [&>div]:w-full [&>div>div]:w-full mb-8">
           <GoogleLogin
             onSuccess={handleSuccess}
             onError={handleError}
             theme="outline"
-            shape="rectangular"
+            shape={shape}
             text={mode === 'signup' ? 'signup_with' : 'signin_with'}
             locale="en"
-            width="100%"
             disabled={loading}
           />
         </div>
