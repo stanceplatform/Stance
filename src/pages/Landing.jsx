@@ -1,6 +1,6 @@
 // pages/Landing.jsx
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import AuthShell from '../components/layouts/AuthShell';
 import Logo from '../components/ui/Logo';
 import CTAButton from '../components/ui/CTAButton';
@@ -8,11 +8,25 @@ import GoogleAuthButton from '../components/auth/GoogleAuthButton';
 import bg from '../assets/bg.svg';
 
 const Landing = () => {
+    const navigate = useNavigate();
+    const location = useLocation();
     const [error, setError] = useState('');
+
+    // Handle back button: if no history, redirect to '/'
+    const handleBack = () => {
+        // In React Router v6, location.key === "default" means first entry (no history)
+        if (location.key === 'default') {
+            navigate('/', { replace: true });
+        } else {
+            navigate(-1);
+        }
+    };
 
     return (
         <AuthShell
             bgImage={bg}
+            showBack
+            onBack={handleBack}
             footer={
                 <div className="py-3 max-w-[300px] mx-auto">
                     <p className="text-center font-inter text-[13px] font-normal leading-[16px] text-[#E9B4FD]">

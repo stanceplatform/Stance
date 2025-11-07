@@ -101,7 +101,7 @@ const LoginSignupModal = ({ isOpen, onClose }) => {
             onSuccess={handleGoogleSuccess}
             onError={handleGoogleError}
             theme="outline"
-            shape="rectangular"
+            shape="pill"
             text="signup_with"
             locale="en"
             width="100%"
