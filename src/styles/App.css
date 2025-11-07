@@ -120,3 +120,17 @@ textarea {
   height: 54px;
   border-radius: 8px;
 }
+
+/* Select dropdown overflow fix */
+select {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Ensure select dropdown options don't overflow */
+select option {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

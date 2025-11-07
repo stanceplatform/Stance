@@ -2,17 +2,13 @@ import React, { useState } from 'react';
 import { GoogleLogin } from '@react-oauth/google';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import apiService from '../../services/api';
 import { decodeJWT } from '../../utils/jwt';
-import CollegeSelectionModal from './CollegeSelectionModal';
 
 const GoogleAuthButton = ({ mode = 'signup', onError }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { loginWithGoogle } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [showCollegeModal, setShowCollegeModal] = useState(false);
-  const [pendingAuth, setPendingAuth] = useState(null);
 
   // Determine shape based on route
   const shape = location.pathname.includes('/login') ? 'rectangular' : 'pill';
@@ -45,47 +41,7 @@ const GoogleAuthButton = ({ mode = 'signup', onError }) => {
         providerId: providerId,
       });
 
-      // COMMENTED OUT: College selection popup logic
-      // Check if user needs to select college (first-time user)
-      // Method 1: Check explicit flag from backend
-      // Method 2: Check if collegeId is missing (null/undefined/empty)
-      // Method 3: Fallback - fetch user data and check collegeId
-      // let needsCollegeSelection = false;
-
-      // if (response?.requiresCollegeSelection === true) {
-      //   // Backend explicitly tells us
-      //   needsCollegeSelection = true;
-      // } else if (response?.collegeId === null || response?.collegeId === undefined || response?.collegeId === '') {
-      //   // Backend returned empty collegeId
-      //   needsCollegeSelection = true;
-      // } else if (response?.token) {
-      //   // Fallback: Fetch user data to check if collegeId exists
-      //   try {
-      //     // Temporarily set token to fetch user data
-      //     apiService.setToken(response.token);
-      //     const userData = await apiService.getMe();
-      //     if (!userData?.collegeId || userData?.collegeId === null || userData?.collegeId === '') {
-      //       needsCollegeSelection = true;
-      //     }
-      //   } catch (err) {
-      //     console.error('Failed to fetch user data:', err);
-      //     // If we can't check, assume it's a first-time user to be safe
-      //     needsCollegeSelection = true;
-      //   }
-      // }
-
-      // if (needsCollegeSelection && response?.token) {
-      //   // Store auth data temporarily and show college selection modal
-      //   setPendingAuth({
-      //     token: response.token,
-      //     refreshToken: response.refreshToken,
-      //   });
-      //   setShowCollegeModal(true);
-      //   setLoading(false);
-      //   return;
-      // }
-
-      // Navigate to dashboard (same as regular login)
+      // Navigation will be handled by ProtectedRoute based on collegeSelected status
       navigate('/dashboard', { replace: true });
     } catch (error) {
       console.error('Google authentication error:', error);
@@ -97,35 +53,6 @@ const GoogleAuthButton = ({ mode = 'signup', onError }) => {
       setLoading(false);
     }
   };
-
-  // COMMENTED OUT: College submission handler
-  // const handleCollegeSubmit = async (collegeId) => {
-  //   setLoading(true);
-  //   try {
-  //     // Update user's college
-  //     await apiService.updateUserCollege(collegeId);
-
-  //     // Now authenticate with the stored tokens
-  //     if (pendingAuth) {
-  //       await authenticateWithTokens({
-  //         token: pendingAuth.token,
-  //         refreshToken: pendingAuth.refreshToken,
-  //       });
-  //       setShowCollegeModal(false);
-  //       setPendingAuth(null);
-  //       navigate('/dashboard', { replace: true });
-  //     }
-  //   } catch (error) {
-  //     console.error('Failed to update college:', error);
-  //     const errorMessage = error?.data?.message || error?.message || 'Failed to update college. Please try again.';
-  //     if (onError) {
-  //       onError(errorMessage);
-  //     }
-  //     setShowCollegeModal(false);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
 
   const handleError = () => {
     const errorMessage = 'Google sign in was unsuccessful';
@@ -149,17 +76,6 @@ const GoogleAuthButton = ({ mode = 'signup', onError }) => {
           />
         </div>
       </div>
-
-      {/* COMMENTED OUT: College selection modal */}
-      {/* <CollegeSelectionModal
-        isOpen={showCollegeModal}
-        onClose={() => {
-          setShowCollegeModal(false);
-          setPendingAuth(null);
-        }}
-        onSubmit={handleCollegeSubmit}
-        loading={loading}
-      /> */}
     </>
   );
 };

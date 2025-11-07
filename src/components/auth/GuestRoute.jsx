@@ -4,16 +4,21 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
 const GuestRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, user, loading } = useAuth();
 
   // wait until AuthContext has finished initializing
   if (loading) {
     return <div className="text-center text-white">Checking session…</div>;
   }
 
-  // already logged in -> go to dashboard (root)
+  // already logged in -> redirect based on collegeSelected status
   if (isAuthenticated) {
-    return <Navigate to="/" replace />;
+    // If collegeSelected is false or missing, redirect to select-college page
+    if (user && user.collegeSelected !== true) {
+      return <Navigate to="/select-college" replace />;
+    }
+    // Otherwise, go to dashboard
+    return <Navigate to="/dashboard" replace />;
   }
 
   // not logged in -> show the page

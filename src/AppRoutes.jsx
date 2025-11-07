@@ -22,6 +22,9 @@ import ForgotPassword from './pages/ForgotPassword';
 import SuggestQuestion from './pages/SuggestQuestion';
 import ReportQuestion from './pages/ReportQuestion';
 import Terms from './pages/Terms';
+import SelectCollege from './pages/SelectCollege';
+import SelectCollegeRoute from './components/auth/SelectCollegeRoute';
+import RootRoute from './components/auth/RootRoute';
 
 const AppRoutes = () => {
     return (
@@ -29,10 +32,14 @@ const AppRoutes = () => {
             <AuthProvider>
                 <Router>
                     <Routes>
-                        {/* Dashboard - accessible without login */}
+                        {/* Root route - redirects to /select-college if authenticated but collegeSelected is false */}
                         <Route
                             path="/"
-                            element={<Dashboard />}
+                            element={
+                                <RootRoute>
+                                    <Dashboard />
+                                </RootRoute>
+                            }
                         />
 
                         {/* Guest-only */}
@@ -66,6 +73,16 @@ const AppRoutes = () => {
                                 <GuestRoute>
                                     <Signup />
                                 </GuestRoute>
+                            }
+                        />
+
+                        {/* Select College - accessible when authenticated but collegeSelected is false */}
+                        <Route
+                            path="/select-college"
+                            element={
+                                <SelectCollegeRoute>
+                                    <SelectCollege />
+                                </SelectCollegeRoute>
                             }
                         />
 
