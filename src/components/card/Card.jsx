@@ -9,6 +9,8 @@ import CardNavigation from './CardNavigation'
 import QuestionSection from './QuestionSection'
 import { useCurrentQuestion } from '../../context/CurrentQuestionContext'
 import ShareStanceThanks from '../thankyou/ShareStanceThanks'
+import { useAuth } from '../../context/AuthContext'
+import LoginSignupModal from '../auth/LoginSignupModal'
 
 const SWIPE_THRESHOLD = 60;           // px needed to trigger a swipe
 const ANGLE_GUARD = 0.6;              // require mostly-horizontal: |dx| > 0.6*|dy|
@@ -21,7 +23,9 @@ const Card = () => {
   const [direction, setDirection] = useState('next')
   const [showSuggestQuestion, setShowSuggestQuestion] = useState(false)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+  const [showLoginModal, setShowLoginModal] = useState(false)
   const { setQuestionId } = useCurrentQuestion()
+  const { isAuthenticated } = useAuth()
 
   // swipe state (touch/pointer)
   const startX = useRef(0)
@@ -80,10 +84,18 @@ const Card = () => {
       setCurrentQuestionIndex(0)
       return
     }
+    
+    // Check if user is authenticated before any navigation
+    if (!isAuthenticated) {
+      setShowLoginModal(true)
+      return
+    }
+    
     if (currentQuestionIndex === questions.length - 1) {
       setShowSuggestQuestion(true)
       return
     }
+    
     goToIndex(currentQuestionIndex + 1, 'next')
   }
 
@@ -93,10 +105,18 @@ const Card = () => {
       setCurrentQuestionIndex(questions.length - 1)
       return
     }
+    
+    // Check if user is authenticated before any navigation
+    if (!isAuthenticated) {
+      setShowLoginModal(true)
+      return
+    }
+    
     if (currentQuestionIndex === 0) {
       setShowSuggestQuestion(true)
       return
     }
+    
     goToIndex(currentQuestionIndex - 1, 'prev')
   }
 
@@ -229,6 +249,12 @@ const Card = () => {
       ) : (
         <ThankYou />
       )}
+      
+      {/* Login/Signup Modal for navigation */}
+      <LoginSignupModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+      />
     </div>
   )
 }
