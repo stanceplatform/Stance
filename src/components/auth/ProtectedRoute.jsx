@@ -17,9 +17,9 @@ const ProtectedRoute = ({ children }) => {
     }
 
     // If authenticated but collegeSelected is false or missing, redirect to select-college page
-    // if (isAuthenticated && user && user.collegeSelected !== true) {
-    //     return <Navigate to="/select-college" replace state={{ from: location }} />;
-    // }
+    if (isAuthenticated && user && user.collegeSelected !== true) {
+        return <Navigate to="/select-college" replace state={{ from: location }} />;
+    }
 
     return children;
 };

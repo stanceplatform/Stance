@@ -333,8 +333,8 @@ class ApiService {
   }
 
   async updateUserCollege(collegeId) {
-    return this.request('/auth/update-college', {
-      method: 'POST',
+    return this.request('/auth/college', {
+      method: 'PUT',
       body: JSON.stringify({ collegeId }),
     });
   }

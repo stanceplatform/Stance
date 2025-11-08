@@ -16,9 +16,9 @@ const RootRoute = ({ children }) => {
   }
 
   // If authenticated but collegeSelected is false or missing, redirect to select-college
-  // if (isAuthenticated && user && user.collegeSelected !== true) {
-  //   return <Navigate to="/select-college" replace />;
-  // }
+  if (isAuthenticated && user && user.collegeSelected !== true) {
+    return <Navigate to="/select-college" replace />;
+  }
 
   // Otherwise, show the children (Dashboard)
   return children;
