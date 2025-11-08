@@ -31,6 +31,7 @@ const GoogleSignIn = () => {
         <GoogleLogin
           onSuccess={handleSuccess}
           onError={handleError}
+          useOneTap={false}
           theme="filled_blue"
           shape="rectangular"
           text="signin_with"

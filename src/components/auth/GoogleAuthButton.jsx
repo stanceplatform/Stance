@@ -68,6 +68,7 @@ const GoogleAuthButton = ({ mode = 'signup', onError }) => {
           <GoogleLogin
             onSuccess={handleSuccess}
             onError={handleError}
+            useOneTap={false}
             theme="outline"
             shape={shape}
             text={mode === 'signup' ? 'signup_with' : 'signin_with'}
