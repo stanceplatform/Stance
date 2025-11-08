@@ -104,7 +104,8 @@ const LoginSignupModal = ({ isOpen, onClose }) => {
             shape="pill"
             text="signup_with"
             locale="en"
-            width="100%"
+            width={340}
+            height={54}
             disabled={loading}
           />
         </div>
