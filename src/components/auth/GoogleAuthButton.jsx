@@ -74,6 +74,7 @@ const GoogleAuthButton = ({ mode = 'signup', onError }) => {
             text={mode === 'signup' ? 'signup_with' : 'signin_with'}
             locale="en"
             disabled={loading}
+            width={360}
           />
         </div>
       </div>

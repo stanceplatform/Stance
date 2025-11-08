@@ -14,9 +14,9 @@ const GuestRoute = ({ children }) => {
   // already logged in -> redirect based on collegeSelected status
   if (isAuthenticated) {
     // If collegeSelected is false or missing, redirect to select-college page
-    if (user && user.collegeSelected !== true) {
-      return <Navigate to="/select-college" replace />;
-    }
+    // if (user && user.collegeSelected !== true) {
+    //   return <Navigate to="/select-college" replace />;
+    // }
     // Otherwise, go to dashboard
     return <Navigate to="/dashboard" replace />;
   }
