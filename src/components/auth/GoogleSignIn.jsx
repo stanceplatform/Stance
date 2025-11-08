@@ -12,11 +12,6 @@ const GoogleSignIn = () => {
 
   const handleSuccess = async (credentialResponse) => {
     try {
-      // Here you would typically send the credential to your backend
-      // to verify and create/update the user session
-      console.log('Google Sign In successful:', credentialResponse);
-      
-      // For now, we'll just set the user as authenticated
       login();
       navigate('/dashboard');
     } catch (error) {
