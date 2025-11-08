@@ -75,6 +75,7 @@ const GoogleAuthButton = ({ mode = 'signup', onError }) => {
             locale="en"
             disabled={loading}
             width={360}
+            height={54}
           />
         </div>
       </div>
