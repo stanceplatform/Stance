@@ -55,7 +55,7 @@ const RequestInvite = () => {
           >
             <CTAButton as="div" variant="secondary">
               <span className="font-inter font-[500] text-[18px] leading-[32px] tracking-[0.88px]">
-                {loading ? 'Requesting…' : 'Request Invite'}
+                {loading ? 'Sending…' : 'Send Verification Link'}
               </span>
             </CTAButton>
           </button>

@@ -77,7 +77,7 @@ const Landing = () => {
                             variant="secondary"
                         >
                             <span className="font-inter font-[500] text-[18px] leading-[32px] tracking-[0.88px] text-white">
-                                Request Invite
+                                Sign up
                             </span>
                         </CTAButton>
                     </Link>
