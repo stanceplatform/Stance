@@ -1,14 +1,18 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../../context/AuthContext';
 import { decodeJWT } from '../../utils/jwt';
 
 const LoginSignupModal = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { loginWithGoogle } = useAuth();
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  // Get questionid from URL query params
+  const questionid = new URLSearchParams(location.search).get('questionid');
 
   if (!isOpen) return null;
 
@@ -40,9 +44,16 @@ const LoginSignupModal = ({ isOpen, onClose }) => {
         providerId: providerId,
       });
 
-      // Close modal and navigate home
+      // Close modal and navigate to /?questionid=XXX if questionid exists
       onClose();
-      navigate('/', { replace: true });
+      // Get questionid from URL or sessionStorage
+      const redirectQuestionId = questionid || sessionStorage.getItem('redirectQuestionId');
+      if (redirectQuestionId) {
+        sessionStorage.removeItem('redirectQuestionId');
+        navigate(`/?questionid=${redirectQuestionId}`, { replace: true });
+      } else {
+        navigate('/', { replace: true });
+      }
     } catch (error) {
       console.error('Google Sign In error:', error);
       const errorMessage = error?.message || 'Sign in failed. Please try again.';
@@ -58,12 +69,22 @@ const LoginSignupModal = ({ isOpen, onClose }) => {
 
   const handleSignupClick = () => {
     onClose();
-    navigate('/auth');
+    // Store questionid in sessionStorage for later retrieval
+    if (questionid) {
+      sessionStorage.setItem('redirectQuestionId', questionid);
+    }
+    const queryString = questionid ? `?questionid=${questionid}` : '';
+    navigate(`/auth${queryString}`);
   };
 
   const handleLoginClick = () => {
     onClose();
-    navigate('/login');
+    // Store questionid in sessionStorage for later retrieval
+    if (questionid) {
+      sessionStorage.setItem('redirectQuestionId', questionid);
+    }
+    const queryString = questionid ? `?questionid=${questionid}` : '';
+    navigate(`/login${queryString}`);
   };
 
   return (

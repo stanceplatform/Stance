@@ -1,6 +1,6 @@
 // src/components/auth/RootRoute.jsx
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
 /**
@@ -10,13 +10,19 @@ import { useAuth } from '../../context/AuthContext';
  */
 const RootRoute = ({ children }) => {
   const { isAuthenticated, user, loading } = useAuth();
+  const location = useLocation();
 
   if (loading) {
     return <div className="text-center text-white">Checking session…</div>;
   }
 
   // If authenticated but collegeSelected is false or missing, redirect to select-college
+  // Preserve questionid in sessionStorage if it exists in URL
   if (isAuthenticated && user && user.collegeSelected !== true) {
+    const questionid = new URLSearchParams(location.search).get('questionid');
+    if (questionid) {
+      sessionStorage.setItem('redirectQuestionId', questionid);
+    }
     return <Navigate to="/select-college" replace />;
   }
 

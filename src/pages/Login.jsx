@@ -1,6 +1,6 @@
 // pages/Login.jsx
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import AuthShell from '../components/layouts/AuthShell';
 import Logo from '../components/ui/Logo';
 import CTAButton from '../components/ui/CTAButton';
@@ -11,6 +11,7 @@ import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [form, setForm] = useState({ usernameOrEmail: '', password: '' });
   const [err, setErr] = useState('');
   const { login, loading } = useAuth();
@@ -29,8 +30,14 @@ const Login = () => {
     }
     try {
       await login(form);
-      const to = location.state?.from?.pathname || '/';
-      navigate(to, { replace: true });
+      // Get questionid from URL query params or sessionStorage and redirect to /?questionid=XXX
+      const questionid = searchParams.get('questionid') || sessionStorage.getItem('redirectQuestionId');
+      if (questionid) {
+        sessionStorage.removeItem('redirectQuestionId');
+        navigate(`/?questionid=${questionid}`, { replace: true });
+      } else {
+        navigate('/', { replace: true });
+      }
     } catch (error) {
       // This will now show the exact API error message
       setErr(error.message || 'Login failed');

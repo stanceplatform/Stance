@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useCurrentQuestion } from "../../context/CurrentQuestionContext";
 
@@ -14,8 +14,12 @@ const Header = ({
   const [open, setOpen] = useState(false);
   const menuRef = useRef(null);
   const navigate = useNavigate();
+  const location = useLocation();
   const { logout, user, isAuthenticated } = useAuth()
   const { questionId } = useCurrentQuestion();
+
+  // Get questionid from URL query params
+  const questionIdFromUrl = new URLSearchParams(location.search).get('questionid');
 
   useEffect(() => {
     const handler = (e) => {
@@ -202,6 +206,7 @@ const Header = ({
                         onClick={() => {
                           logout();
                           setOpen(false);
+                          window.location.reload();
                         }}
                       >
                         <span className="text-lg"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -218,14 +223,30 @@ const Header = ({
             <>
               {/* Sign up button */}
               <button
-                onClick={() => navigate("/auth")}
+                onClick={() => {
+                  const questionid = questionIdFromUrl || questionId;
+                  // Store questionid in sessionStorage for later retrieval
+                  if (questionid) {
+                    sessionStorage.setItem('redirectQuestionId', questionid);
+                  }
+                  const queryString = questionid ? `?questionid=${questionid}` : '';
+                  navigate(`/auth${queryString}`);
+                }}
                 className="px-3 py-1.5 rounded-full text-[#9105C6] bg-white font-inter font-semibold text-sm hover:text-[#7A0499] transition-colors"
               >
                 Sign up
               </button>
               {/* Log in button */}
               <button
-                onClick={() => navigate("/login")}
+                onClick={() => {
+                  const questionid = questionIdFromUrl || questionId;
+                  // Store questionid in sessionStorage for later retrieval
+                  if (questionid) {
+                    sessionStorage.setItem('redirectQuestionId', questionid);
+                  }
+                  const queryString = questionid ? `?questionid=${questionid}` : '';
+                  navigate(`/login${queryString}`);
+                }}
                 className="px-4 py-2 rounded-full bg-transparent text-[#F0E224] font-inter font-medium text-sm hover:bg-white/10 transition-colors"
               >
                 Log in

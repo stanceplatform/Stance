@@ -41,8 +41,14 @@ const GoogleAuthButton = ({ mode = 'signup', onError }) => {
         providerId: providerId,
       });
 
-      // Navigation will be handled by ProtectedRoute based on collegeSelected status
-      navigate('/', { replace: true });
+      // Get questionid from URL query params or sessionStorage and redirect to /?questionid=XXX
+      const questionid = new URLSearchParams(location.search).get('questionid') || sessionStorage.getItem('redirectQuestionId');
+      if (questionid) {
+        sessionStorage.removeItem('redirectQuestionId');
+        navigate(`/?questionid=${questionid}`, { replace: true });
+      } else {
+        navigate('/', { replace: true });
+      }
     } catch (error) {
       console.error('Google authentication error:', error);
       const errorMessage = error?.message || 'Google authentication failed. Please try again.';

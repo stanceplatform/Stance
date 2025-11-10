@@ -66,8 +66,14 @@ const SelectCollege = () => {
 
       toast.success('College added successfully');
 
-      // Navigate to dashboard
-      navigate('/', { replace: true });
+      // Navigate to dashboard, preserving questionid if it exists in sessionStorage
+      const questionid = sessionStorage.getItem('redirectQuestionId');
+      if (questionid) {
+        sessionStorage.removeItem('redirectQuestionId');
+        navigate(`/?questionid=${questionid}`, { replace: true });
+      } else {
+        navigate('/', { replace: true });
+      }
     } catch (err) {
       console.error('Failed to update college:', err);
       const errorMessage = getApiErrorMessage(err);
