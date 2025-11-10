@@ -181,6 +181,24 @@ class ApiService {
     return this.request(`/questions/list?page=${page}&size=${size}&sort=${sort}`);
   }
 
+  // Public questions endpoint (no authentication required)
+  async getQuestionsPublic(page = 0, size = 10) {
+    // Make request without Authorization header
+    const url = `${this.baseURL}/questions?page=${page}&size=${size}`;
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        accept: '*/*',
+      },
+    });
+    const data = await this._parseResponse(response);
+    if (!response.ok) {
+      throw { status: response.status, data: data.parsed };
+    }
+    return data.parsed;
+  }
+
   async voteOnQuestion(questionId, answerOptionId) {
     return this.request(`/questions/${questionId}/vote`, {
       method: 'POST',
@@ -296,6 +314,36 @@ class ApiService {
   async getMe() {
     // GET /auth/me
     return this.request('/auth/me', { method: 'GET' });
+  }
+
+  async oauth2Callback({ provider, code, email, name, profilePicture, providerId }) {
+    const data = await this.request('/auth/oauth2/callback', {
+      method: 'POST',
+      body: JSON.stringify({ provider, code, email, name, profilePicture, providerId }),
+    });
+
+    if (data?.token) this.setToken(data.token);
+    if (data?.refreshToken) this.setRefreshToken(data.refreshToken);
+
+    if (data?.id || data?.email || data?.username) {
+      localStorage.setItem('user', JSON.stringify({ id: data.id, email: data.email, username: data.username }));
+    }
+
+    return data;
+  }
+
+  async updateUserCollege(collegeId) {
+    return this.request('/auth/college', {
+      method: 'PUT',
+      body: JSON.stringify({ collegeId }),
+    });
+  }
+
+  async getColleges() {
+    const data = await this.request('/waitlist/institutes', { method: 'GET' });
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data?.institutes)) return data.institutes;
+    return [];
   }
 
   // Feedback

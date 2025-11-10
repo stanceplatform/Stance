@@ -2,6 +2,11 @@ import apiService from './api.js';
 import { toast } from 'react-hot-toast';
 import { getApiErrorMessage } from '../utils/apiError';
 
+// Helper to check if user is authenticated
+const isAuthenticated = () => {
+  return !!localStorage.getItem('authToken');
+};
+
 // Fallback to local data
 const loadFallbackData = async () => {
   try {
@@ -15,10 +20,53 @@ const loadFallbackData = async () => {
   }
 };
 
+// Transform public API response to match expected format
+const transformPublicQuestions = (apiResponse) => {
+  if (!apiResponse?.content) return [];
+
+  return apiResponse.content.map((q) => {
+    // Transform from API format to frontend format
+    const question = {
+      id: q.id,
+      question: q.text,
+      backgroundImageUrl: q.backgroundImage,
+      commentCount: q.commentCount || 0,
+      answerOptions: [
+        {
+          id: 1, // Assuming Yes is option 1
+          value: 'Yes',
+          votes: q.yesVotes || 0,
+          percentage: q.yesVotes && q.noVotes ?
+            ((q.yesVotes / (q.yesVotes + q.noVotes)) * 100).toFixed(1) : '0'
+        },
+        {
+          id: 2, // Assuming No is option 2
+          value: 'No',
+          votes: q.noVotes || 0,
+          percentage: q.yesVotes && q.noVotes ?
+            ((q.noVotes / (q.yesVotes + q.noVotes)) * 100).toFixed(1) : '0'
+        }
+      ],
+      userResponse: q.userVote ? {
+        answered: true,
+        selectedOptionId: q.userVote
+      } : null
+    };
+    return question;
+  });
+};
+
 export const fetchAllCards = async () => {
   try {
-    const response = await apiService.getQuestionsResponse(0, 10, 'DESC');
-    return response || [];
+    if (isAuthenticated()) {
+      // Use authenticated endpoint
+      const response = await apiService.getQuestionsResponse(0, 10, 'DESC');
+      return response || [];
+    } else {
+      // Use public endpoint
+      const response = await apiService.getQuestionsPublic(0, 10);
+      return transformPublicQuestions(response) || [];
+    }
   } catch (error) {
     console.error('API fetch failed, using fallback:', error);
     toast.error(getApiErrorMessage(error));
@@ -39,6 +87,11 @@ export const fetchOpinions = async () => {
 };
 
 export const fetchCardComments = async (questionId) => {
+  // Don't fetch comments if user is not authenticated
+  if (!isAuthenticated()) {
+    return [];
+  }
+
   try {
     const response = await apiService.getComments(questionId);
     return response.content || [];

@@ -1,19 +1,36 @@
 // pages/Landing.jsx
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import AuthShell from '../components/layouts/AuthShell';
 import Logo from '../components/ui/Logo';
 import CTAButton from '../components/ui/CTAButton';
+import GoogleAuthButton from '../components/auth/GoogleAuthButton';
 import bg from '../assets/bg.svg';
 
 const Landing = () => {
+    const navigate = useNavigate();
+    const location = useLocation();
+    const [error, setError] = useState('');
+
+    // Handle back button: if no history, redirect to '/'
+    const handleBack = () => {
+        // In React Router v6, location.key === "default" means first entry (no history)
+        if (location.key === 'default') {
+            navigate('/', { replace: true });
+        } else {
+            navigate(-1);
+        }
+    };
+
     return (
         <AuthShell
             bgImage={bg}
+            showBack
+            onBack={handleBack}
             footer={
                 <div className="py-3 max-w-[300px] mx-auto">
                     <p className="text-center font-inter text-[13px] font-normal leading-[16px] text-[#E9B4FD]">
-                        By proceeding, I agree to Stance’s{' '}
+                        By proceeding, I agree to Stance's{' '}
                         <br />
                         <Link to="/terms-conditions" className="underline">
                             Terms & Conditions
@@ -48,6 +65,11 @@ const Landing = () => {
                     </Link>
                 </div>
 
+                {/* Google Sign up button */}
+                <div className="mb-5">
+                    <GoogleAuthButton mode="signup" onError={setError} />
+                </div>
+
                 <div>
                     <Link to="/request-invite" className="no-underline">
                         <CTAButton
@@ -55,7 +77,7 @@ const Landing = () => {
                             variant="secondary"
                         >
                             <span className="font-inter font-[500] text-[18px] leading-[32px] tracking-[0.88px] text-white">
-                                Request Invite
+                                Sign up
                             </span>
                         </CTAButton>
                     </Link>
@@ -69,6 +91,12 @@ const Landing = () => {
                         Forgot password?
                     </Link>
                 </div>
+
+                {error && (
+                    <div className="mt-3 text-center text-[14px] text-red-200">
+                        {error}
+                    </div>
+                )}
             </div>
         </AuthShell>
     );

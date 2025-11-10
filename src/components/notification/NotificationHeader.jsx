@@ -12,7 +12,7 @@ function NotifHeader() {
     if (canGoBack) {
       navigate(-1);
     } else {
-      navigate('/dashboard', { replace: true });
+      navigate('/', { replace: true });
     }
   };
 

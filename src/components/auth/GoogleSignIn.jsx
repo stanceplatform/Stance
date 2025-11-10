@@ -12,13 +12,8 @@ const GoogleSignIn = () => {
 
   const handleSuccess = async (credentialResponse) => {
     try {
-      // Here you would typically send the credential to your backend
-      // to verify and create/update the user session
-      console.log('Google Sign In successful:', credentialResponse);
-      
-      // For now, we'll just set the user as authenticated
       login();
-      navigate('/dashboard');
+      navigate('/');
     } catch (error) {
       console.error('Google Sign In error:', error);
       setError('Sign in Failed, please try again');
@@ -36,7 +31,7 @@ const GoogleSignIn = () => {
         <GoogleLogin
           onSuccess={handleSuccess}
           onError={handleError}
-          useOneTap
+          useOneTap={false}
           theme="filled_blue"
           shape="rectangular"
           text="signin_with"
