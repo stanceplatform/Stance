@@ -340,7 +340,10 @@ class ApiService {
   }
 
   async getColleges() {
-    return this.request('/institutes', { method: 'GET' });
+    const data = await this.request('/waitlist/institutes', { method: 'GET' });
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data?.institutes)) return data.institutes;
+    return [];
   }
 
   // Feedback

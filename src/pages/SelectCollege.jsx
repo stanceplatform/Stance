@@ -1,11 +1,13 @@
 // pages/SelectCollege.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import AuthShell from '../components/layouts/AuthShell';
 import Logo from '../components/ui/Logo';
 import CTAButton from '../components/ui/CTAButton';
 import apiService from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { getApiErrorMessage } from '../utils/apiError';
 import bg from '../assets/bg.svg';
 
 const SelectCollege = () => {
@@ -49,7 +51,8 @@ const SelectCollege = () => {
     setError('');
 
     if (!selectedCollege) {
-      setError('Please select a college');
+      const validationMessage = 'Please select a college';
+      setError(validationMessage);
       return;
     }
 
@@ -61,12 +64,15 @@ const SelectCollege = () => {
       // Refresh user data to get updated collegeSelected status
       await fetchMe();
 
+      toast.success('College added successfully');
+
       // Navigate to dashboard
       navigate('/dashboard', { replace: true });
     } catch (err) {
       console.error('Failed to update college:', err);
-      const errorMessage = err?.data?.message || err?.message || 'Failed to update college. Please try again.';
+      const errorMessage = getApiErrorMessage(err);
       setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -90,7 +96,8 @@ const SelectCollege = () => {
               setSelectedCollege(e.target.value);
               setError('');
             }}
-            className="w-full px-4 py-3 h-[56px] rounded-[16px] border-2 border-dashed border-white/80 bg-white/95 backdrop-blur-sm text-[#121212] focus:outline-none focus:border-[#F0E224] focus:ring-2 focus:ring-[#F0E224]/30 appearance-none cursor-pointer font-inter text-[16px] leading-[24px] shadow-lg transition-all duration-200 hover:border-white hover:bg-white"
+            className={`w-full px-4 py-3 h-[56px] rounded-[16px] border-2 border-dashed bg-white/95 backdrop-blur-sm text-[#121212] focus:outline-none focus:ring-2 focus:ring-[#F0E224]/30 appearance-none cursor-pointer font-inter text-[16px] leading-[24px] shadow-lg transition-all duration-200 hover:border-white hover:bg-white ${error ? 'border-red-300 focus:border-red-300' : 'border-white/80 focus:border-[#F0E224]'
+              }`}
             disabled={loading}
             style={{
               backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 12 12'%3E%3Cpath fill='%23121212' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
@@ -117,7 +124,7 @@ const SelectCollege = () => {
             as="button"
             type="submit"
             variant="primary"
-            disabled={loading || !selectedCollege}
+            disabled={loading}
           >
             <span className="font-inter font-[500] text-[18px] leading-[32px] tracking-[0.88px] text-[#5B037C]">
               {loading ? 'Submitting...' : 'Continue'}
