@@ -25,6 +25,7 @@ import Terms from './pages/Terms';
 import SelectCollege from './pages/SelectCollege';
 import SelectCollegeRoute from './components/auth/SelectCollegeRoute';
 import RootRoute from './components/auth/RootRoute';
+import NotFound from './pages/NotFound';
 
 const AppRoutes = () => {
     return (
@@ -145,9 +146,26 @@ const AppRoutes = () => {
                             path="/terms-conditions"
                             element={<Terms />}
                         />
-                        <Route path="/forgot-password" element={<ForgotPassword />} />
-                        <Route path="/reset-password" element={<ResetPassword />} />
-                        <Route path="/thankyou" element={<ThankYou />} />
+                        <Route
+                            path="/forgot-password"
+                            element={
+                                <GuestRoute>
+                                    <ForgotPassword />
+                                </GuestRoute>
+                            }
+                        />
+                        <Route
+                            path="/reset-password"
+                            element={
+                                <GuestRoute>
+                                    <ResetPassword />
+                                </GuestRoute>
+                            }
+                        />
+                        <Route
+                            path="*"
+                            element={<NotFound />}
+                        />
                     </Routes>
                 </Router>
             </AuthProvider>
