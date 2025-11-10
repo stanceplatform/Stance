@@ -1,6 +1,7 @@
 // Card.jsx
 import { motion } from 'framer-motion'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useLocation, useSearchParams } from 'react-router-dom'
 import { fetchAllCards } from '../../services/operations'
 import { useApi } from '../../hooks/useApi'
 
@@ -26,6 +27,28 @@ const Card = () => {
   const [showLoginModal, setShowLoginModal] = useState(false)
   const { setQuestionId } = useCurrentQuestion()
   const { isAuthenticated } = useAuth()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const location = useLocation()
+
+  const questionIdParam = useMemo(() => {
+    try {
+      return new URLSearchParams(location.search).get('questionid')
+    } catch {
+      return null
+    }
+  }, [location.search])
+
+  const setQuestionSearchParam = useCallback((id, options = { replace: true }) => {
+    setSearchParams(prev => {
+      const params = new URLSearchParams(prev)
+      if (id != null) {
+        params.set('questionid', String(id))
+      } else {
+        params.delete('questionid')
+      }
+      return params
+    }, options)
+  }, [setSearchParams])
 
   // swipe state (touch/pointer)
   const startX = useRef(0)
@@ -75,6 +98,12 @@ const Card = () => {
       setCurrentQuestionIndex(newIndex)
       setNextBackgroundImage(null)
       blocked.current = false
+      const nextId = questions[newIndex]?.id
+      if (nextId != null) {
+        setQuestionSearchParam(nextId)
+      } else {
+        setQuestionSearchParam(null)
+      }
     }, 150) // keep your quick transition
   }
 
@@ -82,20 +111,26 @@ const Card = () => {
     if (showSuggestQuestion) {
       setShowSuggestQuestion(false)
       setCurrentQuestionIndex(0)
+      const firstId = questions[0]?.id
+      if (firstId != null) {
+        setQuestionSearchParam(firstId)
+      } else {
+        setQuestionSearchParam(null)
+      }
       return
     }
-    
+
     // Check if user is authenticated before any navigation
     if (!isAuthenticated) {
       setShowLoginModal(true)
       return
     }
-    
+
     if (currentQuestionIndex === questions.length - 1) {
       setShowSuggestQuestion(true)
       return
     }
-    
+
     goToIndex(currentQuestionIndex + 1, 'next')
   }
 
@@ -103,20 +138,26 @@ const Card = () => {
     if (showSuggestQuestion) {
       setShowSuggestQuestion(false)
       setCurrentQuestionIndex(questions.length - 1)
+      const lastId = questions[questions.length - 1]?.id
+      if (lastId != null) {
+        setQuestionSearchParam(lastId)
+      } else {
+        setQuestionSearchParam(null)
+      }
       return
     }
-    
+
     // Check if user is authenticated before any navigation
     if (!isAuthenticated) {
       setShowLoginModal(true)
       return
     }
-    
+
     if (currentQuestionIndex === 0) {
       setShowSuggestQuestion(true)
       return
     }
-    
+
     goToIndex(currentQuestionIndex - 1, 'prev')
   }
 
@@ -188,6 +229,53 @@ const Card = () => {
     }
   }, [questionsData]);
 
+  useEffect(() => {
+    if (!questions.length) return
+
+    const currentId = questions[currentQuestionIndex]?.id
+
+    if (questionIdParam) {
+      const targetIndex = questions.findIndex(q => String(q.id) === questionIdParam)
+      if (targetIndex !== -1) {
+        if (
+          showSuggestQuestion &&
+          questionIdParam !== String(currentId ?? '')
+        ) {
+          setShowSuggestQuestion(false)
+        }
+        if (targetIndex !== currentQuestionIndex) {
+          setCurrentQuestionIndex(targetIndex)
+          const targetId = questions[targetIndex]?.id
+          if (targetId != null && questionIdParam !== String(targetId)) {
+            setQuestionSearchParam(targetId)
+          }
+        }
+        return
+      }
+    }
+
+    const fallbackId = questions[0]?.id
+    if (fallbackId != null) {
+      if (showSuggestQuestion) {
+        setShowSuggestQuestion(false)
+      }
+      if (currentQuestionIndex !== 0) {
+        setCurrentQuestionIndex(0)
+      }
+      if (questionIdParam !== String(fallbackId)) {
+        setQuestionSearchParam(fallbackId)
+      }
+    } else {
+      setQuestionSearchParam(null)
+    }
+  }, [
+    questionIdParam,
+    questions,
+    currentQuestionIndex,
+    showSuggestQuestion,
+    setQuestionSearchParam,
+  ])
+
 
   return (
     <div className="flex overflow-hidden flex-col mx-auto w-full max-w-[480px] max-h-screen-dvh relative">
@@ -249,7 +337,7 @@ const Card = () => {
       ) : (
         <ThankYou />
       )}
-      
+
       {/* Login/Signup Modal for navigation */}
       <LoginSignupModal
         isOpen={showLoginModal}
