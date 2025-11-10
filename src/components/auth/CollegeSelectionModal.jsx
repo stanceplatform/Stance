@@ -22,16 +22,6 @@ const CollegeSelectionModal = ({ isOpen, onClose, onSubmit, loading: externalLoa
     } catch (err) {
       console.error('Failed to fetch colleges:', err);
       setError('Failed to load colleges. Please try again.');
-      // Fallback to hardcoded list if API fails
-      setColleges([
-        { id: '1', name: 'NITK - National Institute of Technology Karnataka, Surathkal' },
-        { id: '2', name: 'Ramjas College' },
-        { id: '3', name: 'SRCC - Shri Ram College of Commerce' },
-        { id: '4', name: 'JGU - O P Jindal Global University' },
-        { id: '5', name: 'LSR - Lady Shri Ram College' },
-        { id: '6', name: 'IIT Delhi - Indian Institute of Technology Delhi' },
-        { id: '7', name: 'Others' },
-      ]);
     } finally {
       setLoading(false);
     }
