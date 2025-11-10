@@ -39,7 +39,7 @@ export default function ShareStanceThanks({
     if (onNext) return onNext();
     // Fallback: go to dashboard first question
     window.dispatchEvent(new CustomEvent("stance:reset-first"));
-    navigate("/dashboard", { replace: true });
+    navigate("/", { replace: true });
   };
 
   const handlePrevious = () => {

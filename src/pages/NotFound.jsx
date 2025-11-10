@@ -12,7 +12,7 @@ const NotFound = () => {
 
   const handleGoHome = () => {
     if (isAuthenticated) {
-      navigate('/dashboard', { replace: true });
+      navigate('/', { replace: true });
     } else {
       navigate('/auth', { replace: true });
     }

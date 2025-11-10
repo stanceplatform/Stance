@@ -42,7 +42,7 @@ const GoogleAuthButton = ({ mode = 'signup', onError }) => {
       });
 
       // Navigation will be handled by ProtectedRoute based on collegeSelected status
-      navigate('/dashboard', { replace: true });
+      navigate('/', { replace: true });
     } catch (error) {
       console.error('Google authentication error:', error);
       const errorMessage = error?.message || 'Google authentication failed. Please try again.';

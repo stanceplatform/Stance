@@ -89,14 +89,6 @@ const AppRoutes = () => {
 
                         {/* Auth-required */}
                         <Route
-                            path="/dashboard"
-                            element={
-                                <ProtectedRoute>
-                                    <Dashboard />
-                                </ProtectedRoute>
-                            }
-                        />
-                        <Route
                             path="/send-invite"
                             element={
                                 <ProtectedRoute>

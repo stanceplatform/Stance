@@ -17,8 +17,8 @@ const GuestRoute = ({ children }) => {
     if (user && user.collegeSelected !== true) {
       return <Navigate to="/select-college" replace />;
     }
-    // Otherwise, go to dashboard
-    return <Navigate to="/dashboard" replace />;
+    // Otherwise, go to home (dashboard)
+    return <Navigate to="/" replace />;
   }
 
   // not logged in -> show the page

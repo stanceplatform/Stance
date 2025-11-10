@@ -40,9 +40,9 @@ const LoginSignupModal = ({ isOpen, onClose }) => {
         providerId: providerId,
       });
 
-      // Close modal and navigate to dashboard
+      // Close modal and navigate home
       onClose();
-      navigate('/dashboard', { replace: true });
+      navigate('/', { replace: true });
     } catch (error) {
       console.error('Google Sign In error:', error);
       const errorMessage = error?.message || 'Sign in failed. Please try again.';

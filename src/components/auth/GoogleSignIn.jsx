@@ -13,7 +13,7 @@ const GoogleSignIn = () => {
   const handleSuccess = async (credentialResponse) => {
     try {
       login();
-      navigate('/dashboard');
+      navigate('/');
     } catch (error) {
       console.error('Google Sign In error:', error);
       setError('Sign in Failed, please try again');

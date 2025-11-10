@@ -9,7 +9,7 @@ const HeaderSecondary = ({ onBack }) => {
     if (window.history.length > 1) {
       navigate(-1);
     } else {
-      navigate("/dashboard", { replace: true });
+      navigate("/", { replace: true });
     }
   };
 

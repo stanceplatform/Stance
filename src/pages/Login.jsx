@@ -29,7 +29,7 @@ const Login = () => {
     }
     try {
       await login(form);
-      const to = location.state?.from?.pathname || '/dashboard';
+      const to = location.state?.from?.pathname || '/';
       navigate(to, { replace: true });
     } catch (error) {
       // This will now show the exact API error message

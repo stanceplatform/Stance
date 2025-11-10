@@ -132,7 +132,7 @@ export default function Signup() {
           refreshToken: res.refreshToken,
         });
         setOk("Signup completed!");
-        navigate("/dashboard");
+        navigate("/");
       } else {
         setErr(res?.message || "Signup failed. Please try again.");
       }

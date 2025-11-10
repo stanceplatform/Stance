@@ -67,7 +67,7 @@ const SelectCollege = () => {
       toast.success('College added successfully');
 
       // Navigate to dashboard
-      navigate('/dashboard', { replace: true });
+      navigate('/', { replace: true });
     } catch (err) {
       console.error('Failed to update college:', err);
       const errorMessage = getApiErrorMessage(err);

@@ -9,7 +9,7 @@ import { useAuth } from '../../context/AuthContext';
  * - User is authenticated AND collegeSelected is false or missing
  * Redirects if:
  * - Not authenticated -> redirect to "/"
- * - Authenticated but collegeSelected is true -> redirect to "/dashboard"
+ * - Authenticated but collegeSelected is true -> redirect to "/"
  */
 const SelectCollegeRoute = ({ children }) => {
   const { isAuthenticated, user, loading } = useAuth();
@@ -23,9 +23,9 @@ const SelectCollegeRoute = ({ children }) => {
     return <Navigate to="/" replace />;
   }
 
-  // If authenticated and collegeSelected is true, redirect to dashboard
+  // If authenticated and collegeSelected is true, redirect home
   if (isAuthenticated && user && user.collegeSelected === true) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/" replace />;
   }
 
   // Allow access if authenticated and collegeSelected is false or missing
