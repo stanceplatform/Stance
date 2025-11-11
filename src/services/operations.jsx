@@ -60,11 +60,11 @@ export const fetchAllCards = async () => {
   try {
     if (isAuthenticated()) {
       // Use authenticated endpoint
-      const response = await apiService.getQuestionsResponse(0, 10, 'DESC');
+      const response = await apiService.getQuestionsResponse(0, 1000, 'DESC');
       return response || [];
     } else {
       // Use public endpoint
-      const response = await apiService.getQuestionsPublic(0, 10);
+      const response = await apiService.getQuestionsPublic(0, 1000, 'DESC');
       return transformPublicQuestions(response) || [];
     }
   } catch (error) {
