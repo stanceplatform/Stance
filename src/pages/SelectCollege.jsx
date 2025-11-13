@@ -1,5 +1,5 @@
 // pages/SelectCollege.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import AuthShell from '../components/layouts/AuthShell';
@@ -17,6 +17,22 @@ const SelectCollege = () => {
   const [selectedCollege, setSelectedCollege] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Sort colleges alphabetically but keep "Others" at the end
+  const sortedColleges = useMemo(() => {
+    const others = colleges.filter(college =>
+      college.name.toLowerCase() === 'others'
+    );
+    const rest = colleges.filter(college =>
+      college.name.toLowerCase() !== 'others'
+    );
+
+    const sortedRest = [...rest].sort((a, b) =>
+      a.name.localeCompare(b.name)
+    );
+
+    return [...sortedRest, ...others];
+  }, [colleges]);
 
   useEffect(() => {
     fetchColleges();
@@ -113,7 +129,7 @@ const SelectCollege = () => {
             }}
           >
             <option value="" className="text-[#9CA3AF]">--- Select College ---</option>
-            {colleges.map((college) => (
+            {sortedColleges.map((college) => (
               <option key={college.id} value={college.id} className="text-[#121212] py-2">
                 {college.name}
               </option>
