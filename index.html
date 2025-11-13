@@ -2,14 +2,23 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+
+    <!-- Favicons for maximum compatibility -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="alternate icon" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.svg" />
 
     <!-- PWA: manifest + theme -->
     <link rel="manifest" href="/manifest.webmanifest" />
     <meta name="theme-color" content="#75049F" />
 
-    <!-- iOS install support -->
-    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+    <!-- iOS install support - Apple requires PNG but SVG might work on newer iOS -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/logo-sm.svg" />
+    <link rel="apple-touch-icon" href="/logo-sm.svg" />
+
+    <!-- Additional mobile favicon support -->
+    <meta name="msapplication-TileColor" content="#75049F" />
+    <meta name="msapplication-TileImage" content="/favicon.svg" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="mobile-web-app-capable" content="yes" />
