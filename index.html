@@ -4,17 +4,31 @@
     <meta charset="UTF-8" />
 
     <!-- Favicons for maximum compatibility -->
+    <!-- Modern browsers: SVG favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="alternate icon" href="/favicon.svg" />
-    <link rel="shortcut icon" href="/favicon.svg" />
+    <!-- iOS Safari fallback: PNG favicon (required for iOS) -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <!-- Legacy fallback -->
+    <link rel="shortcut icon" href="/favicon.ico" />
 
     <!-- PWA: manifest + theme -->
     <link rel="manifest" href="/manifest.webmanifest" />
     <meta name="theme-color" content="#75049F" />
 
-    <!-- iOS install support - Apple requires PNG but SVG might work on newer iOS -->
-    <link rel="apple-touch-icon" sizes="180x180" href="/favicon.svg" />
-    <link rel="apple-touch-icon" href="/favicon.svg" />
+    <!-- iOS install support - Apple requires PNG format -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link
+      rel="apple-touch-icon"
+      sizes="152x152"
+      href="/apple-touch-icon-152x152.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="120x120"
+      href="/apple-touch-icon-120x120.png"
+    />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
