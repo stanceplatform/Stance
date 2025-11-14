@@ -63,8 +63,11 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
       const i = opts.findIndex(o => o.id === _selected);
       setUserChoice(i >= 0 ? i + 1 : null);
       setHasVoted(true);
+    } else {
+      setHasVoted(false);
+      setUserChoice(null);
     }
-  }, [question.id]);
+  }, [question.id, question.userResponse]);
 
   const handleVote = async (option, choiceNumber) => {
     if (hasVoted || isVoting) return;
@@ -87,7 +90,7 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
         currentAnswers;
 
       setCurrentAnswers(updated);
-      onVoteUpdate?.(question.id, updated);
+      onVoteUpdate?.(question.id, updated, option.id);
       setUserChoice(choiceNumber);
       setHasVoted(true);
     } catch (error) {

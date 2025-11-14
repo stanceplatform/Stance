@@ -69,21 +69,21 @@ const Card = () => {
   }, [questions, currentQuestionIndex, setQuestionId, showSuggestQuestion])
 
   // 🔑 also mark userResponse after vote (so revisiting shows results)
-  const updateQuestionOptions = (questionId, newOptions) => {
+  const updateQuestionOptions = (questionId, newOptions, selectedOptionId) => {
     setQuestions(prev =>
       prev.map(q =>
         q.id === questionId
           ? {
-            ...q,
-            answerOptions: newOptions,
-            userResponse: {
-              ...q.userResponse,
-              answered: true,
-              selectedOptionId:
-                newOptions.find(o => o.isSelected)?.id ??
-                q.userResponse?.selectedOptionId,
-            },
-          }
+              ...q,
+              answerOptions: newOptions,
+              userResponse: {
+                ...q.userResponse,
+                answered: true,
+                selectedOptionId: selectedOptionId ?? 
+                  newOptions.find(o => o.isSelected)?.id ??
+                  q.userResponse?.selectedOptionId,
+              },
+            }
           : q
       )
     )
