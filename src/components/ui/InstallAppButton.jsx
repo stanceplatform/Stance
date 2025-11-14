@@ -10,7 +10,7 @@ export default function InstallAppButton({ className = "" }) {
       onClick={install}
       className={
         className ||
-        "px-4 py-2 rounded-lg bg-purple-600 text-white font-medium hover:bg-purple-700 transition"
+        "px-4 py-2 rounded-lg bg-purple-600 text-black font-medium hover:bg-purple-700 transition"
       }
     >
       Install Stance

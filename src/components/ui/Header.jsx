@@ -102,7 +102,7 @@ const Header = ({
               </IconButton>
 
               {/* Invite (person + plus) */}
-              <IconButton
+              {/* <IconButton
                 aria-label="Invite"
                 onClick={(e) => {
                   navigate("/send-invite");
@@ -119,7 +119,7 @@ const Header = ({
                     </clipPath>
                   </defs>
                 </svg>
-              </IconButton>
+              </IconButton> */}
 
               {/* 3 dots (menu) */}
               <div className="relative" ref={menuRef}>
