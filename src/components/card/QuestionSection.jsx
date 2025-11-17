@@ -71,7 +71,7 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
 
   const handleVote = async (option, choiceNumber) => {
     if (hasVoted || isVoting) return;
-    
+
     // Check if user is authenticated
     if (!isAuthenticated) {
       setShowLoginModal(true);
@@ -201,18 +201,18 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
           </AnimatePresence>
         </div>
 
-        <button
-          disabled={!hasVoted}
-          onClick={toggleDrawer}
-          className={`gap-2 self-center px-4 py-2 mt-6 mb-2 font-inter font-medium text-base tracking-wide rounded-[40px] z-10 ${hasVoted
-            ? "bg-[#F0E224] text-[#5B037C]"
-            : "text-white"
-            }`}
-        >
-          {!hasVoted
-            ? `Arguments (${commentCount})`
-            : `View Arguments (${commentCount})`}
-        </button>
+        {!hasVoted ? (
+          <div className="gap-2 self-center px-4 py-2 mt-6 mb-2 font-inter font-medium text-base tracking-wide rounded-[40px] z-10 text-white text-center">
+            {totalStances} Stances • {commentCount} Arguments
+          </div>
+        ) : (
+          <button
+            onClick={toggleDrawer}
+            className="gap-2 self-center px-4 py-2 mt-6 mb-2 font-inter font-medium text-base tracking-wide rounded-[40px] z-10 bg-[#F0E224] text-[#5B037C]"
+          >
+            View Arguments ({commentCount})
+          </button>
+        )}
 
       </div>
 
