@@ -102,7 +102,8 @@ function ArgumentsView({
   const secondOption = answerOptions?.[1];
   const firstPct = formatPct(firstOption?.percentage ?? 0);
   const secondPct = formatPct(secondOption?.percentage ?? 0);
-  const stancesCount = totalStances || 67; // Dummy: 67
+  const stancesCount = totalStances || 0;
+  const argumentsCount = argsList.length;
 
   marked.setOptions({ gfm: true, breaks: true });
 
@@ -111,12 +112,20 @@ function ArgumentsView({
   return (
     <div className="absolute bottom-0 flex flex-col justify-end w-full py-4 px-3 custom-gradient z-10">
       {/* Question - smaller font */}
-      <h2 className="text-white text-left font-intro font-normal text-[32px] leading-[40px] mt-5 z-0">
+      <h2
+        className="text-white text-left font-inter z-0 mt-5"
+        style={{
+          fontWeight: 600,
+          fontSize: '15px',
+          lineHeight: '22px',
+          letterSpacing: '0%'
+        }}
+      >
         {question || 'Should we have shared hostels for inclusivity?'}
       </h2>
 
       {/* Progress Bar - same as old but less height */}
-      <div className="w-full z-10 mt-6">
+      <div className="w-full z-10 mt-3">
         <div className="">
           <ProgressBarWithLabels
             firstOptionPercentage={firstPct}
@@ -126,10 +135,17 @@ function ArgumentsView({
             secondOptionPercentage={secondPct}
           />
         </div>
-        {/* Show total stances */}
+        {/* Show total stances and arguments */}
         <div className="mt-1 mb-1 w-full text-center">
-          <span className="font-inter text-white text-base">
-            {stancesCount} Stances
+          <span
+            className="font-inter font-normal text-white"
+            style={{
+              fontSize: '13px',
+              lineHeight: '100%',
+              letterSpacing: '0%'
+            }}
+          >
+            {stancesCount} Stances • {argumentsCount} Arguments
           </span>
         </div>
       </div>

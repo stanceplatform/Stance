@@ -148,14 +148,14 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
 
   return (
     <section className="w-full ">
-      <div className="absolute bottom-0 flex flex-col justify-end w-full p-4 custom-gradient ">
-        <h2 className="text-responsive text-left font-intro font-normal text-white leading-[56px] mt-5 z-0">
-          {question.question}
-        </h2>
+      {!hasVoted && (
+        <div className="absolute bottom-0 flex flex-col justify-end w-full p-4 custom-gradient ">
+          <h2 className="text-responsive text-left font-intro font-normal text-white leading-[56px] mt-5 z-0">
+            {question.question}
+          </h2>
 
-        <div className="flex w-full z-10">
-          <AnimatePresence mode="wait" initial={false}>
-            {!hasVoted ? (
+          <div className="flex w-full z-10">
+            <AnimatePresence mode="wait" initial={false}>
               <motion.div key="options" {...fadeSlide} className="flex w-full mt-6 font-inter">
                 <button
                   className="relative flex-1 shrink gap-2 self-stretch mx-3 px-3 py-2 h-full text-left font-medium text-[22px] tracking-wide leading-8 whitespace-wrap bg-[#F0E224] rounded-md text-[#121212] max-w-xs disabled:opacity-60"
@@ -177,17 +177,14 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
                   <span className="absolute left-[-10px] top-[50%] translate-y-[-80%] w-0 h-0 border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent border-r-[10px] border-r-[#9105C6]"></span>
                 </button>
               </motion.div>
-            ) : null}
-          </AnimatePresence>
-        </div>
+            </AnimatePresence>
+          </div>
 
-        {!hasVoted && (
           <div className="gap-2 self-center px-4 py-2 mt-6 mb-2 font-inter font-medium text-base tracking-wide rounded-[40px] z-10 text-white text-center">
             {totalStances} Stances • {commentCount} Arguments
           </div>
-        )}
-
-      </div>
+        </div>
+      )}
 
       {hasVoted && (
         <ArgumentsView
