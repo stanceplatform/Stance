@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { voteOnCard } from '../../services/operations';
-import CommentDrawer from '../comments/CommentDrawer';
+import ArgumentsView from '../comments/ArgumentsView';
 import ProgressBarWithLabels from '../charts/ProgressBar';
 import { getApiErrorMessage } from '../../utils/apiError';
 import toast from 'react-hot-toast';
@@ -177,55 +177,31 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
                   <span className="absolute left-[-10px] top-[50%] translate-y-[-80%] w-0 h-0 border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent border-r-[10px] border-r-[#9105C6]"></span>
                 </button>
               </motion.div>
-            ) : (
-              <motion.div
-                key={`bar-${question.id}-${currentAnswers[0]?.percentage}-${currentAnswers[1]?.percentage}`}
-                {...fadeSlide}
-                className="w-full z-10"
-              >
-                <ProgressBarWithLabels
-                  firstOptionPercentage={formatPct(currentAnswers[0]?.percentage ?? 0)}
-                  userChoice={userChoice}
-                  firstOptionText={currentAnswers[0]?.value ?? 'Option A'}
-                  secondOptionText={currentAnswers[1]?.value ?? 'Option B'}
-                  secondOptionPercentage={formatPct(currentAnswers[1]?.percentage ?? 0)}
-                />
-                {/* ✅ Show total stances */}
-                <div className="mt-4 w-full text-center">
-                  <span className="font-inter text-white text-base">
-                    {totalStances} Stances
-                  </span>
-                </div>
-              </motion.div>
-            )}
+            ) : null}
           </AnimatePresence>
         </div>
 
-        {!hasVoted ? (
+        {!hasVoted && (
           <div className="gap-2 self-center px-4 py-2 mt-6 mb-2 font-inter font-medium text-base tracking-wide rounded-[40px] z-10 text-white text-center">
             {totalStances} Stances • {commentCount} Arguments
           </div>
-        ) : (
-          <button
-            onClick={toggleDrawer}
-            className="gap-2 self-center px-4 py-2 mt-6 mb-2 font-inter font-medium text-base tracking-wide rounded-[40px] z-10 bg-[#F0E224] text-[#5B037C]"
-          >
-            View Arguments ({commentCount})
-          </button>
         )}
 
       </div>
 
-      <div ref={drawerRef}>
-        <CommentDrawer
+      {hasVoted && (
+        <ArgumentsView
           onNewComment={handleNewComment}
           onRemoveComment={handleDeleteComment}
-          isOpen={isDrawerOpen}
-          onClose={toggleDrawer}
+          isOpen={true}
+          onClose={() => { }}
           cardId={question.id}
+          question={question.question}
           answerOptions={currentAnswers}
+          userChoice={userChoice}
+          totalStances={totalStances}
         />
-      </div>
+      )}
 
       <LoginSignupModal
         isOpen={showLoginModal}
