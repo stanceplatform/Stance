@@ -20,7 +20,7 @@ const ProgressBarWithLabels = ({ firstOptionPercentage, userChoice, firstOptionT
       {/* Answer Labels */}
       <div className="flex justify-between w-full">
         <div className="text-left">
-          <p 
+          <p
             className="text-white font-inter"
             style={{
               fontWeight: 400,
@@ -32,10 +32,9 @@ const ProgressBarWithLabels = ({ firstOptionPercentage, userChoice, firstOptionT
           >
             {firstOptionText}
           </p>
-          {userChoice === 1 && <p className="text-white text-[10px] font-medium mt-1 leading-3">(your stance)</p>}
         </div>
         <div className="text-right">
-          <p 
+          <p
             className="text-white font-inter"
             style={{
               fontWeight: 400,
@@ -47,7 +46,6 @@ const ProgressBarWithLabels = ({ firstOptionPercentage, userChoice, firstOptionT
           >
             {secondOptionText}
           </p>
-          {userChoice === 2 && <p className="text-white text-[10px] font-medium mt-1 leading-3">(your stance)</p>}
         </div>
       </div>
 
@@ -56,14 +54,14 @@ const ProgressBarWithLabels = ({ firstOptionPercentage, userChoice, firstOptionT
         {/* Left (Yellow) */}
         <div
           className="relative gap-2 self-stretch mr-3 px-3 py-1 h-full text-left text-xl tracking-wide leading-6 whitespace-nowrap rounded-[4px]"
-          style={{ 
+          style={{
             width: `${leftWidth}%`,
             backgroundColor: userChoice === 1 ? '#F0E224' : '#776F08',
             color: '#565006'
           }}
         >
           {firstOptionPercentage}%
-          <span 
+          <span
             className="absolute right-[-9px] top-[60%] -translate-y-1/2 w-0 h-0 border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent border-l-[10px]"
             style={{ borderLeftColor: userChoice === 1 ? '#F0E224' : '#776F08' }}
           ></span>
@@ -72,14 +70,14 @@ const ProgressBarWithLabels = ({ firstOptionPercentage, userChoice, firstOptionT
         {/* Right (Purple) */}
         <div
           className="relative gap-2 self-stretch ml-3 px-3 py-1 h-full text-right text-xl tracking-wide leading-6 whitespace-nowrap rounded-[4px]"
-          style={{ 
+          style={{
             width: `${rightWidth}%`,
             backgroundColor: userChoice === 2 ? '#9105C6' : '#3A0250',
             color: '#E9B4FD'
           }}
         >
           {secondPct}%
-          <span 
+          <span
             className="absolute left-[-9px] top-[40%] -translate-y-1/2 w-0 h-0 border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent border-r-[10px]"
             style={{ borderRightColor: userChoice === 2 ? '#9105C6' : '#3A0250' }}
           ></span>

@@ -23,7 +23,7 @@ const formatPct = (v) => {
   return num.toFixed(1);
 };
 
-function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
+function QuestionSection({ question, onVoteUpdate, onDrawerToggle, onNext, onPrevious }) {
   const normalizedOptions = question.answerOptions ?? question.answeroptions ?? [];
   const { isAuthenticated } = useAuth();
 
@@ -197,6 +197,8 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
           answerOptions={currentAnswers}
           userChoice={userChoice}
           totalStances={totalStances}
+          onNext={onNext}
+          onPrevious={onPrevious}
         />
       )}
 

@@ -331,6 +331,8 @@ const Card = () => {
               question={questions[currentQuestionIndex]}
               onVoteUpdate={updateQuestionOptions}
               onDrawerToggle={setIsDrawerOpen}
+              onNext={handleNextQuestion}
+              onPrevious={handlePreviousQuestion}
             />
           </motion.div>
         </div>
