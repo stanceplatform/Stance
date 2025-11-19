@@ -100,23 +100,40 @@ function ArgumentsView({
     }
   }, [isOpen, loadArguments]);
 
-  // Initialize collapsed offset when this sheet opens
+  // Initialize collapsed offset when this sheet opens (dynamic by first comment length)
   useEffect(() => {
     if (!isOpen) return;
     if (typeof window === 'undefined') return;
 
     const vh = window.innerHeight || 0;
 
-    // Collapsed state mein kitna content visible rakhna hai (question + 1 comment)
-    const visibleHeight = Math.min(360, Math.round(vh * 0.55));
-    // Sheet ko top se kitna niche slide karna hai
+    // --- estimate first comment line count (1..6) ---
+    const firstArg = argsList[0];
+    let approxLines = 3; // default mid
+    if (firstArg && typeof firstArg.text === 'string') {
+      const plain = firstArg.text.replace(/<[^>]+>/g, '');
+      const len = plain.length;
+      const charsPerLine = 45; // approx for this mobile width
+      approxLines = Math.ceil(len / charsPerLine);
+      if (approxLines < 1) approxLines = 1;
+      if (approxLines > 6) approxLines = 6;
+    }
+
+    // 1 line -> ~260px, 6 lines -> ~360px (interpolated)
+    const MIN_VISIBLE = 260;
+    const MAX_VISIBLE = 360;
+    const t = (approxLines - 1) / 5; // 0..1
+    let visibleHeight = MIN_VISIBLE + t * (MAX_VISIBLE - MIN_VISIBLE);
+
+    // safety: don't exceed viewport
+    visibleHeight = Math.min(visibleHeight, vh - 120); // leave a bit of headroom
+
     const offset = vh - visibleHeight;
 
     setCollapsedOffset(offset);
     setCurrentOffset(offset);
     setIsExpanded(false);
-  }, [isOpen]);
-
+  }, [isOpen, argsList]);
 
   const formatPct = (v) => {
     if (v == null || v === '') return '0';
@@ -178,17 +195,12 @@ function ArgumentsView({
     const dragThreshold = 15;             // px: kitna move hone ke baad drag start maana
     const maxOvershootDown = 40;
 
-    // ⬇️ Yahan change hai:
     if (!state.hasMoved) {
       if (Math.abs(delta) < dragThreshold) {
-        // abhi tak drag start nahi hua, kuch mat karo
         return;
       }
-      // threshold cross ho gaya → ab se drag start
       state.hasMoved = true;
       setIsDragging(true);
-      // IMPORTANT: startY / startOffset ko **reset mat karo**
-      // taki finger jahan tak aayi hai, sheet wahin se smooth move ho
     }
 
     let nextOffset = state.startOffset + delta;
@@ -206,7 +218,6 @@ function ArgumentsView({
 
     setCurrentOffset(nextOffset);
   };
-
 
   const endDrag = () => {
     const state = dragStateRef.current;
@@ -300,14 +311,14 @@ function ArgumentsView({
             transition: isDragging ? 'none' : 'transform 200ms ease-out',
           }}
         >
-
           <div
             className={`flex flex-col rounded-t-2xl overflow-hidden ${isExpanded ? 'bg-white' : 'bg-transparent'
               }`}
           >
             {/* Question + Progress */}
             <div
-              className={`px-3 ${isExpanded ? 'pt-0' : 'pt-4'} pb-3 ${isExpanded ? 'bg-[#121212]' : 'bg-transparent'
+              className={`px-3 ${isExpanded ? 'pt-0' : 'pt-4'
+                } pb-3 ${isExpanded ? 'bg-[#121212]' : 'bg-transparent'
                 }`}
             >
               <h2
@@ -349,9 +360,10 @@ function ArgumentsView({
             {/* Scrollable comments area */}
             <div
               ref={scrollContainerRef}
-              className={`${isExpanded ? 'px-2 pt-4 pb-24 bg-white' : 'px-3 pt-2 pb-24'} overflow-y-auto`}
+              className={`${isExpanded ? 'px-2 pt-4 pb-24 bg-white' : 'px-3 pt-2 pb-24'
+                } overflow-y-auto`}
               style={{
-                maxHeight: 'calc(100vh - 180px)', // 220 se kam rakho to upar ka part zyada visible rahega
+                maxHeight: 'calc(100vh - 180px)',
                 overflowY: !isExpanded || isDragging ? 'hidden' : 'auto',
               }}
             >
