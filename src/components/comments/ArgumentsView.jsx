@@ -103,19 +103,41 @@ function ArgumentsView({
   // Initialize collapsed offset when this sheet opens
   useEffect(() => {
     if (!isOpen) return;
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
 
     const vh = window.innerHeight || 0;
 
-    // Collapsed state mein kitna content visible rakhna hai (question + 1 comment)
-    const visibleHeight = Math.min(360, Math.round(vh * 0.55));
-    // Sheet ko top se kitna niche slide karna hai
+    // --- 1) First comment ke approx line count nikaalo ---
+    const firstArg = argsList[0];
+    const rawText = (firstArg?.text || "")
+      .replace(/<[^>]+>/g, "") // agar markdown/HTML ho to tags hata do
+      .trim();
+
+    const CHARS_PER_LINE = 55;        // approx. ek line mein kitne chars fit hote
+    let approxLines = Math.ceil(rawText.length / CHARS_PER_LINE);
+
+    if (approxLines < 1) approxLines = 1;
+    if (approxLines > 6) approxLines = 6; // max 6 lines tak hi treat karna hai
+
+    // --- 2) 1 line => 260px, 6 lines => 360px (beech mein smooth interpolate) ---
+    const MIN_VISIBLE = 260; // 1-liner position
+    const MAX_VISIBLE = 360; // 6-line position
+
+    // 1 line pe factor = 0, 6 lines pe factor = 1
+    const factor = (approxLines - 1) / 5; // 5 = (6 - 1)
+    const lineBasedVisible =
+      MIN_VISIBLE + factor * (MAX_VISIBLE - MIN_VISIBLE);
+
+    // Screen ke hisaab se thoda clamp (jaise pehle 0.55 * vh kar rahe the)
+    const visibleHeight = Math.min(lineBasedVisible, Math.round(vh * 0.55));
+
     const offset = vh - visibleHeight;
 
     setCollapsedOffset(offset);
     setCurrentOffset(offset);
     setIsExpanded(false);
-  }, [isOpen]);
+  }, [isOpen, argsList.length]);
+
 
   const formatPct = (v) => {
     if (v == null || v === '') return '0';
@@ -302,12 +324,12 @@ function ArgumentsView({
           }}
         >
           <div
-            className={`flex flex-col rounded-t-2xl overflow-hidden ${isExpanded ? 'bg-transparent' : 'bg-transparent'
+            className={`flex flex-col rounded-b-2xl overflow-hidden ${isExpanded ? 'bg-transparent' : 'bg-transparent'
               }`}
           >
             {/* Question + Progress */}
             <div
-              className={`px-3 ${isExpanded ? 'pt-0' : 'pt-4'} pb-3 bg-transparent`}
+              className={`px-3 rounded-b-2xl ${isExpanded ? 'pt-0' : 'pt-4'} pb-0 bg-transparent`}
               style={{
                 // header ka dark bg bhi swipe ke sath fade-in
                 backgroundColor: `rgba(18,18,18,${expansionProgress})`,

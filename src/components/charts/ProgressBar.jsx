@@ -53,7 +53,7 @@ const ProgressBarWithLabels = ({ firstOptionPercentage, userChoice, firstOptionT
       <motion.div key="options" className="flex w-full justify-between">
         {/* Left (Yellow) */}
         <div
-          className="relative gap-2 self-stretch mr-3 px-3 py-1 h-full text-left text-xl tracking-wide leading-6 whitespace-nowrap rounded-[4px]"
+          className="relative gap-2 self-stretch mr-3 px-3 py-0 h-full text-left text-xl tracking-wide leading-6 whitespace-nowrap rounded-[4px]"
           style={{
             width: `${leftWidth}%`,
             backgroundColor: userChoice === 1 ? '#F0E224' : '#776F08',
@@ -62,14 +62,14 @@ const ProgressBarWithLabels = ({ firstOptionPercentage, userChoice, firstOptionT
         >
           {firstOptionPercentage}%
           <span
-            className="absolute right-[-9px] top-[60%] -translate-y-1/2 w-0 h-0 border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent border-l-[10px]"
+            className="absolute right-[-10px] top-[60%] -translate-y-1/2 w-0 h-0 border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent border-l-[10px]"
             style={{ borderLeftColor: userChoice === 1 ? '#F0E224' : '#776F08' }}
           ></span>
         </div>
 
         {/* Right (Purple) */}
         <div
-          className="relative gap-2 self-stretch ml-3 px-3 py-1 h-full text-right text-xl tracking-wide leading-6 whitespace-nowrap rounded-[4px]"
+          className="relative gap-2 self-stretch ml-3 px-3 py-0 h-full text-right text-xl tracking-wide leading-6 whitespace-nowrap rounded-[4px]"
           style={{
             width: `${rightWidth}%`,
             backgroundColor: userChoice === 2 ? '#9105C6' : '#3A0250',
