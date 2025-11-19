@@ -72,7 +72,7 @@ const Header = ({
             loading="lazy"
             src="/logo-sm.svg"
             alt="Logo"
-            className="object-contain z-20 shrink-0 self-stretch my-auto aspect-[2.72] w-[98px]"
+            className="object-contain shrink-0 self-stretch my-auto aspect-[2.72] w-[98px]"
           />
         </div>
 
@@ -136,7 +136,7 @@ const Header = ({
 
                 {open && (
                   <div
-                    className="absolute right-0 w-72 rounded-2xl bg-white shadow-lg border border-gray-200 overflow-hidden z-50"
+                    className="absolute right-0 w-72 rounded-2xl bg-white shadow-lg border border-gray-200 overflow-hidden"
                     role="menu"
                   >
                     {/* Profile header */}

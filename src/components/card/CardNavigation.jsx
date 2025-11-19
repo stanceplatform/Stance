@@ -9,12 +9,12 @@ function CardNavigation({ onNext, onPrevious }) { // Removed question prop
   };
 
   return (
-    <nav className="flex absolute inset-0 h-full overflow-hidden mx-auto max-w-[480px] z-10" id="card-navigation" >
+    <nav className="flex absolute top-0 left-0 right-0 h-1/2 overflow-hidden mx-auto max-w-[480px] z-10" id="card-navigation" >
       <div className="flex-1 h-full" onClick={handleLeftTap} style={{ cursor: 'pointer', }}>
-        {/* Left half of the screen */}
+        {/* Left half of the top 50% of the screen */}
       </div>
       <div className="flex-1 h-full" onClick={handleRightTap} style={{ cursor: 'pointer', }}>
-        {/* Right half of the screen */}
+        {/* Right half of the top 50% of the screen */}
       </div>
     </nav>
   );
