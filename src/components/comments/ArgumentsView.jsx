@@ -100,40 +100,22 @@ function ArgumentsView({
     }
   }, [isOpen, loadArguments]);
 
-  // Initialize collapsed offset when this sheet opens (dynamic by first comment length)
+  // Initialize collapsed offset when this sheet opens
   useEffect(() => {
     if (!isOpen) return;
     if (typeof window === 'undefined') return;
 
     const vh = window.innerHeight || 0;
 
-    // --- estimate first comment line count (1..6) ---
-    const firstArg = argsList[0];
-    let approxLines = 3; // default mid
-    if (firstArg && typeof firstArg.text === 'string') {
-      const plain = firstArg.text.replace(/<[^>]+>/g, '');
-      const len = plain.length;
-      const charsPerLine = 45; // approx for this mobile width
-      approxLines = Math.ceil(len / charsPerLine);
-      if (approxLines < 1) approxLines = 1;
-      if (approxLines > 6) approxLines = 6;
-    }
-
-    // 1 line -> ~260px, 6 lines -> ~360px (interpolated)
-    const MIN_VISIBLE = 260;
-    const MAX_VISIBLE = 360;
-    const t = (approxLines - 1) / 5; // 0..1
-    let visibleHeight = MIN_VISIBLE + t * (MAX_VISIBLE - MIN_VISIBLE);
-
-    // safety: don't exceed viewport
-    visibleHeight = Math.min(visibleHeight, vh - 120); // leave a bit of headroom
-
+    // Collapsed state mein kitna content visible rakhna hai (question + 1 comment)
+    const visibleHeight = Math.min(360, Math.round(vh * 0.55));
+    // Sheet ko top se kitna niche slide karna hai
     const offset = vh - visibleHeight;
 
     setCollapsedOffset(offset);
     setCurrentOffset(offset);
     setIsExpanded(false);
-  }, [isOpen, argsList]);
+  }, [isOpen]);
 
   const formatPct = (v) => {
     if (v == null || v === '') return '0';
@@ -165,6 +147,12 @@ function ArgumentsView({
 
   const visibleArgs = isFullyCollapsed ? argsList.slice(0, 1) : argsList;
 
+  // ---- expansion progress (0 = collapsed, 1 = fully expanded) ----
+  const expansionProgress =
+    collapsedOffset <= 0
+      ? 0
+      : Math.min(1, Math.max(0, 1 - currentOffset / collapsedOffset));
+
   // --- DRAG HANDLERS ---
 
   const startDrag = (clientY) => {
@@ -192,7 +180,7 @@ function ArgumentsView({
     if (!state.active) return;
 
     const delta = clientY - state.startY; // +ve = down, -ve = up
-    const dragThreshold = 15;             // px: kitna move hone ke baad drag start maana
+    const dragThreshold = 15; // px: kitna move hone ke baad drag start maana
     const maxOvershootDown = 40;
 
     if (!state.hasMoved) {
@@ -309,17 +297,21 @@ function ArgumentsView({
           style={{
             transform: `translateY(${currentOffset}px)`,
             transition: isDragging ? 'none' : 'transform 200ms ease-out',
+            // white background fades in as we expand, and fills full height
+            backgroundColor: `rgba(255,255,255,${expansionProgress})`,
           }}
         >
           <div
-            className={`flex flex-col rounded-t-2xl overflow-hidden ${isExpanded ? 'bg-white' : 'bg-transparent'
+            className={`flex flex-col rounded-t-2xl overflow-hidden ${isExpanded ? 'bg-transparent' : 'bg-transparent'
               }`}
           >
             {/* Question + Progress */}
             <div
-              className={`px-3 ${isExpanded ? 'pt-0' : 'pt-4'
-                } pb-3 ${isExpanded ? 'bg-[#121212]' : 'bg-transparent'
-                }`}
+              className={`px-3 ${isExpanded ? 'pt-0' : 'pt-4'} pb-3 bg-transparent`}
+              style={{
+                // header ka dark bg bhi swipe ke sath fade-in
+                backgroundColor: `rgba(18,18,18,${expansionProgress})`,
+              }}
             >
               <h2
                 className="text-left font-inter mt-1"
@@ -360,10 +352,11 @@ function ArgumentsView({
             {/* Scrollable comments area */}
             <div
               ref={scrollContainerRef}
-              className={`${isExpanded ? 'px-2 pt-4 pb-24 bg-white' : 'px-3 pt-2 pb-24'
+              className={`${isExpanded ? 'px-2 pt-4 pb-24' : 'px-3 pt-2 pb-24'
                 } overflow-y-auto`}
               style={{
                 maxHeight: 'calc(100vh - 180px)',
+                // comments scroll only when fully expanded & not dragging
                 overflowY: !isExpanded || isDragging ? 'hidden' : 'auto',
               }}
             >
