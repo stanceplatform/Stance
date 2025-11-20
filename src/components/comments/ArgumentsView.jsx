@@ -1,8 +1,62 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
-import ProgressBarWithLabels from '../charts/ProgressBar';
-import { fetchCardComments, postCommentOnCard, likeComment, unlikeComment } from '../../services/operations';
-import { marked } from 'marked';
-import OpinionForm from './OpinionForm';
+import React, {
+  useState,
+  useCallback,
+  useEffect,
+  useRef,
+} from "react";
+import ProgressBarWithLabels from "../charts/ProgressBar";
+import {
+  fetchCardComments,
+  postCommentOnCard,
+  likeComment,
+  unlikeComment,
+  apiService,
+} from "../../services/operations";
+import { marked } from "marked";
+import OpinionForm from "./OpinionForm";
+import toast from "react-hot-toast";
+import { useAuth } from "../../context/AuthContext";
+
+// Delete Confirmation Modal
+function ConfirmDeleteModal({ open, onCancel, onConfirm, loading }) {
+  if (!open) return null;
+  return (
+    <>
+      <div
+        className="fixed inset-0 z-[98] bg-black/60 backdrop-blur-[2px]"
+        onClick={onCancel}
+      />
+      <div className="fixed z-[99] inset-0 flex items-center justify-center p-4">
+        <div className="w-full max-w-sm rounded-2xl bg-neutral-900 border border-neutral-700 shadow-2xl overflow-hidden">
+          <div className="px-5 py-4 border-b border-neutral-800">
+            <h3 className="text-white text-base font-medium">
+              Delete comment?
+            </h3>
+            <p className="text-neutral-300 text-sm mt-1">
+              This action cannot be undone.
+            </p>
+          </div>
+          <div className="p-4 flex items-center justify-end gap-2">
+            <button
+              className="px-4 py-2 rounded-lg text-sm bg-neutral-800 text-neutral-200 hover:bg-neutral-700"
+              onClick={onCancel}
+              disabled={loading}
+            >
+              Cancel
+            </button>
+            <button
+              className="px-4 py-2 rounded-lg text-sm bg-red-600 text-white hover:bg-red-500 disabled:opacity-60"
+              onClick={onConfirm}
+              disabled={loading}
+            >
+              {loading ? "Deleting..." : "Delete"}
+            </button>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
 
 // Theme helper function - returns colors based on selected stance
 function getCommentTheme(selectedOptionId, answerOptions) {
@@ -12,26 +66,26 @@ function getCommentTheme(selectedOptionId, answerOptions) {
   // Yellow stance (first option)
   if (selectedOptionId === firstOptionId) {
     return {
-      bgColor: '#FCF9CF',
-      titleColor: '#776F08',
-      borderColor: '#F0E224',
+      bgColor: "#FCF9CF",
+      titleColor: "#776F08",
+      borderColor: "#F0E224",
     };
   }
 
   // Purple stance (second option) - default
   if (selectedOptionId === secondOptionId) {
     return {
-      bgColor: '#F8E6FE',
-      titleColor: '#5B037C',
-      borderColor: '#BF24F9',
+      bgColor: "#F8E6FE",
+      titleColor: "#5B037C",
+      borderColor: "#BF24F9",
     };
   }
 
   // Default to purple if no match
   return {
-    bgColor: '#F8E6FE',
-    titleColor: '#5B037C',
-    borderColor: '#BF24F9',
+    bgColor: "#F8E6FE",
+    titleColor: "#5B037C",
+    borderColor: "#BF24F9",
   };
 }
 
@@ -55,6 +109,11 @@ function ArgumentsView({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isClosingForm, setIsClosingForm] = useState(false);
   const [likeDebounce, setLikeDebounce] = useState({});
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [commentIdToDelete, setCommentIdToDelete] = useState(null);
+
+  const { user } = useAuth();
 
   // sheet drag + state
   const [isExpanded, setIsExpanded] = useState(false); // false = collapsed (first comment), true = full list
@@ -68,39 +127,102 @@ function ArgumentsView({
     startY: 0,
     startOffset: 0,
     hasMoved: false,
-    fromScroller: false, // NEW
+    fromScroller: false,
   });
 
   const touchStartYRef = useRef(0); // for global pull-to-refresh guard
 
-  const loadArguments = useCallback(
-    async () => {
-      if (!cardId) {
-        setIsLoading(false);
-        return;
-      }
+  // ---------- LONG PRESS MENU STATE ----------
+  const [contextMenu, setContextMenu] = useState({
+    open: false,
+    commentId: null,
+    top: 0,
+    left: 0,
+    openAbove: false,
+  });
 
-      try {
-        setIsLoading(true);
-        setError(null);
-        const comments = await fetchCardComments(cardId);
-        const commentsArray = Array.isArray(comments)
-          ? comments
-          : comments?.content || [];
+  const longPressTimerRef = useRef(null);
+  const longPressStartYRef = useRef(0);
+  const LONG_PRESS_DURATION = 550; // ms
+  const LONG_PRESS_MOVE_TOLERANCE = 10; // px
 
-        // Sort by createdAt descending (newest first)
-        const sorted = [...commentsArray].sort(
-          (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
-        );
-        setArgsList(sorted);
-      } catch (err) {
-        setError(err?.message || 'Failed to load arguments');
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [cardId]
-  );
+  const clearLongPressTimer = () => {
+    if (longPressTimerRef.current) {
+      window.clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+  };
+
+  const openContextMenu = (commentId, cardElement) => {
+    if (!cardElement || typeof window === "undefined") return;
+
+    const rect = cardElement.getBoundingClientRect();
+    const viewportHeight =
+      window.innerHeight || document.documentElement.clientHeight;
+
+    const menuHeight = 88; // approx. 2 items
+    const gapBelow = 8; // Gap when menu opens below comment
+    const gapAbove = 4; // Gap when menu opens above comment (reduced space)
+
+    const spaceBelow = viewportHeight - rect.bottom;
+    const opensBelow = spaceBelow >= menuHeight || rect.top < menuHeight;
+
+    const top = opensBelow
+      ? rect.bottom + gapBelow
+      : rect.top - menuHeight - gapAbove;
+
+    // Left align with comment padding (comment has p-3 = 12px, so left should be rect.left + 12)
+    const left = rect.left + 12;
+
+    setContextMenu({
+      open: true,
+      commentId,
+      top,
+      left,
+      openAbove: !opensBelow,
+    });
+  };
+
+  const closeContextMenu = () => {
+    setContextMenu((prev) => ({
+      ...prev,
+      open: false,
+      commentId: null,
+    }));
+  };
+
+  useEffect(() => {
+    return () => {
+      clearLongPressTimer();
+    };
+  }, []);
+
+  // ------------------------------------------
+
+  const loadArguments = useCallback(async () => {
+    if (!cardId) {
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      setError(null);
+      const comments = await fetchCardComments(cardId);
+      const commentsArray = Array.isArray(comments)
+        ? comments
+        : comments?.content || [];
+
+      const sorted = [...commentsArray].sort(
+        (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
+      );
+      setArgsList(sorted);
+    } catch (err) {
+      setError(err?.message || "Failed to load arguments");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [cardId]);
 
   useEffect(() => {
     if (isOpen) {
@@ -111,14 +233,12 @@ function ArgumentsView({
   // Initialize collapsed offset when this sheet opens
   useEffect(() => {
     if (!isOpen) return;
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
 
     const vh = window.innerHeight || 0;
 
     const firstArg = argsList[0];
-    const rawText = (firstArg?.text || '')
-      .replace(/<[^>]+>/g, '')
-      .trim();
+    const rawText = (firstArg?.text || "").replace(/<[^>]+>/g, "").trim();
 
     const CHARS_PER_LINE = 55;
     let approxLines = Math.ceil(rawText.length / CHARS_PER_LINE);
@@ -133,7 +253,10 @@ function ArgumentsView({
     const lineBasedVisible =
       MIN_VISIBLE + factor * (MAX_VISIBLE - MIN_VISIBLE);
 
-    const visibleHeight = Math.min(lineBasedVisible, Math.round(vh * 0.55));
+    const visibleHeight = Math.min(
+      lineBasedVisible,
+      Math.round(vh * 0.55)
+    );
 
     const offset = vh - visibleHeight;
 
@@ -142,9 +265,9 @@ function ArgumentsView({
     setIsExpanded(false);
   }, [isOpen, argsList.length]);
 
-  // Body lock + global pull-to-refresh blocker (Instagram-style)
+  // Body lock + global pull-to-refresh blocker
   useEffect(() => {
-    if (!isOpen || typeof window === 'undefined') return;
+    if (!isOpen || typeof window === "undefined") return;
 
     const root = document.documentElement;
     const body = document.body;
@@ -153,9 +276,9 @@ function ArgumentsView({
     const prevBodyOverscroll = body.style.overscrollBehaviorY;
     const prevBodyOverflow = body.style.overflow;
 
-    root.style.overscrollBehaviorY = 'none';
-    body.style.overscrollBehaviorY = 'none';
-    body.style.overflow = 'hidden';
+    root.style.overscrollBehaviorY = "none";
+    body.style.overscrollBehaviorY = "none";
+    body.style.overflow = "hidden";
 
     const handleTouchStartDoc = (e) => {
       if (e.touches && e.touches.length > 0) {
@@ -177,22 +300,20 @@ function ArgumentsView({
         scroller.scrollTop + scroller.clientHeight >=
         scroller.scrollHeight - 1;
 
-      // Anywhere outside scroller – block vertical pan completely
       if (!targetInsideScroller) {
         e.preventDefault();
         return;
       }
 
-      // Inside scroller – block bounce at edges
       if ((atTop && deltaY > 0) || (atBottom && deltaY < 0)) {
         e.preventDefault();
       }
     };
 
-    document.addEventListener('touchstart', handleTouchStartDoc, {
+    document.addEventListener("touchstart", handleTouchStartDoc, {
       passive: false,
     });
-    document.addEventListener('touchmove', handleTouchMoveDoc, {
+    document.addEventListener("touchmove", handleTouchMoveDoc, {
       passive: false,
     });
 
@@ -201,19 +322,20 @@ function ArgumentsView({
       body.style.overscrollBehaviorY = prevBodyOverscroll;
       body.style.overflow = prevBodyOverflow;
 
-      document.removeEventListener('touchstart', handleTouchStartDoc);
-      document.removeEventListener('touchmove', handleTouchMoveDoc);
+      document.removeEventListener("touchstart", handleTouchStartDoc);
+      document.removeEventListener("touchmove", handleTouchMoveDoc);
     };
   }, [isOpen]);
 
   const formatPct = (v) => {
-    if (v == null || v === '') return '0';
+    if (v == null || v === "") return "0";
     const num = Number(v);
-    if (Number.isNaN(num)) return '0';
+    if (Number.isNaN(num)) return "0";
     const abs = Math.abs(num);
     const intPart = Math.trunc(num);
     const firstDecimal = Math.floor(abs * 10) % 10;
-    const hasAnyFraction = Math.round((abs - Math.floor(abs)) * 100) !== 0;
+    const hasAnyFraction =
+      Math.round((abs - Math.floor(abs)) * 100) !== 0;
     if (!hasAnyFraction || firstDecimal === 0) return String(intPart);
     return num.toFixed(1);
   };
@@ -244,13 +366,12 @@ function ArgumentsView({
 
   const startDrag = (clientY, fromScroller = false) => {
     dragStateRef.current = {
-      active: !fromScroller,      // fromScroller => we decide later in move
+      active: !fromScroller,
       startY: clientY,
       startOffset: currentOffset,
       hasMoved: false,
       fromScroller,
     };
-    // isDragging stays false until threshold is crossed in moveDrag
   };
 
   const moveDragInternal = (clientY, e) => {
@@ -319,16 +440,13 @@ function ArgumentsView({
     if (!touch) return;
 
     const scroller = scrollContainerRef.current;
-    const isInScroller =
-      scroller && scroller.contains(e.target);
+    const isInScroller = scroller && scroller.contains(e.target);
 
-    // If touch starts inside comments when expanded, we may either scroll or drag later.
     if (isExpanded && isInScroller) {
-      startDrag(touch.clientY, true); // fromScroller = true
+      startDrag(touch.clientY, true);
       return;
     }
 
-    // Otherwise, normal sheet drag (header / outside area)
     e.stopPropagation();
     startDrag(touch.clientY, false);
   };
@@ -341,17 +459,14 @@ function ArgumentsView({
     const state = dragStateRef.current;
     const clientY = touch.clientY;
 
-    // Case 1: gesture started inside scroller
     if (state.fromScroller) {
       const scroller = scrollContainerRef.current;
       if (!scroller) return;
 
       const delta = clientY - state.startY;
-      const atTop = scroller.scrollTop <= 0 + 1; // tolerance
+      const atTop = scroller.scrollTop <= 1;
 
-      // If list is at top & user pulls down => convert to sheet drag
       if (!state.active && atTop && delta > 0) {
-        // freeze list at top
         scroller.scrollTop = 0;
         state.active = true;
         state.hasMoved = false;
@@ -361,16 +476,13 @@ function ArgumentsView({
         return;
       }
 
-      // If we already switched to sheet drag, keep dragging
       if (state.active) {
         moveDragInternal(clientY, e);
       }
 
-      // else: normal scroll – do nothing here
       return;
     }
 
-    // Case 2: started outside scroller (header, etc.)
     moveDragInternal(clientY, e);
   };
 
@@ -401,29 +513,28 @@ function ArgumentsView({
     setTimeout(() => {
       setShowOpinionForm(false);
       setIsClosingForm(false);
-    }, 300); // Match animation duration
+    }, 300);
   };
 
   const handleAddOpinion = async (newOpinion) => {
     try {
       setIsSubmitting(true);
-      const addedComment = await postCommentOnCard(cardId, newOpinion.content);
+      const addedComment = await postCommentOnCard(
+        cardId,
+        newOpinion.content
+      );
 
-      // Add to list and sort by newest first
-      setArgsList(prev => {
+      setArgsList((prev) => {
         const updated = [addedComment, ...prev];
         return updated.sort(
           (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
         );
       });
 
-      // Notify parent
       onNewComment?.();
-
-      // Close the form with animation
       handleCloseForm();
     } catch (err) {
-      throw err; // Let OpinionForm handle the error toast
+      throw err;
     } finally {
       setIsSubmitting(false);
     }
@@ -432,7 +543,7 @@ function ArgumentsView({
   const canLike = (commentId) => {
     const now = Date.now();
     const lastLike = likeDebounce[commentId] || 0;
-    return (now - lastLike) >= 2000;
+    return now - lastLike >= 2000;
   };
 
   const handleLike = async (commentId) => {
@@ -440,10 +551,12 @@ function ArgumentsView({
       if (!canLike(commentId)) return;
 
       setError(null);
-      setLikeDebounce(prev => ({ ...prev, [commentId]: Date.now() }));
+      setLikeDebounce((prev) => ({
+        ...prev,
+        [commentId]: Date.now(),
+      }));
 
-      // decide server call from current state (before change)
-      const current = argsList.find(c => c.id === commentId);
+      const current = argsList.find((c) => c.id === commentId);
       const wasLiked = !!current?.likes?.isLikedByCurrentUser;
 
       if (wasLiked) {
@@ -452,36 +565,106 @@ function ArgumentsView({
         await likeComment(commentId);
       }
 
-      // ⬇️ REFRESH from backend to get authoritative likes & likedUsers
       const comments = await fetchCardComments(cardId);
       const commentsArray = Array.isArray(comments)
         ? comments
         : comments?.content || [];
 
-      // Sort by createdAt descending (newest first)
       const sorted = [...commentsArray].sort(
         (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
       );
       setArgsList(sorted);
     } catch (err) {
-      setError(err?.message || 'Failed to like comment');
+      setError(err?.message || "Failed to like comment");
     }
   };
+
+  // --------- CONTEXT MENU ACTIONS ------------
+
+  const handleDeleteComment = () => {
+    const id = contextMenu.commentId;
+    if (!id) return;
+    setCommentIdToDelete(id);
+    closeContextMenu();
+    setShowDeleteConfirm(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    const id = commentIdToDelete;
+    if (!id) return;
+    try {
+      setDeleting(true);
+      await apiService.deleteComment(id);
+      await loadArguments();
+      onRemoveComment?.();
+      setShowDeleteConfirm(false);
+      setCommentIdToDelete(null);
+      toast.success("Argument deleted.");
+    } catch (err) {
+      console.error("Delete failed", err);
+      toast.error("Failed to delete. Please try again.");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleReportComment = () => {
+    // Yahan API call / toast etc kar sakte ho
+    closeContextMenu();
+  };
+
+  // TOUCH / CONTEXT HANDLERS FOR COMMENT CARD
+
+  const handleCommentTouchStart = (e, commentId) => {
+    if (!isExpanded) return; // only when fully expanded
+    clearLongPressTimer();
+
+    const touch = e.touches[0];
+    if (!touch) return;
+
+    longPressStartYRef.current = touch.clientY;
+    const cardElement = e.currentTarget;
+
+    longPressTimerRef.current = window.setTimeout(() => {
+      openContextMenu(commentId, cardElement);
+    }, LONG_PRESS_DURATION);
+  };
+
+  const handleCommentTouchMove = (e) => {
+    if (!longPressTimerRef.current) return;
+    const touch = e.touches[0];
+    if (!touch) return;
+    const dy = touch.clientY - longPressStartYRef.current;
+    if (Math.abs(dy) > LONG_PRESS_MOVE_TOLERANCE) {
+      clearLongPressTimer();
+    }
+  };
+
+  const handleCommentTouchEnd = () => {
+    clearLongPressTimer();
+  };
+
+  const handleCommentContextMenu = (e, commentId) => {
+    e.preventDefault();
+    if (!isExpanded) return;
+    openContextMenu(commentId, e.currentTarget);
+  };
+
+  // -------------------------------------------
 
   if (!isOpen) return null;
 
   return (
     <div
-      className={`fixed inset-0 flex flex-col w-full max-w-[480px] mx-auto ${isDragging || isExpanded ? 'z-[100]' : 'z-0'
-        }`}
+      className={`fixed inset-0 flex flex-col w-full max-w-[480px] mx-auto ${isDragging || isExpanded ? "z-[100]" : "z-0"
+        } ${contextMenu.open && 'select-none'}`}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
       style={{
-        overscrollBehaviorY: 'contain',
+        overscrollBehaviorY: "contain",
       }}
     >
-
       {/* Background gradient behind everything */}
       <div className="absolute inset-0 custom-gradient -z-10" />
 
@@ -495,15 +678,15 @@ function ArgumentsView({
           onMouseDown={handleMouseDown}
           style={{
             transform: `translateY(${currentOffset}px)`,
-            transition: isDragging ? 'none' : 'transform 200ms ease-out',
+            transition: isDragging ? "none" : "transform 200ms ease-out",
             backgroundColor: `rgba(255,255,255,${expansionProgress})`,
           }}
         >
           <div className="flex flex-col rounded-b-2xl overflow-hidden bg-transparent">
             {/* Question + Progress */}
             <div
-              className={`px-3 rounded-b-2xl ${isExpanded ? 'pt-0' : 'pt-4'
-                } pb-0 bg-transparent`}
+              className={`px-3 rounded-b-2xl ${isExpanded ? "py-3" : "pt-4 pb-0"
+                }  bg-transparent`}
               style={{
                 backgroundColor: `rgba(18,18,18,${expansionProgress})`,
               }}
@@ -512,30 +695,30 @@ function ArgumentsView({
                 className="text-left font-inter mt-1"
                 style={{
                   fontWeight: 600,
-                  fontSize: '15px',
-                  lineHeight: '22px',
-                  letterSpacing: '0%',
-                  color: '#FFFFFF',
+                  fontSize: "15px",
+                  lineHeight: "22px",
+                  letterSpacing: "0%",
+                  color: "#FFFFFF",
                 }}
               >
-                {question || 'Should we have shared hostels for inclusivity?'}
+                {question || "Should we have shared hostels for inclusivity?"}
               </h2>
 
               <div className="w-full mt-3">
                 <ProgressBarWithLabels
                   firstOptionPercentage={firstPct}
                   userChoice={userChoice}
-                  firstOptionText={firstOption?.value ?? 'Option A'}
-                  secondOptionText={secondOption?.value ?? 'Option B'}
+                  firstOptionText={firstOption?.value ?? "Option A"}
+                  secondOptionText={secondOption?.value ?? "Option B"}
                   secondOptionPercentage={secondPct}
                 />
                 <div className="mt-1 mb-1 w-full text-center">
                   <span
                     className="font-inter font-normal text-white"
                     style={{
-                      fontSize: '13px',
-                      lineHeight: '100%',
-                      letterSpacing: '0%',
+                      fontSize: "13px",
+                      lineHeight: "100%",
+                      letterSpacing: "0%",
                     }}
                   >
                     {stancesCount} Stances • {argumentsCount} Arguments
@@ -547,12 +730,12 @@ function ArgumentsView({
             {/* Scrollable comments area */}
             <div
               ref={scrollContainerRef}
-              className={`${isExpanded ? 'px-2 pt-4 pb-24' : 'px-3 pt-2 pb-24'
+              className={`${isExpanded ? "px-2 pt-4 pb-24" : "px-3 pt-2 pb-24"
                 } overflow-y-auto`}
               style={{
-                maxHeight: 'calc(100vh - 180px)',
-                overflowY: !isExpanded || isDragging ? 'hidden' : 'auto',
-                overscrollBehaviorY: 'contain',
+                maxHeight: "calc(100vh - 180px)",
+                overflowY: !isExpanded || isDragging ? "hidden" : "auto",
+                overscrollBehaviorY: "contain",
               }}
             >
               {isLoading ? (
@@ -572,7 +755,8 @@ function ArgumentsView({
                 <div className="space-y-3">
                   {visibleArgs.map((arg) => {
                     const selectedOptionId =
-                      arg.answer?.selectedOptionId || arg.selectedOptionId;
+                      arg.answer?.selectedOptionId ||
+                      arg.selectedOptionId;
                     const theme = getCommentTheme(
                       selectedOptionId,
                       answerOptions
@@ -581,30 +765,40 @@ function ArgumentsView({
                     return (
                       <div
                         key={arg.id}
-                        className={`rounded-2xl p-3 z-0 ${isExpanded ? '' : 'max-h-[200px] overflow-hidden'
+                        data-comment-id={arg.id}
+                        data-comment-card
+                        className={`rounded-2xl p-3 z-0 ${isExpanded ? "" : "max-h-[200px] overflow-hidden"
                           }`}
                         style={{ backgroundColor: theme.bgColor }}
+                        onTouchStart={(e) =>
+                          handleCommentTouchStart(e, arg.id)
+                        }
+                        onTouchMove={handleCommentTouchMove}
+                        onTouchEnd={handleCommentTouchEnd}
+                        onContextMenu={(e) =>
+                          handleCommentContextMenu(e, arg.id)
+                        }
                       >
                         <div className="flex items-center justify-between mb-2">
                           <span
                             className="font-inter font-normal text-[15px] leading-[22px]"
                             style={{ color: theme.titleColor }}
                           >
-                            {arg.user?.firstName || arg.author || 'Unknown'}
+                            {arg.user?.firstName || arg.author || "Unknown"}
                           </span>
                           <div className="flex items-center gap-3">
                             <div
                               className="flex items-center justify-center border"
                               style={{
-                                width: '59px',
-                                height: '30px',
-                                borderRadius: '8px',
-                                paddingTop: '4px',
-                                paddingRight: '8px',
-                                paddingBottom: '4px',
-                                paddingLeft: '8px',
-                                gap: '4px',
-                                borderWidth: '1px',
+                                width: "59px",
+                                height: "30px",
+                                borderRadius: "8px",
+                                paddingTop: "4px",
+                                paddingRight: "8px",
+                                paddingBottom: "4px",
+                                paddingLeft: "8px",
+                                gap: "4px",
+                                borderWidth: "1px",
                                 borderColor: theme.borderColor,
                               }}
                             >
@@ -622,7 +816,7 @@ function ArgumentsView({
                               </svg>
                               <span
                                 className="text-[#121212] font-inter font-normal text-[15px] leading-[22px]"
-                                style={{ verticalAlign: 'middle' }}
+                                style={{ verticalAlign: "middle" }}
                               >
                                 {arg.replies || 0}
                               </span>
@@ -632,25 +826,25 @@ function ArgumentsView({
                               onClick={() => handleLike(arg.id)}
                               className="flex items-center justify-center border cursor-pointer"
                               style={{
-                                width: '59px',
-                                height: '30px',
-                                borderRadius: '8px',
-                                paddingTop: '4px',
-                                paddingRight: '8px',
-                                paddingBottom: '4px',
-                                paddingLeft: '8px',
-                                gap: '4px',
-                                borderWidth: '1px',
+                                width: "59px",
+                                height: "30px",
+                                borderRadius: "8px",
+                                paddingTop: "4px",
+                                paddingRight: "8px",
+                                paddingBottom: "4px",
+                                paddingLeft: "8px",
+                                gap: "4px",
+                                borderWidth: "1px",
                                 borderColor: theme.borderColor,
                                 backgroundColor: arg.likes?.isLikedByCurrentUser
                                   ? selectedOptionId === answerOptions?.[0]?.id
-                                    ? '#F0E224' // Yellow stance - liked
+                                    ? "#F0E224"
                                     : selectedOptionId === answerOptions?.[1]?.id
-                                      ? '#BF24F9' // Purple stance - liked
-                                      : 'transparent'
-                                  : 'transparent',
+                                      ? "#BF24F9"
+                                      : "transparent"
+                                  : "transparent",
                                 borderColor: arg.likes?.isLikedByCurrentUser
-                                  ? 'transparent'
+                                  ? "transparent"
                                   : theme.borderColor,
                               }}
                             >
@@ -665,26 +859,30 @@ function ArgumentsView({
                                   d="M9.99816 3L15.8352 8.837L14.7732 9.9L10.7482 5.875L10.7502 16.156H9.25016L9.24816 5.875L5.22316 9.9L4.16016 8.837L9.99816 3Z"
                                   fill={
                                     arg.likes?.isLikedByCurrentUser
-                                      ? selectedOptionId === answerOptions?.[0]?.id
-                                        ? '#121212' // Yellow stance - liked text
-                                        : selectedOptionId === answerOptions?.[1]?.id
-                                          ? '#FFFFFF' // Purple stance - liked text
-                                          : '#121212'
-                                      : '#121212'
+                                      ? selectedOptionId ===
+                                        answerOptions?.[0]?.id
+                                        ? "#121212"
+                                        : selectedOptionId ===
+                                          answerOptions?.[1]?.id
+                                          ? "#FFFFFF"
+                                          : "#121212"
+                                      : "#121212"
                                   }
                                 />
                               </svg>
                               <span
                                 className="font-inter font-normal text-[15px] leading-[22px]"
                                 style={{
-                                  verticalAlign: 'middle',
+                                  verticalAlign: "middle",
                                   color: arg.likes?.isLikedByCurrentUser
-                                    ? selectedOptionId === answerOptions?.[0]?.id
-                                      ? '#121212' // Yellow stance - liked text
-                                      : selectedOptionId === answerOptions?.[1]?.id
-                                        ? '#FFFFFF' // Purple stance - liked text
-                                        : '#121212'
-                                    : '#121212',
+                                    ? selectedOptionId ===
+                                      answerOptions?.[0]?.id
+                                      ? "#121212"
+                                      : selectedOptionId ===
+                                        answerOptions?.[1]?.id
+                                        ? "#FFFFFF"
+                                        : "#121212"
+                                    : "#121212",
                                 }}
                               >
                                 {arg.likes?.count ||
@@ -698,7 +896,7 @@ function ArgumentsView({
                         <div
                           className="text-[#212121] font-inter font-normal text-base leading-[24px] text-start"
                           dangerouslySetInnerHTML={{
-                            __html: marked.parse(arg.text || ''),
+                            __html: marked.parse(arg.text || ""),
                           }}
                         />
                       </div>
@@ -711,18 +909,68 @@ function ArgumentsView({
         </div>
       </div>
 
+      {/* Context menu overlay */}
+      {contextMenu.open && (() => {
+        const selectedComment = argsList.find(arg => arg.id === contextMenu.commentId);
+        const ownerId = selectedComment?.user?.id || selectedComment?.authorId || selectedComment?.createdById;
+        const isOwn = user?.id && ownerId && Number(ownerId) === Number(user.id);
+
+        return (
+          <div
+            className="fixed inset-0 z-[150]"
+            onClick={closeContextMenu}
+          >
+            <div
+              className="absolute bg-white rounded-xl shadow-lg py-2 px-3 text-sm"
+              style={{
+                top: contextMenu.top,
+                left: contextMenu.left,
+                minWidth: "140px",
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {isOwn && (
+                <button
+                  className="block w-full text-left py-1.5 text-[#E11D48] font-medium"
+                  onClick={handleDeleteComment}
+                >
+                  Delete
+                </button>
+              )}
+              <button
+                className="block w-full text-left py-1.5 text-[#111827]"
+                onClick={handleReportComment}
+              >
+                Report
+              </button>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmDeleteModal
+        open={showDeleteConfirm}
+        loading={deleting}
+        onCancel={() => {
+          setShowDeleteConfirm(false);
+          setCommentIdToDelete(null);
+        }}
+        onConfirm={handleConfirmDelete}
+      />
+
       {/* Gradient overlay between comment and button (fixed at bottom) */}
       <div
         className="fixed bottom-0 left-0 right-0 max-w-[480px] mx-auto h-16 pointer-events-none z-10"
         style={{
           background:
-            'linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.3) 50%, rgba(0, 0, 0, 1) 100%)',
+            "linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.3) 50%, rgba(0, 0, 0, 1) 100%)",
         }}
       />
 
       {/* Bottom buttons */}
       <div className="fixed bottom-0 left-0 right-0 max-w-[480px] mx-auto px-3 pb-2 z-20">
-        <div className="flex items-center" style={{ gap: '8px' }}>
+        <div className="flex items-center" style={{ gap: "8px" }}>
           <button
             className="flex items-center justify-center w-12 h-12 rounded-[40px] bg-white shadow-md p-3"
             onClick={() => {
@@ -744,12 +992,14 @@ function ArgumentsView({
           </button>
 
           <button
-            className="flex-1 bg-[#F0E224] text-[#212121] font-inter font-medium text-[18px] leading-[32px] rounded-[40px]"
+            className="flex-1 font-inter font-medium text-[18px] leading-[32px] rounded-[40px]"
             style={{
-              paddingTop: '8px',
-              paddingRight: '24px',
-              paddingBottom: '8px',
-              paddingLeft: '24px',
+              paddingTop: "8px",
+              paddingRight: "24px",
+              paddingBottom: "8px",
+              paddingLeft: "24px",
+              backgroundColor: userChoice === 1 ? "#F0E224" : userChoice === 2 ? "#9105C6" : "#F0E224",
+              color: userChoice === 1 ? "#212121" : userChoice === 2 ? "#FFFFFF" : "#212121",
             }}
             onClick={() => {
               setShowOpinionForm(true);
@@ -792,7 +1042,7 @@ function ArgumentsView({
         >
           {/* Backdrop */}
           <div
-            className="absolute inset-0 bg-black/50 transition-opacity duration-300 ease-out"
+            className="absolute max-w-[480px] mx-auto inset-0 bg-black/50 transition-opacity duration-300 ease-out"
             style={{
               opacity: isClosingForm ? 0 : 1,
             }}
@@ -808,14 +1058,13 @@ function ArgumentsView({
             className="relative w-full max-w-[480px] mx-auto bg-[#121212] rounded-t-2xl shadow-2xl"
             style={{
               animation: isClosingForm
-                ? 'slideDown 0.3s ease-out forwards'
-                : 'slideUp 0.3s ease-out forwards',
+                ? "slideDown 0.3s ease-out forwards"
+                : "slideUp 0.3s ease-out forwards",
             }}
             onClick={(e) => {
               e.stopPropagation();
             }}
           >
-            {/* Form Container */}
             <div className="px-3 pt-4 pb-6">
               <OpinionForm onAddOpinion={handleAddOpinion} />
             </div>
@@ -823,26 +1072,16 @@ function ArgumentsView({
         </div>
       )}
 
-      {/* Slide animations */}
       <style>{`
         @keyframes slideUp {
-          from {
-            transform: translateY(100%);
-          }
-          to {
-            transform: translateY(0);
-          }
+          from { transform: translateY(100%); }
+          to { transform: translateY(0); }
         }
         @keyframes slideDown {
-          from {
-            transform: translateY(0);
-          }
-          to {
-            transform: translateY(100%);
-          }
+          from { transform: translateY(0); }
+          to { transform: translateY(100%); }
         }
       `}</style>
-
     </div>
   );
 }
