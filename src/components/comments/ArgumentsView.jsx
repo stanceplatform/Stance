@@ -1,7 +1,8 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import ProgressBarWithLabels from '../charts/ProgressBar';
-import { fetchCardComments } from '../../services/operations';
+import { fetchCardComments, postCommentOnCard } from '../../services/operations';
 import { marked } from 'marked';
+import OpinionForm from './OpinionForm';
 
 // Theme helper function - returns colors based on selected stance
 function getCommentTheme(selectedOptionId, answerOptions) {
@@ -50,6 +51,9 @@ function ArgumentsView({
   const [argsList, setArgsList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showOpinionForm, setShowOpinionForm] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isClosingForm, setIsClosingForm] = useState(false);
 
   // sheet drag + state
   const [isExpanded, setIsExpanded] = useState(false); // false = collapsed (first comment), true = full list
@@ -63,7 +67,10 @@ function ArgumentsView({
     startY: 0,
     startOffset: 0,
     hasMoved: false,
+    fromScroller: false, // NEW
   });
+
+  const touchStartYRef = useRef(0); // for global pull-to-refresh guard
 
   const loadArguments = useCallback(
     async () => {
@@ -103,32 +110,28 @@ function ArgumentsView({
   // Initialize collapsed offset when this sheet opens
   useEffect(() => {
     if (!isOpen) return;
-    if (typeof window === "undefined") return;
+    if (typeof window === 'undefined') return;
 
     const vh = window.innerHeight || 0;
 
-    // --- 1) First comment ke approx line count nikaalo ---
     const firstArg = argsList[0];
-    const rawText = (firstArg?.text || "")
-      .replace(/<[^>]+>/g, "") // agar markdown/HTML ho to tags hata do
+    const rawText = (firstArg?.text || '')
+      .replace(/<[^>]+>/g, '')
       .trim();
 
-    const CHARS_PER_LINE = 55;        // approx. ek line mein kitne chars fit hote
+    const CHARS_PER_LINE = 55;
     let approxLines = Math.ceil(rawText.length / CHARS_PER_LINE);
 
     if (approxLines < 1) approxLines = 1;
-    if (approxLines > 6) approxLines = 6; // max 6 lines tak hi treat karna hai
+    if (approxLines > 6) approxLines = 6;
 
-    // --- 2) 1 line => 260px, 6 lines => 360px (beech mein smooth interpolate) ---
-    const MIN_VISIBLE = 260; // 1-liner position
-    const MAX_VISIBLE = 360; // 6-line position
+    const MIN_VISIBLE = 260;
+    const MAX_VISIBLE = 360;
 
-    // 1 line pe factor = 0, 6 lines pe factor = 1
-    const factor = (approxLines - 1) / 5; // 5 = (6 - 1)
+    const factor = (approxLines - 1) / 5;
     const lineBasedVisible =
       MIN_VISIBLE + factor * (MAX_VISIBLE - MIN_VISIBLE);
 
-    // Screen ke hisaab se thoda clamp (jaise pehle 0.55 * vh kar rahe the)
     const visibleHeight = Math.min(lineBasedVisible, Math.round(vh * 0.55));
 
     const offset = vh - visibleHeight;
@@ -138,6 +141,69 @@ function ArgumentsView({
     setIsExpanded(false);
   }, [isOpen, argsList.length]);
 
+  // Body lock + global pull-to-refresh blocker (Instagram-style)
+  useEffect(() => {
+    if (!isOpen || typeof window === 'undefined') return;
+
+    const root = document.documentElement;
+    const body = document.body;
+
+    const prevRootOverscroll = root.style.overscrollBehaviorY;
+    const prevBodyOverscroll = body.style.overscrollBehaviorY;
+    const prevBodyOverflow = body.style.overflow;
+
+    root.style.overscrollBehaviorY = 'none';
+    body.style.overscrollBehaviorY = 'none';
+    body.style.overflow = 'hidden';
+
+    const handleTouchStartDoc = (e) => {
+      if (e.touches && e.touches.length > 0) {
+        touchStartYRef.current = e.touches[0].clientY;
+      }
+    };
+
+    const handleTouchMoveDoc = (e) => {
+      if (!scrollContainerRef.current) return;
+
+      const scroller = scrollContainerRef.current;
+      const targetInsideScroller = scroller.contains(e.target);
+
+      const currentY = e.touches[0].clientY;
+      const deltaY = currentY - touchStartYRef.current;
+
+      const atTop = scroller.scrollTop <= 0;
+      const atBottom =
+        scroller.scrollTop + scroller.clientHeight >=
+        scroller.scrollHeight - 1;
+
+      // Anywhere outside scroller – block vertical pan completely
+      if (!targetInsideScroller) {
+        e.preventDefault();
+        return;
+      }
+
+      // Inside scroller – block bounce at edges
+      if ((atTop && deltaY > 0) || (atBottom && deltaY < 0)) {
+        e.preventDefault();
+      }
+    };
+
+    document.addEventListener('touchstart', handleTouchStartDoc, {
+      passive: false,
+    });
+    document.addEventListener('touchmove', handleTouchMoveDoc, {
+      passive: false,
+    });
+
+    return () => {
+      root.style.overscrollBehaviorY = prevRootOverscroll;
+      body.style.overscrollBehaviorY = prevBodyOverscroll;
+      body.style.overflow = prevBodyOverflow;
+
+      document.removeEventListener('touchstart', handleTouchStartDoc);
+      document.removeEventListener('touchmove', handleTouchMoveDoc);
+    };
+  }, [isOpen]);
 
   const formatPct = (v) => {
     if (v == null || v === '') return '0';
@@ -160,7 +226,6 @@ function ArgumentsView({
 
   marked.setOptions({ gfm: true, breaks: true });
 
-  // fully collapsed = first comment only
   const isFullyCollapsed =
     !isExpanded &&
     !isDragging &&
@@ -169,7 +234,6 @@ function ArgumentsView({
 
   const visibleArgs = isFullyCollapsed ? argsList.slice(0, 1) : argsList;
 
-  // ---- expansion progress (0 = collapsed, 1 = fully expanded) ----
   const expansionProgress =
     collapsedOffset <= 0
       ? 0
@@ -177,32 +241,23 @@ function ArgumentsView({
 
   // --- DRAG HANDLERS ---
 
-  const startDrag = (clientY) => {
-    // If expanded and list is scrolled, let list scroll instead of dragging the sheet
-    if (
-      isExpanded &&
-      scrollContainerRef.current &&
-      scrollContainerRef.current.scrollTop > 0
-    ) {
-      dragStateRef.current.active = false;
-      return;
-    }
-
+  const startDrag = (clientY, fromScroller = false) => {
     dragStateRef.current = {
-      active: true,
+      active: !fromScroller,      // fromScroller => we decide later in move
       startY: clientY,
       startOffset: currentOffset,
       hasMoved: false,
+      fromScroller,
     };
-    // DON'T set isDragging yet – wait until threshold is crossed
+    // isDragging stays false until threshold is crossed in moveDrag
   };
 
-  const moveDrag = (clientY, e) => {
+  const moveDragInternal = (clientY, e) => {
     const state = dragStateRef.current;
     if (!state.active) return;
 
-    const delta = clientY - state.startY; // +ve = down, -ve = up
-    const dragThreshold = 15; // px: kitna move hone ke baad drag start maana
+    const delta = clientY - state.startY;
+    const dragThreshold = 15;
     const maxOvershootDown = 40;
 
     if (!state.hasMoved) {
@@ -215,9 +270,7 @@ function ArgumentsView({
 
     let nextOffset = state.startOffset + delta;
 
-    // TOP: no overshoot upward
     if (nextOffset < 0) nextOffset = 0;
-    // BOTTOM: thoda overshoot allowed
     if (nextOffset > collapsedOffset + maxOvershootDown) {
       nextOffset = collapsedOffset + maxOvershootDown;
     }
@@ -233,46 +286,91 @@ function ArgumentsView({
     const state = dragStateRef.current;
     if (!state.active) {
       setIsDragging(false);
+      dragStateRef.current.fromScroller = false;
       return;
     }
 
     state.active = false;
 
-    // If user only tapped (never crossed threshold) → do nothing
     if (!state.hasMoved) {
       setIsDragging(false);
+      dragStateRef.current.fromScroller = false;
       return;
     }
 
-    // Snap decision: must drag ~80% down to collapse.
     const collapseThreshold = collapsedOffset * 0.8;
 
     if (currentOffset < collapseThreshold) {
-      // snap open
       setCurrentOffset(0);
       setIsExpanded(true);
     } else {
-      // snap closed
       setCurrentOffset(collapsedOffset);
       setIsExpanded(false);
     }
 
     setIsDragging(false);
+    dragStateRef.current.fromScroller = false;
   };
 
   const handleTouchStart = (e) => {
     if (!isOpen) return;
     const touch = e.touches[0];
     if (!touch) return;
+
+    const scroller = scrollContainerRef.current;
+    const isInScroller =
+      scroller && scroller.contains(e.target);
+
+    // If touch starts inside comments when expanded, we may either scroll or drag later.
+    if (isExpanded && isInScroller) {
+      startDrag(touch.clientY, true); // fromScroller = true
+      return;
+    }
+
+    // Otherwise, normal sheet drag (header / outside area)
     e.stopPropagation();
-    startDrag(touch.clientY);
+    startDrag(touch.clientY, false);
   };
 
   const handleTouchMove = (e) => {
     if (!isOpen) return;
     const touch = e.touches[0];
     if (!touch) return;
-    moveDrag(touch.clientY, e);
+
+    const state = dragStateRef.current;
+    const clientY = touch.clientY;
+
+    // Case 1: gesture started inside scroller
+    if (state.fromScroller) {
+      const scroller = scrollContainerRef.current;
+      if (!scroller) return;
+
+      const delta = clientY - state.startY;
+      const atTop = scroller.scrollTop <= 0 + 1; // tolerance
+
+      // If list is at top & user pulls down => convert to sheet drag
+      if (!state.active && atTop && delta > 0) {
+        // freeze list at top
+        scroller.scrollTop = 0;
+        state.active = true;
+        state.hasMoved = false;
+        state.startY = clientY;
+        state.startOffset = currentOffset;
+        moveDragInternal(clientY, e);
+        return;
+      }
+
+      // If we already switched to sheet drag, keep dragging
+      if (state.active) {
+        moveDragInternal(clientY, e);
+      }
+
+      // else: normal scroll – do nothing here
+      return;
+    }
+
+    // Case 2: started outside scroller (header, etc.)
+    moveDragInternal(clientY, e);
   };
 
   const handleTouchEnd = () => {
@@ -282,13 +380,14 @@ function ArgumentsView({
 
   const handleMouseDown = (e) => {
     if (!isOpen) return;
-    startDrag(e.clientY);
+    startDrag(e.clientY, false);
   };
 
   const handleMouseMove = (e) => {
     if (!isOpen) return;
-    if (!dragStateRef.current.active) return;
-    moveDrag(e.clientY, e);
+    const state = dragStateRef.current;
+    if (!state.active) return;
+    moveDragInternal(e.clientY, e);
   };
 
   const handleMouseUp = () => {
@@ -296,15 +395,53 @@ function ArgumentsView({
     endDrag();
   };
 
+  const handleCloseForm = () => {
+    setIsClosingForm(true);
+    setTimeout(() => {
+      setShowOpinionForm(false);
+      setIsClosingForm(false);
+    }, 300); // Match animation duration
+  };
+
+  const handleAddOpinion = async (newOpinion) => {
+    try {
+      setIsSubmitting(true);
+      const addedComment = await postCommentOnCard(cardId, newOpinion.content);
+
+      // Add to list and sort by newest first
+      setArgsList(prev => {
+        const updated = [addedComment, ...prev];
+        return updated.sort(
+          (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
+        );
+      });
+
+      // Notify parent
+      onNewComment?.();
+
+      // Close the form with animation
+      handleCloseForm();
+    } catch (err) {
+      throw err; // Let OpinionForm handle the error toast
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
     <div
-      className="fixed inset-0 flex flex-col w-full max-w-[480px] mx-auto z-[100]"
+      className={`fixed inset-0 flex flex-col w-full max-w-[480px] mx-auto ${isDragging || isExpanded ? 'z-[100]' : 'z-0'
+        }`}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
+      style={{
+        overscrollBehaviorY: 'contain',
+      }}
     >
+
       {/* Background gradient behind everything */}
       <div className="absolute inset-0 custom-gradient -z-10" />
 
@@ -319,19 +456,15 @@ function ArgumentsView({
           style={{
             transform: `translateY(${currentOffset}px)`,
             transition: isDragging ? 'none' : 'transform 200ms ease-out',
-            // white background fades in as we expand, and fills full height
             backgroundColor: `rgba(255,255,255,${expansionProgress})`,
           }}
         >
-          <div
-            className={`flex flex-col rounded-b-2xl overflow-hidden ${isExpanded ? 'bg-transparent' : 'bg-transparent'
-              }`}
-          >
+          <div className="flex flex-col rounded-b-2xl overflow-hidden bg-transparent">
             {/* Question + Progress */}
             <div
-              className={`px-3 rounded-b-2xl ${isExpanded ? 'pt-0' : 'pt-4'} pb-0 bg-transparent`}
+              className={`px-3 rounded-b-2xl ${isExpanded ? 'pt-0' : 'pt-4'
+                } pb-0 bg-transparent`}
               style={{
-                // header ka dark bg bhi swipe ke sath fade-in
                 backgroundColor: `rgba(18,18,18,${expansionProgress})`,
               }}
             >
@@ -378,8 +511,8 @@ function ArgumentsView({
                 } overflow-y-auto`}
               style={{
                 maxHeight: 'calc(100vh - 180px)',
-                // comments scroll only when fully expanded & not dragging
                 overflowY: !isExpanded || isDragging ? 'hidden' : 'auto',
+                overscrollBehaviorY: 'contain',
               }}
             >
               {isLoading ? (
@@ -518,10 +651,9 @@ function ArgumentsView({
         }}
       />
 
-      {/* Bottom buttons – unchanged from your original code */}
+      {/* Bottom buttons */}
       <div className="fixed bottom-0 left-0 right-0 max-w-[480px] mx-auto px-3 pb-2 z-20">
         <div className="flex items-center" style={{ gap: '8px' }}>
-          {/* Left Arrow Button */}
           <button
             className="flex items-center justify-center w-12 h-12 rounded-[40px] bg-white shadow-md p-3"
             onClick={() => {
@@ -542,7 +674,6 @@ function ArgumentsView({
             </svg>
           </button>
 
-          {/* Add Argument Button */}
           <button
             className="flex-1 bg-[#F0E224] text-[#212121] font-inter font-medium text-[18px] leading-[32px] rounded-[40px]"
             style={{
@@ -552,13 +683,12 @@ function ArgumentsView({
               paddingLeft: '24px',
             }}
             onClick={() => {
-              // no-op, same as original
+              setShowOpinionForm(true);
             }}
           >
             Add argument
           </button>
 
-          {/* Right Arrow Button */}
           <button
             className="flex items-center justify-center w-12 h-12 rounded-[40px] bg-white shadow-md p-3"
             onClick={() => {
@@ -580,6 +710,70 @@ function ArgumentsView({
           </button>
         </div>
       </div>
+
+      {/* Opinion Form Bottom Sheet */}
+      {(showOpinionForm || isClosingForm) && (
+        <div
+          className="fixed inset-0 z-[200] flex items-end"
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !isClosingForm) {
+              handleCloseForm();
+            }
+          }}
+        >
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/50 transition-opacity duration-300 ease-out"
+            style={{
+              opacity: isClosingForm ? 0 : 1,
+            }}
+            onClick={() => {
+              if (!isClosingForm) {
+                handleCloseForm();
+              }
+            }}
+          />
+
+          {/* Bottom Sheet */}
+          <div
+            className="relative w-full max-w-[480px] mx-auto bg-[#121212] rounded-t-2xl shadow-2xl"
+            style={{
+              animation: isClosingForm
+                ? 'slideDown 0.3s ease-out forwards'
+                : 'slideUp 0.3s ease-out forwards',
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+          >
+            {/* Form Container */}
+            <div className="px-3 pt-4 pb-6">
+              <OpinionForm onAddOpinion={handleAddOpinion} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Slide animations */}
+      <style>{`
+        @keyframes slideUp {
+          from {
+            transform: translateY(100%);
+          }
+          to {
+            transform: translateY(0);
+          }
+        }
+        @keyframes slideDown {
+          from {
+            transform: translateY(0);
+          }
+          to {
+            transform: translateY(100%);
+          }
+        }
+      `}</style>
+
     </div>
   );
 }
