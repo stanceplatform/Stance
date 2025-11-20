@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import ProgressBarWithLabels from '../charts/ProgressBar';
-import { fetchCardComments, postCommentOnCard } from '../../services/operations';
+import { fetchCardComments, postCommentOnCard, likeComment, unlikeComment } from '../../services/operations';
 import { marked } from 'marked';
 import OpinionForm from './OpinionForm';
 
@@ -54,6 +54,7 @@ function ArgumentsView({
   const [showOpinionForm, setShowOpinionForm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isClosingForm, setIsClosingForm] = useState(false);
+  const [likeDebounce, setLikeDebounce] = useState({});
 
   // sheet drag + state
   const [isExpanded, setIsExpanded] = useState(false); // false = collapsed (first comment), true = full list
@@ -428,6 +429,45 @@ function ArgumentsView({
     }
   };
 
+  const canLike = (commentId) => {
+    const now = Date.now();
+    const lastLike = likeDebounce[commentId] || 0;
+    return (now - lastLike) >= 2000;
+  };
+
+  const handleLike = async (commentId) => {
+    try {
+      if (!canLike(commentId)) return;
+
+      setError(null);
+      setLikeDebounce(prev => ({ ...prev, [commentId]: Date.now() }));
+
+      // decide server call from current state (before change)
+      const current = argsList.find(c => c.id === commentId);
+      const wasLiked = !!current?.likes?.isLikedByCurrentUser;
+
+      if (wasLiked) {
+        await unlikeComment(commentId);
+      } else {
+        await likeComment(commentId);
+      }
+
+      // ⬇️ REFRESH from backend to get authoritative likes & likedUsers
+      const comments = await fetchCardComments(cardId);
+      const commentsArray = Array.isArray(comments)
+        ? comments
+        : comments?.content || [];
+
+      // Sort by createdAt descending (newest first)
+      const sorted = [...commentsArray].sort(
+        (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
+      );
+      setArgsList(sorted);
+    } catch (err) {
+      setError(err?.message || 'Failed to like comment');
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -587,8 +627,10 @@ function ArgumentsView({
                                 {arg.replies || 0}
                               </span>
                             </div>
-                            <div
-                              className="flex items-center justify-center border"
+                            <button
+                              type="button"
+                              onClick={() => handleLike(arg.id)}
+                              className="flex items-center justify-center border cursor-pointer"
                               style={{
                                 width: '59px',
                                 height: '30px',
@@ -600,6 +642,16 @@ function ArgumentsView({
                                 gap: '4px',
                                 borderWidth: '1px',
                                 borderColor: theme.borderColor,
+                                backgroundColor: arg.likes?.isLikedByCurrentUser
+                                  ? selectedOptionId === answerOptions?.[0]?.id
+                                    ? '#F0E224' // Yellow stance - liked
+                                    : selectedOptionId === answerOptions?.[1]?.id
+                                      ? '#BF24F9' // Purple stance - liked
+                                      : 'transparent'
+                                  : 'transparent',
+                                borderColor: arg.likes?.isLikedByCurrentUser
+                                  ? 'transparent'
+                                  : theme.borderColor,
                               }}
                             >
                               <svg
@@ -611,19 +663,36 @@ function ArgumentsView({
                               >
                                 <path
                                   d="M9.99816 3L15.8352 8.837L14.7732 9.9L10.7482 5.875L10.7502 16.156H9.25016L9.24816 5.875L5.22316 9.9L4.16016 8.837L9.99816 3Z"
-                                  fill="#121212"
+                                  fill={
+                                    arg.likes?.isLikedByCurrentUser
+                                      ? selectedOptionId === answerOptions?.[0]?.id
+                                        ? '#121212' // Yellow stance - liked text
+                                        : selectedOptionId === answerOptions?.[1]?.id
+                                          ? '#FFFFFF' // Purple stance - liked text
+                                          : '#121212'
+                                      : '#121212'
+                                  }
                                 />
                               </svg>
                               <span
-                                className="text-[#121212] font-inter font-normal text-[15px] leading-[22px]"
-                                style={{ verticalAlign: 'middle' }}
+                                className="font-inter font-normal text-[15px] leading-[22px]"
+                                style={{
+                                  verticalAlign: 'middle',
+                                  color: arg.likes?.isLikedByCurrentUser
+                                    ? selectedOptionId === answerOptions?.[0]?.id
+                                      ? '#121212' // Yellow stance - liked text
+                                      : selectedOptionId === answerOptions?.[1]?.id
+                                        ? '#FFFFFF' // Purple stance - liked text
+                                        : '#121212'
+                                    : '#121212',
+                                }}
                               >
                                 {arg.likes?.count ||
                                   arg.upvotes ||
                                   arg.likeCount ||
                                   0}
                               </span>
-                            </div>
+                            </button>
                           </div>
                         </div>
                         <div

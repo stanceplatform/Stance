@@ -199,6 +199,7 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle, onNext, onPre
           totalStances={totalStances}
           onNext={onNext}
           onPrevious={onPrevious}
+          backgroundImageUrl={question.backgroundImageUrl}
         />
       )}
 
