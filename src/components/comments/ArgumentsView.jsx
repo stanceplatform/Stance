@@ -122,6 +122,7 @@ function ArgumentsView({
   const [isDragging, setIsDragging] = useState(false);
 
   const scrollContainerRef = useRef(null);
+  const firstCommentTextRef = useRef(null);
   const dragStateRef = useRef({
     active: false,
     startY: 0,
@@ -171,7 +172,7 @@ function ArgumentsView({
       ? rect.bottom + gapBelow
       : rect.top - menuHeight - gapAbove;
 
-    // Left align with comment padding (comment has p-3 = 12px, so left should be rect.left + 12)
+    // Left align with comment padding (comment has p-3 = 12px)
     const left = rect.left + 12;
 
     setContextMenu({
@@ -231,6 +232,7 @@ function ArgumentsView({
   }, [isOpen, loadArguments]);
 
   // Initialize collapsed offset when this sheet opens
+  // Initialize collapsed offset when this sheet opens
   useEffect(() => {
     if (!isOpen) return;
     if (typeof window === "undefined") return;
@@ -258,12 +260,53 @@ function ArgumentsView({
       Math.round(vh * 0.55)
     );
 
-    const offset = vh - visibleHeight;
+    // ✨ tweakable gap between first card bottom and "Add argument"
+    const SHORT_LINES_THRESHOLD = 3;    // <=3 lines = short
+
+    // Calculate actualLines if ref is available, otherwise use approxLines
+    let actualLines = approxLines;
+    if (firstCommentTextRef.current) {
+      const textElement = firstCommentTextRef.current;
+      const computedStyle = window.getComputedStyle(textElement);
+      const lineHeight = parseFloat(computedStyle.lineHeight) || 24;
+
+      // Get actual content height (scrollHeight excludes padding/border)
+      // For capital/small letters, this gives accurate rendered height
+      const contentHeight = textElement.scrollHeight;
+
+      // Calculate lines based on actual rendered content
+      actualLines = Math.round(contentHeight / lineHeight);
+      if (actualLines < 1) actualLines = 1;
+      if (actualLines > 6) actualLines = 6;
+    }
+
+    let BASE_BOTTOM_GAP = -42;
+    console.log("approxLines", approxLines);
+    if (actualLines === 1) {
+      BASE_BOTTOM_GAP = -42;
+    } else if (actualLines === 2) {
+      BASE_BOTTOM_GAP = -50;
+    } else if (actualLines === 3) {
+      BASE_BOTTOM_GAP = -70;
+    } else if (actualLines === 4) {
+      BASE_BOTTOM_GAP = -42;
+    } else {
+      BASE_BOTTOM_GAP = -42;
+    }
+
+    const isShortFirstComment = approxLines <= SHORT_LINES_THRESHOLD;
+
+    let offset = vh - visibleHeight;
+
+    if (isShortFirstComment) {
+      offset += BASE_BOTTOM_GAP;  // bigger value = more space under card
+    }
 
     setCollapsedOffset(offset);
     setCurrentOffset(offset);
     setIsExpanded(false);
   }, [isOpen, argsList.length]);
+
 
   // Body lock + global pull-to-refresh blocker
   useEffect(() => {
@@ -610,7 +653,6 @@ function ArgumentsView({
   };
 
   const handleReportComment = () => {
-    // Yahan API call / toast etc kar sakte ho
     closeContextMenu();
   };
 
@@ -653,9 +695,7 @@ function ArgumentsView({
 
   // -------------------------------------------
 
-  // Background should be visible only when:
-  // - sheet is expanded AND
-  // - we're not currently dragging down from the top-expanded state
+  // Background visible only when expanded and not dragging down from top
   const isDraggingDownFromTop =
     isDragging &&
     dragStateRef.current?.fromTopExpanded &&
@@ -663,13 +703,12 @@ function ArgumentsView({
 
   const shouldShowBg = isExpanded && !isDraggingDownFromTop;
 
-
   if (!isOpen) return null;
 
   return (
     <div
       className={`fixed inset-0 flex flex-col w-full max-w-[480px] mx-auto ${isDragging || isExpanded ? "z-[100]" : "z-0"
-        } ${contextMenu.open && 'select-none'}`}
+        } ${contextMenu.open && "select-none"}`}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
@@ -691,8 +730,6 @@ function ArgumentsView({
           style={{
             transform: `translateY(${currentOffset}px)`,
             transition: isDragging ? "none" : "transform 200ms ease-out",
-
-            // 👇 Only show background when EXPANDED
             backgroundColor: shouldShowBg
               ? `rgba(255,255,255,${expansionProgress})`
               : "transparent",
@@ -701,9 +738,9 @@ function ArgumentsView({
           <div className="flex flex-col rounded-b-2xl overflow-hidden bg-transparent">
             {/* Question + Progress */}
             <div
-              className={`px-3 rounded-b-2xl ${isExpanded ? "py-3" : "pt-4 pb-0"} bg-transparent`}
+              className={`px-3 rounded-b-2xl ${isExpanded ? "py-3" : "pt-4 pb-0"
+                } bg-transparent`}
               style={{
-                // 👇 Same logic here also
                 backgroundColor: shouldShowBg
                   ? `rgba(18,18,18,${expansionProgress})`
                   : "transparent",
@@ -771,7 +808,7 @@ function ArgumentsView({
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {visibleArgs.map((arg) => {
+                  {visibleArgs.map((arg, index) => {
                     const selectedOptionId =
                       arg.answer?.selectedOptionId ||
                       arg.selectedOptionId;
@@ -779,6 +816,7 @@ function ArgumentsView({
                       selectedOptionId,
                       answerOptions
                     );
+                    const isFirstComment = index === 0;
 
                     return (
                       <div
@@ -857,7 +895,8 @@ function ArgumentsView({
                                 backgroundColor: arg.likes?.isLikedByCurrentUser
                                   ? selectedOptionId === answerOptions?.[0]?.id
                                     ? "#F0E224"
-                                    : selectedOptionId === answerOptions?.[1]?.id
+                                    : selectedOptionId ===
+                                      answerOptions?.[1]?.id
                                       ? "#BF24F9"
                                       : "transparent"
                                   : "transparent",
@@ -912,6 +951,7 @@ function ArgumentsView({
                           </div>
                         </div>
                         <div
+                          ref={isFirstComment ? firstCommentTextRef : null}
                           className="text-[#212121] font-inter font-normal text-base leading-[24px] text-start"
                           dangerouslySetInnerHTML={{
                             __html: marked.parse(arg.text || ""),
@@ -928,43 +968,47 @@ function ArgumentsView({
       </div>
 
       {/* Context menu overlay */}
-      {contextMenu.open && (() => {
-        const selectedComment = argsList.find(arg => arg.id === contextMenu.commentId);
-        const ownerId = selectedComment?.user?.id || selectedComment?.authorId || selectedComment?.createdById;
-        const isOwn = user?.id && ownerId && Number(ownerId) === Number(user.id);
+      {contextMenu.open &&
+        (() => {
+          const selectedComment = argsList.find(
+            (arg) => arg.id === contextMenu.commentId
+          );
+          const ownerId =
+            selectedComment?.user?.id ||
+            selectedComment?.authorId ||
+            selectedComment?.createdById;
+          const isOwn =
+            user?.id && ownerId && Number(ownerId) === Number(user.id);
 
-        return (
-          <div
-            className="fixed inset-0 z-[150]"
-            onClick={closeContextMenu}
-          >
-            <div
-              className="absolute bg-white rounded-xl shadow-lg py-2 px-3 text-sm"
-              style={{
-                top: contextMenu.top,
-                left: contextMenu.left,
-                minWidth: "140px",
-              }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              {isOwn && (
-                <button
-                  className="block w-full text-left py-1.5 text-[#E11D48] font-medium"
-                  onClick={handleDeleteComment}
-                >
-                  Delete
-                </button>
-              )}
-              <button
-                className="block w-full text-left py-1.5 text-[#111827]"
-                onClick={handleReportComment}
+          return (
+            <div className="fixed inset-0 z-[150]" onClick={closeContextMenu}>
+              <div
+                className="absolute bg-white rounded-xl shadow-lg py-2 px-3 text-sm"
+                style={{
+                  top: contextMenu.top,
+                  left: contextMenu.left,
+                  minWidth: "140px",
+                }}
+                onClick={(e) => e.stopPropagation()}
               >
-                Report
-              </button>
+                {isOwn && (
+                  <button
+                    className="block w-full text-left py-1.5 text-[#E11D48] font-medium"
+                    onClick={handleDeleteComment}
+                  >
+                    Delete
+                  </button>
+                )}
+                <button
+                  className="block w-full text-left py-1.5 text-[#111827]"
+                  onClick={handleReportComment}
+                >
+                  Report
+                </button>
+              </div>
             </div>
-          </div>
-        );
-      })()}
+          );
+        })()}
 
       {/* Delete Confirmation Modal */}
       <ConfirmDeleteModal
@@ -1016,8 +1060,18 @@ function ArgumentsView({
               paddingRight: "24px",
               paddingBottom: "8px",
               paddingLeft: "24px",
-              backgroundColor: userChoice === 1 ? "#F0E224" : userChoice === 2 ? "#9105C6" : "#F0E224",
-              color: userChoice === 1 ? "#212121" : userChoice === 2 ? "#FFFFFF" : "#212121",
+              backgroundColor:
+                userChoice === 1
+                  ? "#F0E224"
+                  : userChoice === 2
+                    ? "#9105C6"
+                    : "#F0E224",
+              color:
+                userChoice === 1
+                  ? "#212121"
+                  : userChoice === 2
+                    ? "#FFFFFF"
+                    : "#212121",
             }}
             onClick={() => {
               setShowOpinionForm(true);
