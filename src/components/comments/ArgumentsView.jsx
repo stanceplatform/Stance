@@ -371,6 +371,7 @@ function ArgumentsView({
       startOffset: currentOffset,
       hasMoved: false,
       fromScroller,
+      fromTopExpanded: isExpanded && currentOffset === 0 && !fromScroller,
     };
   };
 
@@ -652,6 +653,17 @@ function ArgumentsView({
 
   // -------------------------------------------
 
+  // Background should be visible only when:
+  // - sheet is expanded AND
+  // - we're not currently dragging down from the top-expanded state
+  const isDraggingDownFromTop =
+    isDragging &&
+    dragStateRef.current?.fromTopExpanded &&
+    currentOffset > 0;
+
+  const shouldShowBg = isExpanded && !isDraggingDownFromTop;
+
+
   if (!isOpen) return null;
 
   return (
@@ -679,16 +691,22 @@ function ArgumentsView({
           style={{
             transform: `translateY(${currentOffset}px)`,
             transition: isDragging ? "none" : "transform 200ms ease-out",
-            backgroundColor: `rgba(255,255,255,${expansionProgress})`,
+
+            // 👇 Only show background when EXPANDED
+            backgroundColor: shouldShowBg
+              ? `rgba(255,255,255,${expansionProgress})`
+              : "transparent",
           }}
         >
           <div className="flex flex-col rounded-b-2xl overflow-hidden bg-transparent">
             {/* Question + Progress */}
             <div
-              className={`px-3 rounded-b-2xl ${isExpanded ? "py-3" : "pt-4 pb-0"
-                }  bg-transparent`}
+              className={`px-3 rounded-b-2xl ${isExpanded ? "py-3" : "pt-4 pb-0"} bg-transparent`}
               style={{
-                backgroundColor: `rgba(18,18,18,${expansionProgress})`,
+                // 👇 Same logic here also
+                backgroundColor: shouldShowBg
+                  ? `rgba(18,18,18,${expansionProgress})`
+                  : "transparent",
               }}
             >
               <h2
