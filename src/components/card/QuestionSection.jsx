@@ -23,7 +23,7 @@ const formatPct = (v) => {
   return num.toFixed(1);
 };
 
-function QuestionSection({ question, onVoteUpdate, onDrawerToggle, onNext, onPrevious }) {
+function QuestionSection({ question, onVoteUpdate, onDrawerToggle, onNext, onPrevious, hasVoted: hasVotedProp, onHasVotedChange }) {
   const normalizedOptions = question.answerOptions ?? question.answeroptions ?? [];
   const { isAuthenticated } = useAuth();
 
@@ -36,7 +36,9 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle, onNext, onPre
     return idx >= 0 ? idx + 1 : null;
   })();
 
-  const [hasVoted, setHasVoted] = useState(answered);
+  const [hasVotedInternal, setHasVotedInternal] = useState(answered);
+  const hasVoted = hasVotedProp !== undefined ? hasVotedProp : hasVotedInternal;
+  const setHasVoted = onHasVotedChange || setHasVotedInternal;
   const [userChoice, setUserChoice] = useState(initialChoice);
   const [currentAnswers, setCurrentAnswers] = useState(normalizedOptions);
   const [isVoting, setIsVoting] = useState(false);
@@ -67,7 +69,7 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle, onNext, onPre
       setHasVoted(false);
       setUserChoice(null);
     }
-  }, [question.id, question.userResponse]);
+  }, [question.id, question.userResponse, setHasVoted]);
 
   const handleVote = async (option, choiceNumber) => {
     if (hasVoted || isVoting) return;
@@ -200,6 +202,7 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle, onNext, onPre
           onNext={onNext}
           onPrevious={onPrevious}
           backgroundImageUrl={question.backgroundImageUrl}
+          hasVoted={hasVoted}
         />
       )}
 
