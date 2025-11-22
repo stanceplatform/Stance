@@ -779,6 +779,7 @@ function ArgumentsView({
                   firstOptionText={firstOption?.value ?? "Option A"}
                   secondOptionText={secondOption?.value ?? "Option B"}
                   secondOptionPercentage={secondPct}
+                  hasVoted={hasVoted}
                 />
                 <div className="w-full pt-2 pb-4 text-center">
                   <span

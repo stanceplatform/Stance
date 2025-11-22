@@ -1,7 +1,7 @@
 import React from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 
-const ProgressBarWithLabels = ({ firstOptionPercentage, userChoice, firstOptionText, secondOptionText }) => {
+const ProgressBarWithLabels = ({ firstOptionPercentage, userChoice, firstOptionText, secondOptionText, hasVoted }) => {
   const mapWidth = (pct, min) => {
     const p = Math.max(0, Math.min(100, Number(pct) || 0));
     const range = 100 - 2 * min;
@@ -53,7 +53,7 @@ const ProgressBarWithLabels = ({ firstOptionPercentage, userChoice, firstOptionT
       <motion.div key="options" className="flex w-full justify-between">
         {/* Left (Yellow) */}
         <div
-          className="relative gap-2 self-stretch mr-3 px-3 py-0 h-full text-left text-xl tracking-wide leading-6 whitespace-nowrap rounded-[4px]"
+          className="relative gap-2 self-stretch mr-1.5 px-3 py-0 h-full text-left text-xl tracking-wide leading-6 whitespace-nowrap rounded-[4px]"
           style={{
             width: `${leftWidth}%`,
             backgroundColor: userChoice === 1 ? '#F0E224' : '#565006',
@@ -62,14 +62,16 @@ const ProgressBarWithLabels = ({ firstOptionPercentage, userChoice, firstOptionT
         >
           {firstOptionPercentage}%
           <span
-            className="absolute right-[-10px] top-[60%] -translate-y-1/2 w-0 h-0 border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent border-l-[10px]"
-            style={{ borderLeftColor: userChoice === 1 ? '#F0E224' : '#565006' }}
+            className={`absolute  -translate-y-1/2 origin-center w-0 h-0 border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent border-l-[10px] ${hasVoted ? 'scale-[0.70] right-[-7.5px] top-[63%]' : 'right-[-9px] top-[60%]'}`}
+            style={{
+              borderLeftColor: userChoice === 1 ? '#F0E224' : '#565006',
+            }}
           ></span>
         </div>
 
         {/* Right (Purple) */}
         <div
-          className="relative gap-2 self-stretch ml-3 px-3 py-0 h-full text-right text-xl tracking-wide leading-6 whitespace-nowrap rounded-[4px]"
+          className="relative gap-2 self-stretch ml-1.5 px-3 py-0 h-full text-right text-xl tracking-wide leading-6 whitespace-nowrap rounded-[4px]"
           style={{
             width: `${rightWidth}%`,
             backgroundColor: userChoice === 2 ? '#BF24F9' : '#3A0250',
@@ -78,8 +80,10 @@ const ProgressBarWithLabels = ({ firstOptionPercentage, userChoice, firstOptionT
         >
           {secondPct}%
           <span
-            className="absolute left-[-9px] top-[40%] -translate-y-1/2 w-0 h-0 border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent border-r-[10px]"
-            style={{ borderRightColor: userChoice === 2 ? '#BF24F9' : '#3A0250' }}
+            className={`absolute left-[-9px] top-[40%] -translate-y-1/2 origin-center w-0 h-0 border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent border-r-[10px] ${hasVoted ? 'scale-[0.70] left-[-7.5px] top-[45%]' : 'left-[-9px] top-[40%]'}`}
+            style={{
+              borderRightColor: userChoice === 2 ? '#BF24F9' : '#3A0250',
+            }}
           ></span>
         </div>
       </motion.div>
