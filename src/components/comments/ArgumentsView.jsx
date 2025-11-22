@@ -17,6 +17,7 @@ import OpinionForm from "./OpinionForm";
 import toast from "react-hot-toast";
 import { useAuth } from "../../context/AuthContext";
 import CardNavigation from "../card/CardNavigation";
+import ReportComment from "./ReportCommentSheet";
 
 // Delete Confirmation Modal
 function ConfirmDeleteModal({ open, onCancel, onConfirm, loading }) {
@@ -114,6 +115,9 @@ function ArgumentsView({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [commentIdToDelete, setCommentIdToDelete] = useState(null);
+  const [showReport, setShowReport] = useState(false);
+  const [commentIdToReport, setCommentIdToReport] = useState(null);
+  const [reportedComments, setReportedComments] = useState(new Set());
 
   const { user } = useAuth();
 
@@ -655,7 +659,11 @@ function ArgumentsView({
   };
 
   const handleReportComment = () => {
+    const id = contextMenu.commentId;
+    if (!id) return;
+    setCommentIdToReport(id);
     closeContextMenu();
+    setShowReport(true);
   };
 
   // TOUCH / CONTEXT HANDLERS FOR COMMENT CARD
@@ -822,6 +830,7 @@ function ArgumentsView({
                       answerOptions
                     );
                     const isFirstComment = index === 0;
+                    const isReported = reportedComments.has(arg.id);
 
                     return (
                       <div
@@ -955,6 +964,13 @@ function ArgumentsView({
                             </button>
                           </div>
                         </div>
+
+                        {isReported && (
+                          <span className="mt-1 mb-2 self-start text-xs px-2 py-0.5 rounded-full bg-neutral-700 text-neutral-200">
+                            Reported
+                          </span>
+                        )}
+
                         <div
                           ref={isFirstComment ? firstCommentTextRef : null}
                           className="text-[#212121] font-inter font-normal text-base leading-[24px] text-start"
@@ -1024,6 +1040,34 @@ function ArgumentsView({
           setCommentIdToDelete(null);
         }}
         onConfirm={handleConfirmDelete}
+      />
+
+      {/* Report Comment Sheet */}
+      <ReportComment
+        open={showReport}
+        onClose={() => {
+          setShowReport(false);
+          setCommentIdToReport(null);
+        }}
+        commentId={commentIdToReport}
+        onReport={() => {
+          // Optional: handle report callback if needed
+        }}
+        onSuccess={() => {
+          if (commentIdToReport) {
+            setReportedComments((prev) => new Set(prev).add(commentIdToReport));
+            toast.success("Comment reported successfully.");
+            setTimeout(() => {
+              setReportedComments((prev) => {
+                const newSet = new Set(prev);
+                newSet.delete(commentIdToReport);
+                return newSet;
+              });
+            }, 2000);
+          }
+          setShowReport(false);
+          setCommentIdToReport(null);
+        }}
       />
 
       {/* Gradient overlay between comment and button (fixed at bottom) */}
