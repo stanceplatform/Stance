@@ -249,7 +249,7 @@ function ArgumentsView({
     if (approxLines > 6) approxLines = 6;
 
     const MIN_VISIBLE = 260;
-    const MAX_VISIBLE = 360;
+    const MAX_VISIBLE = 385;
 
     const factor = (approxLines - 1) / 5;
     const lineBasedVisible =
@@ -280,18 +280,18 @@ function ArgumentsView({
       if (actualLines > 6) actualLines = 6;
     }
 
-    let BASE_BOTTOM_GAP = -42;
-    console.log("approxLines", approxLines);
+    let BASE_BOTTOM_GAP = -60;
+    console.log("actualLines (measured)", actualLines);
     if (actualLines === 1) {
-      BASE_BOTTOM_GAP = -42;
+      BASE_BOTTOM_GAP = -60;
     } else if (actualLines === 2) {
-      BASE_BOTTOM_GAP = -50;
+      BASE_BOTTOM_GAP = -60;
     } else if (actualLines === 3) {
-      BASE_BOTTOM_GAP = -70;
+      BASE_BOTTOM_GAP = -84;
     } else if (actualLines === 4) {
-      BASE_BOTTOM_GAP = -42;
+      BASE_BOTTOM_GAP = -50;
     } else {
-      BASE_BOTTOM_GAP = -42;
+      BASE_BOTTOM_GAP = -48;
     }
 
     const isShortFirstComment = approxLines <= SHORT_LINES_THRESHOLD;
