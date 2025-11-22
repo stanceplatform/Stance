@@ -16,7 +16,7 @@ const ProgressBarWithLabels = ({ firstOptionPercentage, userChoice, firstOptionT
   const rightWidth = mapWidth(secondPct, minWidth);
 
   return (
-    <div className="flex flex-col items-center w-full space-y-3 p-1">
+    <div className="flex flex-col items-center w-full space-y-3">
       {/* Answer Labels */}
       <div className="flex justify-between w-full">
         <div className="text-left">
@@ -56,14 +56,14 @@ const ProgressBarWithLabels = ({ firstOptionPercentage, userChoice, firstOptionT
           className="relative gap-2 self-stretch mr-3 px-3 py-0 h-full text-left text-xl tracking-wide leading-6 whitespace-nowrap rounded-[4px]"
           style={{
             width: `${leftWidth}%`,
-            backgroundColor: userChoice === 1 ? '#F0E224' : '#776F08',
-            color: '#565006'
+            backgroundColor: userChoice === 1 ? '#F0E224' : '#565006',
+            color: userChoice === 1 ? '#565006' : '#FFFFFF'
           }}
         >
           {firstOptionPercentage}%
           <span
             className="absolute right-[-10px] top-[60%] -translate-y-1/2 w-0 h-0 border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent border-l-[10px]"
-            style={{ borderLeftColor: userChoice === 1 ? '#F0E224' : '#776F08' }}
+            style={{ borderLeftColor: userChoice === 1 ? '#F0E224' : '#565006' }}
           ></span>
         </div>
 
@@ -72,14 +72,14 @@ const ProgressBarWithLabels = ({ firstOptionPercentage, userChoice, firstOptionT
           className="relative gap-2 self-stretch ml-3 px-3 py-0 h-full text-right text-xl tracking-wide leading-6 whitespace-nowrap rounded-[4px]"
           style={{
             width: `${rightWidth}%`,
-            backgroundColor: userChoice === 2 ? '#9105C6' : '#3A0250',
-            color: '#E9B4FD'
+            backgroundColor: userChoice === 2 ? '#BF24F9' : '#3A0250',
+            color: '#FFFFFF'
           }}
         >
           {secondPct}%
           <span
             className="absolute left-[-9px] top-[40%] -translate-y-1/2 w-0 h-0 border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent border-r-[10px]"
-            style={{ borderRightColor: userChoice === 2 ? '#9105C6' : '#3A0250' }}
+            style={{ borderRightColor: userChoice === 2 ? '#BF24F9' : '#3A0250' }}
           ></span>
         </div>
       </motion.div>

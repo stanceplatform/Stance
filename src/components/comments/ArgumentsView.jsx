@@ -172,8 +172,8 @@ function ArgumentsView({
       ? rect.bottom + gapBelow
       : rect.top - menuHeight - gapAbove;
 
-    // Left align with comment padding (comment has p-3 = 12px)
-    const left = rect.left + 12;
+    // Left align with comment padding (comment has p-4 = 16px)
+    const left = rect.left + 16;
 
     setContextMenu({
       open: true,
@@ -738,8 +738,7 @@ function ArgumentsView({
           <div className="flex flex-col rounded-b-2xl overflow-hidden bg-transparent">
             {/* Question + Progress */}
             <div
-              className={`px-3 rounded-b-2xl ${isExpanded ? "py-3" : "pt-4 pb-0"
-                } bg-transparent`}
+              className={`px-4 pt-4 rounded-b-2xl bg-transparent`}
               style={{
                 backgroundColor: shouldShowBg
                   ? `rgba(18,18,18,${expansionProgress})`
@@ -747,7 +746,7 @@ function ArgumentsView({
               }}
             >
               <h2
-                className="text-left font-inter mt-1"
+                className="text-left font-inter"
                 style={{
                   fontWeight: 600,
                   fontSize: "15px",
@@ -759,7 +758,7 @@ function ArgumentsView({
                 {question || "Should we have shared hostels for inclusivity?"}
               </h2>
 
-              <div className="w-full mt-3">
+              <div className="w-full mt-4">
                 <ProgressBarWithLabels
                   firstOptionPercentage={firstPct}
                   userChoice={userChoice}
@@ -767,7 +766,7 @@ function ArgumentsView({
                   secondOptionText={secondOption?.value ?? "Option B"}
                   secondOptionPercentage={secondPct}
                 />
-                <div className="mt-1 mb-1 w-full text-center">
+                <div className="w-full pt-2 pb-4 text-center">
                   <span
                     className="font-inter font-normal text-white"
                     style={{
@@ -785,7 +784,7 @@ function ArgumentsView({
             {/* Scrollable comments area */}
             <div
               ref={scrollContainerRef}
-              className={`${isExpanded ? "px-2 pt-4 pb-24" : "px-3 pt-2 pb-24"
+              className={`${isExpanded ? "px-2 pt-2 pb-10" : "px-2 pt-0 pb-4"
                 } overflow-y-auto`}
               style={{
                 maxHeight: "calc(100vh - 180px)",
@@ -807,7 +806,7 @@ function ArgumentsView({
                   </p>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {visibleArgs.map((arg, index) => {
                     const selectedOptionId =
                       arg.answer?.selectedOptionId ||
@@ -823,7 +822,7 @@ function ArgumentsView({
                         key={arg.id}
                         data-comment-id={arg.id}
                         data-comment-card
-                        className={`rounded-2xl p-3 z-0 ${isExpanded ? "" : "max-h-[200px] overflow-hidden"
+                        className={`rounded-2xl p-4 z-0 ${isExpanded ? "" : "max-h-[200px] overflow-hidden"
                           }`}
                         style={{ backgroundColor: theme.bgColor }}
                         onTouchStart={(e) =>
@@ -835,7 +834,7 @@ function ArgumentsView({
                           handleCommentContextMenu(e, arg.id)
                         }
                       >
-                        <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center justify-between mb-3">
                           <span
                             className="font-inter font-normal text-[15px] leading-[22px]"
                             style={{ color: theme.titleColor }}
@@ -1031,7 +1030,7 @@ function ArgumentsView({
       />
 
       {/* Bottom buttons */}
-      <div className="fixed bottom-0 left-0 right-0 max-w-[480px] mx-auto px-3 pb-2 z-20">
+      <div className="fixed bottom-0 left-0 right-0 max-w-[480px] mx-auto px-4 pb-4 z-20">
         <div className="flex items-center" style={{ gap: "8px" }}>
           <button
             className="flex items-center justify-center w-12 h-12 rounded-[40px] bg-white shadow-md p-3"
