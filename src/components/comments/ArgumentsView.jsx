@@ -127,6 +127,9 @@ function ArgumentsView({
   const [currentOffset, setCurrentOffset] = useState(0); // current translateY
   const [isDragging, setIsDragging] = useState(false);
 
+  // ✅ NEW: control when CSS transition should start (avoid initial load animation)
+  const [enableTransition, setEnableTransition] = useState(false);
+
   const scrollContainerRef = useRef(null);
   const firstCommentTextRef = useRef(null);
   const dragStateRef = useRef({
@@ -204,6 +207,12 @@ function ArgumentsView({
     };
   }, []);
 
+  // ✅ NEW: enable transition only AFTER initial paint
+  useEffect(() => {
+    const timer = setTimeout(() => setEnableTransition(true), 0);
+    return () => clearTimeout(timer);
+  }, []);
+
   // ------------------------------------------
 
   const loadArguments = useCallback(async () => {
@@ -238,7 +247,6 @@ function ArgumentsView({
   }, [isOpen, loadArguments]);
 
   // Initialize collapsed offset when this sheet opens
-  // Initialize collapsed offset when this sheet opens
   useEffect(() => {
     if (!isOpen) return;
     if (typeof window === "undefined") return;
@@ -267,7 +275,7 @@ function ArgumentsView({
     );
 
     // ✨ tweakable gap between first card bottom and "Add argument"
-    const SHORT_LINES_THRESHOLD = 3;    // <=3 lines = short
+    const SHORT_LINES_THRESHOLD = 3; // <=3 lines = short
 
     // Calculate actualLines if ref is available, otherwise use approxLines
     let actualLines = approxLines;
@@ -277,7 +285,6 @@ function ArgumentsView({
       const lineHeight = parseFloat(computedStyle.lineHeight) || 24;
 
       // Get actual content height (scrollHeight excludes padding/border)
-      // For capital/small letters, this gives accurate rendered height
       const contentHeight = textElement.scrollHeight;
 
       // Calculate lines based on actual rendered content
@@ -305,14 +312,13 @@ function ArgumentsView({
     let offset = vh - visibleHeight;
 
     if (isShortFirstComment) {
-      offset += BASE_BOTTOM_GAP;  // bigger value = more space under card
+      offset += BASE_BOTTOM_GAP; // bigger value = more space under card
     }
 
     setCollapsedOffset(offset);
     setCurrentOffset(offset);
     setIsExpanded(false);
   }, [isOpen, argsList.length]);
-
 
   // Body lock + global pull-to-refresh blocker
   useEffect(() => {
@@ -726,8 +732,6 @@ function ArgumentsView({
         overscrollBehaviorY: "contain",
       }}
     >
-
-
       {/* DRAGGABLE SHEET (header + comments) */}
       <div className="flex-1 relative overflow-hidden">
         {hasVoted && (
@@ -741,7 +745,13 @@ function ArgumentsView({
           onMouseDown={handleMouseDown}
           style={{
             transform: `translateY(${currentOffset}px)`,
-            transition: isDragging ? "none" : "transform 200ms ease-out",
+
+            // ✅ FIXED: no transition on initial load, but keep it on drag snap
+            transition:
+              isDragging || !enableTransition
+                ? "none"
+                : "transform 200ms ease-out",
+
             backgroundColor: shouldShowBg
               ? `rgba(255,255,255,${expansionProgress})`
               : "transparent",
