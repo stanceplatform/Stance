@@ -316,7 +316,7 @@ function ArgumentsView({
 
   // Body lock + global pull-to-refresh blocker
   useEffect(() => {
-    if (!isOpen || typeof window === "undefined") return;
+    if (!isOpen || typeof window === "undefined" || showReport) return;
 
     const root = document.documentElement;
     const body = document.body;
@@ -374,7 +374,7 @@ function ArgumentsView({
       document.removeEventListener("touchstart", handleTouchStartDoc);
       document.removeEventListener("touchmove", handleTouchMoveDoc);
     };
-  }, [isOpen]);
+  }, [isOpen, showReport]);
 
   const formatPct = (v) => {
     if (v == null || v === "") return "0";
