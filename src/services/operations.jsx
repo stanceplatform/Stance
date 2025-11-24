@@ -86,19 +86,25 @@ export const fetchOpinions = async () => {
   }
 };
 
-export const fetchCardComments = async (questionId) => {
+export const fetchCardComments = async (questionId, page = 0, size = 100) => {
   // Don't fetch comments if user is not authenticated
   if (!isAuthenticated()) {
-    return [];
+    return { content: [], totalPages: 1, totalElements: 0, last: true };
   }
 
   try {
-    const response = await apiService.getComments(questionId);
-    return response.content || [];
+    const response = await apiService.getComments(questionId, page, size);
+    return {
+      content: response.content || [],
+      totalPages: response.totalPages || 1,
+      totalElements: response.totalElements || 0,
+      last: response.last !== undefined ? response.last : true,
+      first: response.first !== undefined ? response.first : true,
+    };
   } catch (error) {
     console.error('Error fetching comments:', error);
     toast.error(getApiErrorMessage(error));
-    return [];
+    return { content: [], totalPages: 1, totalElements: 0, last: true };
   }
 };
 

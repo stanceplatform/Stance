@@ -107,7 +107,11 @@ function ArgumentsView({
 }) {
   const [argsList, setArgsList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
   const [showOpinionForm, setShowOpinionForm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isClosingForm, setIsClosingForm] = useState(false);
@@ -215,24 +219,27 @@ function ArgumentsView({
 
   // ------------------------------------------
 
-  const loadArguments = useCallback(async () => {
+  const loadArguments = useCallback(async (reset = true) => {
     if (!cardId) {
       setIsLoading(false);
       return;
     }
 
     try {
-      setIsLoading(true);
+      if (reset) {
+        setIsLoading(true);
+        setCurrentPage(0);
+      }
       setError(null);
-      const comments = await fetchCardComments(cardId);
-      const commentsArray = Array.isArray(comments)
-        ? comments
-        : comments?.content || [];
 
-      const sorted = [...commentsArray].sort(
-        (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
-      );
-      setArgsList(sorted);
+      const response = await fetchCardComments(cardId, 0);
+      const commentsArray = response.content || [];
+
+      // Maintain the order from API response (already sorted by backend)
+      setArgsList(commentsArray);
+      setTotalPages(response.totalPages || 1);
+      setHasMore(!response.last && (response.totalPages || 1) > 1);
+      setCurrentPage(0);
     } catch (err) {
       setError(err?.message || "Failed to load arguments");
     } finally {
@@ -240,11 +247,54 @@ function ArgumentsView({
     }
   }, [cardId]);
 
+  const loadMoreComments = useCallback(async () => {
+    if (!cardId || !hasMore || isLoadingMore || currentPage + 1 >= totalPages) {
+      return;
+    }
+
+    try {
+      setIsLoadingMore(true);
+      const nextPage = currentPage + 1;
+      const response = await fetchCardComments(cardId, nextPage);
+      const newComments = response.content || [];
+
+      // Append new comments to existing list
+      setArgsList((prev) => [...prev, ...newComments]);
+      setCurrentPage(nextPage);
+      setHasMore(!response.last && nextPage + 1 < (response.totalPages || 1));
+    } catch (err) {
+      console.error('Error loading more comments:', err);
+      toast.error("Failed to load more comments");
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [cardId, hasMore, isLoadingMore, currentPage, totalPages]);
+
   useEffect(() => {
     if (isOpen) {
       loadArguments();
     }
   }, [isOpen, loadArguments]);
+
+  // Infinite scroll: detect when user reaches bottom
+  useEffect(() => {
+    if (!isOpen || !isExpanded || !hasMore || isLoadingMore) return;
+
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer) return;
+
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
+      const threshold = 100; // Load more when 100px from bottom
+
+      if (scrollHeight - scrollTop - clientHeight < threshold) {
+        loadMoreComments();
+      }
+    };
+
+    scrollContainer.addEventListener('scroll', handleScroll);
+    return () => scrollContainer.removeEventListener('scroll', handleScroll);
+  }, [isOpen, isExpanded, hasMore, isLoadingMore, loadMoreComments]);
 
   // Initialize collapsed offset when this sheet opens
   useEffect(() => {
@@ -298,7 +348,7 @@ function ArgumentsView({
     if (actualLines === 1) {
       BASE_BOTTOM_GAP = -60;
     } else if (actualLines === 2) {
-      BASE_BOTTOM_GAP = -60;
+      BASE_BOTTOM_GAP = -78;
     } else if (actualLines === 3) {
       BASE_BOTTOM_GAP = -84;
     } else if (actualLines === 4) {
@@ -580,12 +630,12 @@ function ArgumentsView({
         newOpinion.content
       );
 
-      setArgsList((prev) => {
-        const updated = [addedComment, ...prev];
-        return updated.sort(
-          (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
-        );
-      });
+      // Reload all comments to maintain API order
+      const response = await fetchCardComments(cardId, 0);
+      setArgsList(response.content || []);
+      setTotalPages(response.totalPages || 1);
+      setHasMore(!response.last && (response.totalPages || 1) > 1);
+      setCurrentPage(0);
 
       onNewComment?.();
       handleCloseForm();
@@ -621,15 +671,11 @@ function ArgumentsView({
         await likeComment(commentId);
       }
 
-      const comments = await fetchCardComments(cardId);
-      const commentsArray = Array.isArray(comments)
-        ? comments
-        : comments?.content || [];
-
-      const sorted = [...commentsArray].sort(
-        (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
-      );
-      setArgsList(sorted);
+      const response = await fetchCardComments(cardId, 0);
+      setArgsList(response.content || []);
+      setTotalPages(response.totalPages || 1);
+      setHasMore(!response.last && (response.totalPages || 1) > 1);
+      setCurrentPage(0);
     } catch (err) {
       setError(err?.message || "Failed to like comment");
     }
@@ -807,7 +853,7 @@ function ArgumentsView({
             {/* Scrollable comments area */}
             <div
               ref={scrollContainerRef}
-              className={`${isExpanded ? "px-2 pt-2 pb-10" : "px-2 pt-0 pb-4"
+              className={`${isExpanded ? "px-2 pt-2 pb-16" : "px-2 pt-0 pb-4"
                 } overflow-y-auto`}
               style={{
                 maxHeight: "calc(100vh - 180px)",
@@ -989,6 +1035,13 @@ function ArgumentsView({
                       </div>
                     );
                   })}
+
+                  {/* Loading indicator for pagination */}
+                  {isLoadingMore && (
+                    <div className="text-white text-center py-4">
+                      Loading more...
+                    </div>
+                  )}
                 </div>
               )}
             </div>
