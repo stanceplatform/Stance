@@ -914,7 +914,6 @@ function ArgumentsView({
                                 paddingLeft: "8px",
                                 gap: "4px",
                                 borderWidth: "1px",
-                                borderColor: theme.borderColor,
                                 backgroundColor: arg.likes?.isLikedByCurrentUser
                                   ? selectedOptionId === answerOptions?.[0]?.id
                                     ? "#F0E224"
