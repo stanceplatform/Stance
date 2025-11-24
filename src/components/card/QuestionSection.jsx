@@ -151,16 +151,16 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle, onNext, onPre
   return (
     <section className="w-full ">
       {!hasVoted && (
-        <div className="absolute bottom-0 flex flex-col justify-end w-full p-4">
-          <h2 className="text-responsive text-left font-intro font-normal text-white leading-[56px] mt-5 z-0">
+        <div className="absolute bottom-0 flex flex-col justify-end w-full px-4">
+          <h2 className="text-left font-intro font-semibold text-white text-[28px] leading-[40px] tracking-[0.01em] mt-5 z-0">
             {question.question}
           </h2>
 
           <div className="flex w-full z-10">
             <AnimatePresence mode="wait" initial={false}>
-              <motion.div key="options" {...fadeSlide} className="flex w-full mt-6 font-inter">
+              <motion.div key="options" {...fadeSlide} className="flex w-full mt-4 font-inter">
                 <button
-                  className="relative flex-1 shrink gap-2 self-stretch mx-3 px-3 py-2 h-full text-left font-medium text-[22px] tracking-wide leading-8 whitespace-wrap bg-[#F0E224] rounded-md text-[#121212] max-w-xs disabled:opacity-60"
+                  className="relative flex-1 shrink gap-2 self-stretch mr-2 pl-3 pr-2 py-2 h-full text-left font-normal text-[17px] leading-[28px] tracking-normal whitespace-wrap bg-[#F0E224] rounded-md text-[#121212] max-w-xs disabled:opacity-60"
                   aria-label={currentAnswers[0]?.value ?? 'Option A'}
                   onClick={() => currentAnswers[0] && handleVote(currentAnswers[0], 1)}
                   disabled={!currentAnswers[0] || isVoting}
@@ -170,7 +170,7 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle, onNext, onPre
                 </button>
 
                 <button
-                  className="relative flex-1 shrink gap-2 self-stretch mx-3 px-3 py-2 h-full text-right font-medium text-[22px] text-white tracking-wide leading-8 whitespace-wrap bg-[#9105C6] rounded-md max-w-xs disabled:opacity-60"
+                  className="relative flex-1 shrink gap-2 self-stretch ml-2 pl-2 pr-3 py-2 h-full text-right font-normal text-[17px] leading-[28px] tracking-normal text-white whitespace-wrap bg-[#9105C6] rounded-md max-w-xs disabled:opacity-60"
                   aria-label={currentAnswers[1]?.value ?? 'Option B'}
                   onClick={() => currentAnswers[1] && handleVote(currentAnswers[1], 2)}
                   disabled={!currentAnswers[1] || isVoting}
@@ -182,7 +182,7 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle, onNext, onPre
             </AnimatePresence>
           </div>
 
-          <div className="gap-2 self-center px-4 py-2 mt-6 mb-2 font-inter font-medium text-base tracking-wide rounded-[40px] z-10 text-white text-center">
+          <div className="gap-2 self-center my-4 font-inter font-medium text-base z-10 text-white text-center">
             {totalStances} Stances • {commentCount} Arguments
           </div>
         </div>
