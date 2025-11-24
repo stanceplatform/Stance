@@ -866,7 +866,7 @@ function ArgumentsView({
                             {arg.user?.firstName || arg.author || "Unknown"}
                           </span>
                           <div className="flex items-center gap-3">
-                            <div
+                            {/* <div
                               className="flex items-center justify-center border"
                               style={{
                                 width: "59px",
@@ -899,7 +899,7 @@ function ArgumentsView({
                               >
                                 {arg.replies || 0}
                               </span>
-                            </div>
+                            </div> */}
                             <button
                               type="button"
                               onClick={() => handleLike(arg.id)}
