@@ -726,8 +726,6 @@ function ArgumentsView({
         overscrollBehaviorY: "contain",
       }}
     >
-      {/* Background gradient behind everything */}
-      <div className="absolute inset-0 custom-gradient -z-10" />
 
 
       {/* DRAGGABLE SHEET (header + comments) */}

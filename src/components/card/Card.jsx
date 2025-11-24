@@ -283,7 +283,7 @@ const Card = () => {
 
 
   return (
-    <div className="flex overflow-hidden flex-col mx-auto w-full max-w-[480px] max-h-screen-dvh relative">
+    <div className="flex overflow-hidden flex-col mx-auto w-full max-w-[480px] max-h-screen-dvh relative" >
       {loading ? (
         <div className="flex items-center justify-center h-screen">
           <div className="text-white">Loading...</div>
@@ -303,6 +303,7 @@ const Card = () => {
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
         >
+          <div className="absolute inset-0 custom-gradient"></div>
           {/* animated incoming background */}
           <motion.div
             key={`bg-next-${currentQuestionIndex}`}

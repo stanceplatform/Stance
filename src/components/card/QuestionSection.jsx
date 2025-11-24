@@ -151,7 +151,7 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle, onNext, onPre
   return (
     <section className="w-full ">
       {!hasVoted && (
-        <div className="absolute bottom-0 flex flex-col justify-end w-full p-4 custom-gradient ">
+        <div className="absolute bottom-0 flex flex-col justify-end w-full p-4">
           <h2 className="text-responsive text-left font-intro font-normal text-white leading-[56px] mt-5 z-0">
             {question.question}
           </h2>
