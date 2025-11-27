@@ -345,25 +345,28 @@ function ArgumentsView({
 
     let BASE_BOTTOM_GAP = -60;
     console.log("actualLines (measured)", actualLines);
-    if (actualLines === 1) {
-      BASE_BOTTOM_GAP = -60;
-    } else if (actualLines === 2) {
-      BASE_BOTTOM_GAP = -78;
-    } else if (actualLines === 3) {
-      BASE_BOTTOM_GAP = -84;
-    } else if (actualLines === 4) {
-      BASE_BOTTOM_GAP = -50;
+    if (argsList.length === 0) {
+      BASE_BOTTOM_GAP = -170;
     } else {
-      BASE_BOTTOM_GAP = -48;
+      if (actualLines === 1) {
+        BASE_BOTTOM_GAP = -60;
+      } else if (actualLines === 2) {
+        BASE_BOTTOM_GAP = -78;
+      } else if (actualLines === 3) {
+        BASE_BOTTOM_GAP = -84;
+      } else if (actualLines === 4) {
+        BASE_BOTTOM_GAP = -50;
+      } else {
+        BASE_BOTTOM_GAP = -48;
+      }
     }
 
     const isShortFirstComment = approxLines <= SHORT_LINES_THRESHOLD;
 
     let offset = vh - visibleHeight;
 
-    if (isShortFirstComment) {
-      offset += BASE_BOTTOM_GAP; // bigger value = more space under card
-    }
+    offset += BASE_BOTTOM_GAP; // bigger value = more space under card
+
 
     setCollapsedOffset(offset);
     setCurrentOffset(offset);
@@ -868,11 +871,42 @@ function ArgumentsView({
                   Error: {error}
                 </div>
               ) : argsList.length === 0 ? (
-                <div className="text-center py-4">
-                  <p className="text-white font-medium">No arguments yet</p>
-                  <p className="text-white/70 text-sm mt-1">
-                    Be the first to share your view.
-                  </p>
+                <div className="">
+                  <div className="rounded-2xl p-4 bg-white pb-32">
+                    <div className="flex flex-col items-center">
+                      <img
+                        src="/argument-bg.png"
+                        alt=""
+                        className="w-full mb-4"
+                      />
+                      <h3
+                        className="text-center mb-1"
+                        style={{
+                          fontFamily: "Intro Cd-Trial",
+                          fontWeight: 600,
+                          fontSize: "18px",
+                          lineHeight: "24px",
+                          letterSpacing: "0%",
+                          color: "#212121",
+                        }}
+                      >
+                        Bold minds lead
+                      </h3>
+                      <p
+                        className="text-center"
+                        style={{
+                          fontFamily: "Inter",
+                          fontWeight: 400,
+                          fontSize: "12px",
+                          lineHeight: "100%",
+                          letterSpacing: "0%",
+                          color: "#4E4E4E",
+                        }}
+                      >
+                        Add the first argument for this stance.
+                      </p>
+                    </div>
+                  </div>
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -1133,7 +1167,7 @@ function ArgumentsView({
 
       {/* Gradient overlay between comment and button (fixed at bottom) */}
       <div
-        className="fixed bottom-0 left-0 right-0 max-w-[480px] mx-auto h-16 pointer-events-none z-10"
+        className="fixed bottom-0 left-0 right-0 max-w-[480px] mx-auto h-16 pointer-events-none z-50"
         style={{
           background:
             "linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.3) 50%, rgba(0, 0, 0, 1) 100%)",
