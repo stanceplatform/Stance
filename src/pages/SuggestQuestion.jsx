@@ -139,7 +139,7 @@ const SuggestQuestion = () => {
 
             {/* Helper text */}
             <p className="text-left text-[14px] leading-[22px] text-[#4E4E4E] mb-6">
-              If your suggested question is selected, we’ll post it anonymously for debate
+              If your suggested question is selected, we’ll post it for debate
             </p>
 
             {/* Submit */}

@@ -25,6 +25,7 @@ const Card = () => {
   const [showSuggestQuestion, setShowSuggestQuestion] = useState(false)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [showLoginModal, setShowLoginModal] = useState(false)
+  const [hasVoted, setHasVoted] = useState(false)
   const { setQuestionId } = useCurrentQuestion()
   const { isAuthenticated } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -63,8 +64,12 @@ const Card = () => {
   useEffect(() => {
     if (questions.length > 0 && !showSuggestQuestion) {
       setQuestionId(questions[currentQuestionIndex]?.id || null)
+      // Update hasVoted based on current question
+      const currentQuestion = questions[currentQuestionIndex]
+      setHasVoted(Boolean(currentQuestion?.userResponse?.answered))
     } else {
       setQuestionId(null)
+      setHasVoted(false)
     }
   }, [questions, currentQuestionIndex, setQuestionId, showSuggestQuestion])
 
@@ -74,16 +79,16 @@ const Card = () => {
       prev.map(q =>
         q.id === questionId
           ? {
-              ...q,
-              answerOptions: newOptions,
-              userResponse: {
-                ...q.userResponse,
-                answered: true,
-                selectedOptionId: selectedOptionId ?? 
-                  newOptions.find(o => o.isSelected)?.id ??
-                  q.userResponse?.selectedOptionId,
-              },
-            }
+            ...q,
+            answerOptions: newOptions,
+            userResponse: {
+              ...q.userResponse,
+              answered: true,
+              selectedOptionId: selectedOptionId ??
+                newOptions.find(o => o.isSelected)?.id ??
+                q.userResponse?.selectedOptionId,
+            },
+          }
           : q
       )
     )
@@ -278,7 +283,7 @@ const Card = () => {
 
 
   return (
-    <div className="flex overflow-hidden flex-col mx-auto w-full max-w-[480px] max-h-screen-dvh relative">
+    <div className="flex overflow-hidden flex-col mx-auto w-full max-w-[480px] max-h-screen-dvh relative" >
       {loading ? (
         <div className="flex items-center justify-center h-screen">
           <div className="text-white">Loading...</div>
@@ -299,6 +304,8 @@ const Card = () => {
           onTouchEnd={onTouchEnd}
         >
           {/* animated incoming background */}
+          <div className="absolute inset-0 custom-gradient"></div>
+
           <motion.div
             key={`bg-next-${currentQuestionIndex}`}
             className="absolute inset-0"
@@ -313,7 +320,7 @@ const Card = () => {
           />
 
           {/* half-screen click navigation (kept) */}
-          {!isDrawerOpen && (
+          {!isDrawerOpen && !hasVoted && (
             <CardNavigation
               onNext={handleNextQuestion}
               onPrevious={handlePreviousQuestion}
@@ -331,6 +338,10 @@ const Card = () => {
               question={questions[currentQuestionIndex]}
               onVoteUpdate={updateQuestionOptions}
               onDrawerToggle={setIsDrawerOpen}
+              onNext={handleNextQuestion}
+              onPrevious={handlePreviousQuestion}
+              hasVoted={hasVoted}
+              onHasVotedChange={setHasVoted}
             />
           </motion.div>
         </div>

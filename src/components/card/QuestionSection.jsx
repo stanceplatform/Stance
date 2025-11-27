@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { voteOnCard } from '../../services/operations';
-import CommentDrawer from '../comments/CommentDrawer';
+import ArgumentsView from '../comments/ArgumentsView';
 import ProgressBarWithLabels from '../charts/ProgressBar';
 import { getApiErrorMessage } from '../../utils/apiError';
 import toast from 'react-hot-toast';
@@ -23,7 +23,7 @@ const formatPct = (v) => {
   return num.toFixed(1);
 };
 
-function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
+function QuestionSection({ question, onVoteUpdate, onDrawerToggle, onNext, onPrevious, hasVoted: hasVotedProp, onHasVotedChange }) {
   const normalizedOptions = question.answerOptions ?? question.answeroptions ?? [];
   const { isAuthenticated } = useAuth();
 
@@ -36,7 +36,9 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
     return idx >= 0 ? idx + 1 : null;
   })();
 
-  const [hasVoted, setHasVoted] = useState(answered);
+  const [hasVotedInternal, setHasVotedInternal] = useState(answered);
+  const hasVoted = hasVotedProp !== undefined ? hasVotedProp : hasVotedInternal;
+  const setHasVoted = onHasVotedChange || setHasVotedInternal;
   const [userChoice, setUserChoice] = useState(initialChoice);
   const [currentAnswers, setCurrentAnswers] = useState(normalizedOptions);
   const [isVoting, setIsVoting] = useState(false);
@@ -67,11 +69,11 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
       setHasVoted(false);
       setUserChoice(null);
     }
-  }, [question.id, question.userResponse]);
+  }, [question.id, question.userResponse, setHasVoted]);
 
   const handleVote = async (option, choiceNumber) => {
     if (hasVoted || isVoting) return;
-    
+
     // Check if user is authenticated
     if (!isAuthenticated) {
       setShowLoginModal(true);
@@ -148,27 +150,27 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
 
   return (
     <section className="w-full ">
-      <div className="absolute bottom-0 flex flex-col justify-end w-full p-4 custom-gradient ">
-        <h2 className="text-responsive text-left font-intro font-normal text-white leading-[56px] mt-5 z-0">
-          {question.question}
-        </h2>
+      {!hasVoted && (
+        <div className="absolute bottom-0 flex flex-col justify-end w-full px-4">
+          <h2 className="text-left font-intro font-semibold text-white text-[28px] leading-[40px] tracking-[0.01em] mt-5 z-0">
+            {question.question}
+          </h2>
 
-        <div className="flex w-full z-10">
-          <AnimatePresence mode="wait" initial={false}>
-            {!hasVoted ? (
-              <motion.div key="options" {...fadeSlide} className="flex w-full mt-6 font-inter">
+          <div className="flex w-full z-10">
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div key="options" {...fadeSlide} className="flex w-full mt-4 font-inter">
                 <button
-                  className="relative flex-1 shrink gap-2 self-stretch mx-3 px-3 py-2 h-full text-left font-medium text-[22px] tracking-wide leading-8 whitespace-wrap bg-[#F0E224] rounded-md text-[#121212] max-w-xs disabled:opacity-60"
+                  className="relative flex-1 shrink gap-2 self-stretch mr-2 pl-3 pr-2 py-2 h-full text-left font-normal text-[17px] leading-[28px] tracking-normal whitespace-wrap bg-[#F0E224] rounded-md text-[#121212] max-w-xs disabled:opacity-60"
                   aria-label={currentAnswers[0]?.value ?? 'Option A'}
                   onClick={() => currentAnswers[0] && handleVote(currentAnswers[0], 1)}
                   disabled={!currentAnswers[0] || isVoting}
                 >
                   {currentAnswers[0]?.value ?? 'Option A'}
-                  <span className="absolute right-[-10px] top-[50%] translate-y-[-20%] w-0 h-0 border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent border-l-[10px] border-l-[#F0E224]"></span>
+                  <span className="absolute right-[-9px] top-[50%] translate-y-[-20%] w-0 h-0 border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent border-l-[10px] border-l-[#F0E224]"></span>
                 </button>
 
                 <button
-                  className="relative flex-1 shrink gap-2 self-stretch mx-3 px-3 py-2 h-full text-right font-medium text-[22px] text-white tracking-wide leading-8 whitespace-wrap bg-[#9105C6] rounded-md max-w-xs disabled:opacity-60"
+                  className="relative flex-1 shrink gap-2 self-stretch ml-2 pl-2 pr-3 py-2 h-full text-right font-normal text-[17px] leading-[28px] tracking-normal text-white whitespace-wrap bg-[#9105C6] rounded-md max-w-xs disabled:opacity-60"
                   aria-label={currentAnswers[1]?.value ?? 'Option B'}
                   onClick={() => currentAnswers[1] && handleVote(currentAnswers[1], 2)}
                   disabled={!currentAnswers[1] || isVoting}
@@ -177,55 +179,32 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle }) {
                   <span className="absolute left-[-10px] top-[50%] translate-y-[-80%] w-0 h-0 border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent border-r-[10px] border-r-[#9105C6]"></span>
                 </button>
               </motion.div>
-            ) : (
-              <motion.div
-                key={`bar-${question.id}-${currentAnswers[0]?.percentage}-${currentAnswers[1]?.percentage}`}
-                {...fadeSlide}
-                className="w-full z-10"
-              >
-                <ProgressBarWithLabels
-                  firstOptionPercentage={formatPct(currentAnswers[0]?.percentage ?? 0)}
-                  userChoice={userChoice}
-                  firstOptionText={currentAnswers[0]?.value ?? 'Option A'}
-                  secondOptionText={currentAnswers[1]?.value ?? 'Option B'}
-                  secondOptionPercentage={formatPct(currentAnswers[1]?.percentage ?? 0)}
-                />
-                {/* ✅ Show total stances */}
-                <div className="mt-4 w-full text-center">
-                  <span className="font-inter text-white text-base">
-                    {totalStances} Stances
-                  </span>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+            </AnimatePresence>
+          </div>
+
+          <div className="gap-2 self-center my-4 font-inter font-medium text-base z-10 text-white text-center">
+            {totalStances} Stances • {commentCount} Arguments
+          </div>
         </div>
+      )}
 
-        <button
-          disabled={!hasVoted}
-          onClick={toggleDrawer}
-          className={`gap-2 self-center px-4 py-2 mt-6 mb-2 font-inter font-medium text-base tracking-wide rounded-[40px] z-10 ${hasVoted
-            ? "bg-[#F0E224] text-[#5B037C]"
-            : "text-white"
-            }`}
-        >
-          {!hasVoted
-            ? `Arguments (${commentCount})`
-            : `View Arguments (${commentCount})`}
-        </button>
-
-      </div>
-
-      <div ref={drawerRef}>
-        <CommentDrawer
+      {hasVoted && (
+        <ArgumentsView
           onNewComment={handleNewComment}
           onRemoveComment={handleDeleteComment}
-          isOpen={isDrawerOpen}
-          onClose={toggleDrawer}
+          isOpen={true}
+          onClose={() => { }}
           cardId={question.id}
+          question={question.question}
           answerOptions={currentAnswers}
+          userChoice={userChoice}
+          totalStances={totalStances}
+          onNext={onNext}
+          onPrevious={onPrevious}
+          backgroundImageUrl={question.backgroundImageUrl}
+          hasVoted={hasVoted}
         />
-      </div>
+      )}
 
       <LoginSignupModal
         isOpen={showLoginModal}
