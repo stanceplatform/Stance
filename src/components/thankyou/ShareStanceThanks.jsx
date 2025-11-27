@@ -55,8 +55,6 @@ export default function ShareStanceThanks({
       {/* Centered content */}
       <div className="flex-1 flex flex-col items-center justify-center px-6">
         <h1 className="text-center font-intro font-[500] text-[44px] leading-[56px] tracking-[0.88px] text-[#9105C6]">
-          Thanks!
-          <br />
           You're all caught up
         </h1>
 
@@ -64,7 +62,7 @@ export default function ShareStanceThanks({
           Got a question for your community?
         </p>
         <p className="mt-6 text-center font-inter font-[400] text-[20px] leading-[32px] text-[#565006]">
-          Suggest one — if it’s selected, we’ll post it anonymously for debate.
+          Suggest one — if it’s selected, we’ll post it for debate.
         </p>
       </div>
 
