@@ -166,7 +166,7 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle, onNext, onPre
                   disabled={!currentAnswers[0] || isVoting}
                 >
                   {currentAnswers[0]?.value ?? 'Option A'}
-                  <span className="absolute right-[-10px] top-[50%] translate-y-[-20%] w-0 h-0 border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent border-l-[10px] border-l-[#F0E224]"></span>
+                  <span className="absolute right-[-9px] top-[50%] translate-y-[-20%] w-0 h-0 border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent border-l-[10px] border-l-[#F0E224]"></span>
                 </button>
 
                 <button

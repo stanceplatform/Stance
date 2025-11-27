@@ -62,7 +62,7 @@ const ProgressBarWithLabels = ({ firstOptionPercentage, userChoice, firstOptionT
         >
           {firstOptionPercentage}%
           <span
-            className={`absolute -translate-y-1/2 origin-center w-0 h-0 border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent border-l-[10px] ${hasVoted ? 'scale-[0.70] right-[-7.5px] top-[63%]' : 'right-[-9px] top-[60%]'}`}
+            className={`absolute -translate-y-1/2 origin-center w-0 h-0 border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent border-l-[10px] ${hasVoted ? 'scale-[0.70] right-[-7.5px] top-[62%]' : 'right-[-9px] top-[60%]'}`}
             style={{
               borderLeftColor: userChoice === 1 ? '#F0E224' : '#565006',
             }}
@@ -80,7 +80,7 @@ const ProgressBarWithLabels = ({ firstOptionPercentage, userChoice, firstOptionT
         >
           {secondPct}%
           <span
-            className={`absolute left-[-9px] top-[40%] -translate-y-1/2 origin-center w-0 h-0 border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent border-r-[10px] ${hasVoted ? 'scale-[0.70] left-[-7px] top-[45%]' : 'left-[-9px] top-[40%]'}`}
+            className={`absolute -translate-y-1/2 origin-center w-0 h-0 border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent border-r-[10px] ${hasVoted ? 'scale-[0.70] left-[-7.5px] top-[45%]' : 'left-[-9px] top-[40%]'}`}
             style={{
               borderRightColor: userChoice === 2 ? '#BF24F9' : '#3A0250',
             }}

@@ -344,7 +344,6 @@ function ArgumentsView({
     }
 
     let BASE_BOTTOM_GAP = -60;
-    console.log("actualLines (measured)", actualLines);
     if (argsList.length === 0) {
       BASE_BOTTOM_GAP = -170;
     } else {
@@ -856,12 +855,13 @@ function ArgumentsView({
             {/* Scrollable comments area */}
             <div
               ref={scrollContainerRef}
-              className={`${isExpanded ? "px-2 pt-2 pb-16" : "px-2 pt-0 pb-4"
+              className={`${isExpanded ? "px-2 pt-2" : "px-2 pt-0 pb-4"
                 } overflow-y-auto`}
               style={{
                 maxHeight: "calc(100vh - 180px)",
                 overflowY: !isExpanded || isDragging ? "hidden" : "auto",
                 overscrollBehaviorY: "contain",
+                paddingBottom: isExpanded ? "180px" : undefined,
               }}
             >
               {isLoading ? (
@@ -872,36 +872,20 @@ function ArgumentsView({
                 </div>
               ) : argsList.length === 0 ? (
                 <div className="">
-                  <div className="rounded-2xl p-4 bg-white pb-32">
+                  <div className="rounded-2xl overflow-hidden pt-0 bg-white pb-32">
                     <div className="flex flex-col items-center">
                       <img
                         src="/argument-bg.png"
                         alt=""
-                        className="w-full mb-4"
+                        className="w-full mb-3"
                       />
                       <h3
-                        className="text-center mb-1"
-                        style={{
-                          fontFamily: "Intro Cd-Trial",
-                          fontWeight: 600,
-                          fontSize: "18px",
-                          lineHeight: "24px",
-                          letterSpacing: "0%",
-                          color: "#212121",
-                        }}
+                        className="text-center font-intro mb-1 font-semibold text-lg leading-6 text-[#212121]"
                       >
                         Bold minds lead
                       </h3>
                       <p
-                        className="text-center"
-                        style={{
-                          fontFamily: "Inter",
-                          fontWeight: 400,
-                          fontSize: "12px",
-                          lineHeight: "100%",
-                          letterSpacing: "0%",
-                          color: "#4E4E4E",
-                        }}
+                        className="text-center font-inter font-normal text-xs leading-none text-[#4E4E4E]"
                       >
                         Add the first argument for this stance.
                       </p>
