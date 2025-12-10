@@ -20,42 +20,7 @@ const loadFallbackData = async () => {
   }
 };
 
-// Transform public API response to match expected format
-const transformPublicQuestions = (apiResponse) => {
-  if (!apiResponse?.content) return [];
-
-  return apiResponse.content.map((q) => {
-    // Transform from API format to frontend format
-    const question = {
-      id: q.id,
-      question: q.text,
-      backgroundImageUrl: q.backgroundImage,
-      commentCount: q.commentCount || 0,
-      answerOptions: [
-        {
-          id: 1, // Assuming Yes is option 1
-          value: 'Yes',
-          votes: q.yesVotes || 0,
-          percentage: q.yesVotes && q.noVotes ?
-            ((q.yesVotes / (q.yesVotes + q.noVotes)) * 100).toFixed(1) : '0'
-        },
-        {
-          id: 2, // Assuming No is option 2
-          value: 'No',
-          votes: q.noVotes || 0,
-          percentage: q.yesVotes && q.noVotes ?
-            ((q.noVotes / (q.yesVotes + q.noVotes)) * 100).toFixed(1) : '0'
-        }
-      ],
-      userResponse: q.userVote ? {
-        answered: true,
-        selectedOptionId: q.userVote
-      } : null
-    };
-    return question;
-  });
-};
-
+// Both endpoints now return the same structure, so no transformation needed
 export const fetchAllCards = async () => {
   try {
     if (isAuthenticated()) {
@@ -63,9 +28,9 @@ export const fetchAllCards = async () => {
       const response = await apiService.getQuestionsResponse(0, 1000, 'DESC');
       return response || [];
     } else {
-      // Use public endpoint
+      // Use public endpoint - now returns same structure as authenticated endpoint
       const response = await apiService.getQuestionsPublic(0, 1000, 'DESC');
-      return transformPublicQuestions(response) || [];
+      return response || [];
     }
   } catch (error) {
     console.error('API fetch failed, using fallback:', error);

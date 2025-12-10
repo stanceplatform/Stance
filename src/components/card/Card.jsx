@@ -57,9 +57,7 @@ const Card = () => {
   const tracking = useRef(false)
   const blocked = useRef(false) // prevent double-trigger while animating
 
-  useEffect(() => {
-    if (questionsData) setQuestions(questionsData)
-  }, [questionsData])
+
 
   useEffect(() => {
     if (questions.length > 0 && !showSuggestQuestion) {
@@ -280,6 +278,7 @@ const Card = () => {
     showSuggestQuestion,
     setQuestionSearchParam,
   ])
+
 
 
   return (
