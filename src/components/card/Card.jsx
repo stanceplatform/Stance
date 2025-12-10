@@ -345,7 +345,7 @@ const Card = () => {
           </motion.div>
         </div>
       ) : (
-        <ThankYou />
+        <ShareStanceThanks onNext={handleNextQuestion} onPrevious={handlePreviousQuestion} />
       )}
 
       {/* Login/Signup Modal for navigation */}
