@@ -222,15 +222,43 @@ const Card = () => {
   };
 
   useEffect(() => {
-    if (questionsData?.length) {
-      setQuestions(
-        questionsData.map(q => ({
-          ...q,
-          backgroundImageUrl: toSafeBg(q.backgroundImageUrl),
-        }))
-      );
-    }
-  }, [questionsData]);
+    if (!questionsData?.length) return;
+
+    // Only run this initialization logic if we haven't set up questions yet
+    if (questions.length > 0) return;
+
+    const sanitize = (data) => data.map(q => ({
+      ...q,
+      backgroundImageUrl: toSafeBg(q.backgroundImageUrl),
+    }));
+
+    const initializeQuestions = async () => {
+      // If we have a specific question ID requested
+      if (questionIdParam) {
+        const existsInInitial = questionsData.some(q => String(q.id) === questionIdParam);
+
+        if (!existsInInitial) {
+          try {
+            // Attempt to fetch with the specific ID
+            const retryData = await fetchAllCards(questionIdParam);
+            const existsInRetry = retryData?.some(q => String(q.id) === questionIdParam);
+
+            if (existsInRetry) {
+              setQuestions(sanitize(retryData));
+              return;
+            }
+          } catch (err) {
+            console.error('Retry fetch failed', err);
+          }
+        }
+      }
+
+      // Fallback or default case: usage of initial data
+      setQuestions(sanitize(questionsData));
+    };
+
+    initializeQuestions();
+  }, [questionsData, questionIdParam, questions.length]);
 
   useEffect(() => {
     if (!questions.length) return

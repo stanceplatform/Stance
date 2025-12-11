@@ -21,15 +21,15 @@ const loadFallbackData = async () => {
 };
 
 // Both endpoints now return the same structure, so no transformation needed
-export const fetchAllCards = async () => {
+export const fetchAllCards = async (qid = null) => {
   try {
     if (isAuthenticated()) {
       // Use authenticated endpoint
-      const response = await apiService.getQuestionsResponse(0, 1000, 'DESC');
+      const response = await apiService.getQuestionsResponse(0, 1000, 'DESC', qid);
       return response || [];
     } else {
       // Use public endpoint - now returns same structure as authenticated endpoint
-      const response = await apiService.getQuestionsPublic(0, 1000, 'DESC');
+      const response = await apiService.getQuestionsPublic(0, 1000, qid);
       return response || [];
     }
   } catch (error) {
