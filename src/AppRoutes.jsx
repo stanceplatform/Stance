@@ -43,6 +43,16 @@ const AppRoutes = () => {
                             }
                         />
 
+                        {/* Category route - reuses Dashboard */}
+                        <Route
+                            path="/:category"
+                            element={
+                                <RootRoute>
+                                    <Dashboard />
+                                </RootRoute>
+                            }
+                        />
+
                         {/* Guest-only */}
                         <Route
                             path="/auth"

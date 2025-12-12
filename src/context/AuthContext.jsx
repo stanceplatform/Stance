@@ -56,10 +56,10 @@ export const AuthProvider = ({ children }) => {
         }
     }, [fetchMe]);
 
-    const loginWithGoogle = useCallback(async ({ provider, code, email, name, profilePicture, providerId }) => {
+    const loginWithGoogle = useCallback(async ({ provider, code, email, name, profilePicture, providerId, category }) => {
         try {
             // only persists tokens, not user (same pattern as regular login)
-            await apiService.oauth2Callback({ provider, code, email, name, profilePicture, providerId });
+            await apiService.oauth2Callback({ provider, code, email, name, profilePicture, providerId, category });
             setIsAuthenticated(true);
             // now fetch the *real* user
             const me = await fetchMe();

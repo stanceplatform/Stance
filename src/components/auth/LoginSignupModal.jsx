@@ -45,14 +45,47 @@ const LoginSignupModal = ({ isOpen, onClose }) => {
       });
 
       // Close modal and navigate to /?questionid=XXX if questionid exists
+      // Close modal and navigate
       onClose();
+
+      // Check for category in current path (e.g. /cricket from /cricket/login or similar)
+      const pathParts = location.pathname.split('/').filter(Boolean);
+      // If we are on a category auth page like /cricket/auth or /cricket/login, the category is the first part
+      // But if we are just on / (home), there is no category.
+      // Actually, if we are in this modal, we might be on a public page or /auth.
+      // Key: If we are on a category page (e.g. /cricket), we want to stay there.
+      // If we are on /cricket/login, we want to go to /cricket.
+
+      let redirectPath = '/';
+
+      // Heuristic: if path starts with something other than auth/login/select-college, it might be a category.
+      // Or if we are currently at /:category (which triggered the modal).
+      // If we are at /cricket, location.pathname is /cricket.
+
+      const currentPath = location.pathname;
+      const isAuthPage = currentPath.includes('/auth') || currentPath.includes('/login');
+
+      if (!isAuthPage && currentPath !== '/') {
+        // We are likely on a category page like /cricket
+        redirectPath = currentPath;
+      } else if (isAuthPage) {
+        // We are on /cricket/login or /login
+        // Extract category from /:category/login
+        const parts = currentPath.split('/');
+        // parts ["", "cricket", "login"]
+        if (parts.length >= 3) {
+          redirectPath = `/${parts[1]}`;
+        }
+      }
+
       // Get questionid from URL or sessionStorage
       const redirectQuestionId = questionid || sessionStorage.getItem('redirectQuestionId');
+
       if (redirectQuestionId) {
         sessionStorage.removeItem('redirectQuestionId');
-        navigate(`/?questionid=${redirectQuestionId}`, { replace: true });
+        navigate(`${redirectPath}?questionid=${redirectQuestionId}`, { replace: true });
       } else {
-        navigate('/', { replace: true });
+        navigate(redirectPath, { replace: true });
       }
     } catch (error) {
       console.error('Google Sign In error:', error);
@@ -69,22 +102,39 @@ const LoginSignupModal = ({ isOpen, onClose }) => {
 
   const handleSignupClick = () => {
     onClose();
-    // Store questionid in sessionStorage for later retrieval
     if (questionid) {
       sessionStorage.setItem('redirectQuestionId', questionid);
     }
     const queryString = questionid ? `?questionid=${questionid}` : '';
-    navigate(`/auth${queryString}`);
+
+    // Check if we are on a category page like /cricket
+    const pathParts = location.pathname.split('/').filter(Boolean);
+    // If we are on /cricket, pathParts[0] is cricket. 
+    // If not auth/login/etc, treat as category.
+    const forbidden = ['auth', 'login', 'signup', 'request-invite', 'select-college'];
+
+    if (pathParts.length > 0 && !forbidden.includes(pathParts[0])) {
+      navigate(`/${pathParts[0]}/auth${queryString}`);
+    } else {
+      navigate(`/auth${queryString}`);
+    }
   };
 
   const handleLoginClick = () => {
     onClose();
-    // Store questionid in sessionStorage for later retrieval
     if (questionid) {
       sessionStorage.setItem('redirectQuestionId', questionid);
     }
     const queryString = questionid ? `?questionid=${questionid}` : '';
-    navigate(`/login${queryString}`);
+
+    const pathParts = location.pathname.split('/').filter(Boolean);
+    const forbidden = ['auth', 'login', 'signup', 'request-invite', 'select-college'];
+
+    if (pathParts.length > 0 && !forbidden.includes(pathParts[0])) {
+      navigate(`/${pathParts[0]}/login${queryString}`);
+    } else {
+      navigate(`/login${queryString}`);
+    }
   };
 
   return (

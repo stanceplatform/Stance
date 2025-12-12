@@ -322,10 +322,10 @@ class ApiService {
     return this.request('/auth/me', { method: 'GET' });
   }
 
-  async oauth2Callback({ provider, code, email, name, profilePicture, providerId }) {
+  async oauth2Callback({ provider, code, email, name, profilePicture, providerId, category }) {
     const data = await this.request('/auth/oauth2/callback', {
       method: 'POST',
-      body: JSON.stringify({ provider, code, email, name, profilePicture, providerId }),
+      body: JSON.stringify({ provider, code, email, name, profilePicture, providerId, category }),
     });
 
     if (data?.token) this.setToken(data.token);

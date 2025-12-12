@@ -52,6 +52,20 @@ const GoogleAuthButton = ({ mode = "signup", onError }) => {
         const profilePicture = profile?.picture ?? "";
         const providerId = profile?.sub ?? "";
 
+        // Extract category from URL if present
+        const pathParts = location.pathname.split('/');
+        let category = null;
+        // Check for /:category/auth or /:category/login
+        const forbidden = ['auth', 'login', 'signup', 'request-invite', 'select-college'];
+        if (pathParts.length >= 2) {
+          const potentialCategory = pathParts[1];
+          // If path is /cricket/auth, pathParts is ["", "cricket", "auth"]
+          // If path is /auth, pathParts is ["", "auth"]
+          if (potentialCategory && !forbidden.includes(potentialCategory)) {
+            category = potentialCategory;
+          }
+        }
+
         // Keep your existing payload shape; pass id_token if available,
         // else the access_token to satisfy any "code" required by your API.
         await loginWithGoogle({
@@ -61,6 +75,7 @@ const GoogleAuthButton = ({ mode = "signup", onError }) => {
           name,
           profilePicture,
           providerId,
+          category,
         });
 
         const qp = new URLSearchParams(location.search);
@@ -69,9 +84,25 @@ const GoogleAuthButton = ({ mode = "signup", onError }) => {
 
         if (questionid) {
           sessionStorage.removeItem("redirectQuestionId");
-          navigate(`/?questionid=${questionid}`, { replace: true });
+
+          // Check if we are on a category login page: /:category/login or /:category/auth
+          const pathParts = location.pathname.split('/');
+          let redirectBase = '/';
+          // ["", "cricket", "login"] or ["", "cricket", "auth"]
+          if (pathParts.length >= 3 && (pathParts[2] === 'login' || pathParts[2] === 'auth')) {
+            redirectBase = `/${pathParts[1]}`;
+          }
+
+          navigate(`${redirectBase}?questionid=${questionid}`, { replace: true });
         } else {
-          navigate("/", { replace: true });
+          // Check if we are on a category login page: /:category/login or /:category/auth
+          const pathParts = location.pathname.split('/');
+          let redirectBase = '/';
+          // ["", "cricket", "login"] or ["", "cricket", "auth"]
+          if (pathParts.length >= 3 && (pathParts[2] === 'login' || pathParts[2] === 'auth')) {
+            redirectBase = `/${pathParts[1]}`;
+          }
+          navigate(redirectBase, { replace: true });
         }
       } catch (err) {
         onError?.(err?.message || "Google authentication failed. Please try again.");
