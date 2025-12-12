@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import CrownIcon from '../components/ui/CrownIcon';
 
 const sampleData = [
   { rank: 1, name: 'Ashish Singh', initials: 'AS', score: 90, color: '#212121', crown: true },
@@ -74,10 +75,8 @@ const Leaderboard = () => {
                   {user.initials}
                 </div>
                 {user.crown && (
-                  <span className="absolute -top-0 -right-0"><svg width="19" height="18" viewBox="0 0 19 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M10.6129 2.12839C11.4194 1.44522 12.6732 2.03212 12.6648 3.08906L12.6597 3.1965L12.2029 8.43544L16.11 6.67163L16.2186 6.62715C17.3425 6.22878 18.3627 7.5334 17.6402 8.53979L12.0887 16.2724C11.7587 16.7321 11.1609 16.913 10.6315 16.7132L1.55914 13.2878C0.980815 13.0695 0.648859 12.4613 0.778219 11.8568L2.94657 1.73798C3.2098 0.510015 4.89256 0.408768 5.33008 1.53439L5.36865 1.64686L6.66172 6.04399L10.5334 2.20145L10.6129 2.12839Z" fill="#F0E224" stroke="white" stroke-width="1.5" />
-                    <path d="M10.3807 8.21068C10.3282 9.09184 11.1807 9.74841 12.0192 9.47233L15.0934 8.45996L10.9568 15.2004L2.97358 11.7443L5.00435 4.31031L5.9928 6.80801C6.3142 7.6191 7.34684 7.85969 7.99378 7.27417L10.5758 4.93564L10.3807 8.21068Z" fill="#F0E224" stroke="#5B037C" stroke-width="1.5" />
-                  </svg>
+                  <span className="absolute -top-0 -right-0">
+                    <CrownIcon />
                   </span>
                 )}
               </div>

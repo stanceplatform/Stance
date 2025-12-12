@@ -3,6 +3,7 @@ import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../../context/AuthContext';
 import { decodeJWT } from '../../utils/jwt';
+import { ALLOWED_CATEGORIES } from '../../utils/constants';
 
 const LoginSignupModal = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
@@ -66,15 +67,22 @@ const LoginSignupModal = ({ isOpen, onClose }) => {
       const isAuthPage = currentPath.includes('/auth') || currentPath.includes('/login');
 
       if (!isAuthPage && currentPath !== '/') {
-        // We are likely on a category page like /cricket
-        redirectPath = currentPath;
+        // Check if currentPath is a category page like /cricket
+        const pathParts = currentPath.split('/').filter(Boolean);
+        const potentialCategory = pathParts[0];
+        if (potentialCategory && ALLOWED_CATEGORIES.includes(potentialCategory)) {
+          redirectPath = currentPath;
+        }
       } else if (isAuthPage) {
         // We are on /cricket/login or /login
         // Extract category from /:category/login
         const parts = currentPath.split('/');
         // parts ["", "cricket", "login"]
         if (parts.length >= 3) {
-          redirectPath = `/${parts[1]}`;
+          const potentialCategory = parts[1];
+          if (potentialCategory && ALLOWED_CATEGORIES.includes(potentialCategory)) {
+            redirectPath = `/${potentialCategory}`;
+          }
         }
       }
 
@@ -109,12 +117,10 @@ const LoginSignupModal = ({ isOpen, onClose }) => {
 
     // Check if we are on a category page like /cricket
     const pathParts = location.pathname.split('/').filter(Boolean);
-    // If we are on /cricket, pathParts[0] is cricket. 
-    // If not auth/login/etc, treat as category.
-    const forbidden = ['auth', 'login', 'signup', 'request-invite', 'select-college'];
+    const potentialCategory = pathParts[0];
 
-    if (pathParts.length > 0 && !forbidden.includes(pathParts[0])) {
-      navigate(`/${pathParts[0]}/auth${queryString}`);
+    if (potentialCategory && ALLOWED_CATEGORIES.includes(potentialCategory)) {
+      navigate(`/${potentialCategory}/auth${queryString}`);
     } else {
       navigate(`/auth${queryString}`);
     }
@@ -128,10 +134,10 @@ const LoginSignupModal = ({ isOpen, onClose }) => {
     const queryString = questionid ? `?questionid=${questionid}` : '';
 
     const pathParts = location.pathname.split('/').filter(Boolean);
-    const forbidden = ['auth', 'login', 'signup', 'request-invite', 'select-college'];
+    const potentialCategory = pathParts[0];
 
-    if (pathParts.length > 0 && !forbidden.includes(pathParts[0])) {
-      navigate(`/${pathParts[0]}/login${queryString}`);
+    if (potentialCategory && ALLOWED_CATEGORIES.includes(potentialCategory)) {
+      navigate(`/${potentialCategory}/login${queryString}`);
     } else {
       navigate(`/login${queryString}`);
     }

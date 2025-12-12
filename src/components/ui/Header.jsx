@@ -1,7 +1,9 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import CrownIcon from "./CrownIcon";
 import { useAuth } from "../../context/AuthContext";
 import { useCurrentQuestion } from "../../context/CurrentQuestionContext";
+import { ALLOWED_CATEGORIES } from "../../utils/constants";
 
 const Header = ({
   onNotificationsClick,
@@ -76,10 +78,21 @@ const Header = ({
           />
         </div>
 
-        {/* Right: icon cluster or auth buttons */}
         <div className="flex items-center gap-2">
           {isAuthenticated ? (
             <>
+              {/* Leaderboard Avatar */}
+              <button
+                onClick={() => navigate('/leaderboard')}
+                className="relative w-8 h-8 rounded-full bg-[#F0E224] text-[#9105C6] flex items-center justify-center font-intro font-bold text-sm shadow-sm hover:scale-105 transition-transform"
+                title="Leaderboard"
+              >
+                {initials}
+                <span className="absolute -top-1 -right-1">
+                  <CrownIcon />
+                </span>
+              </button>
+
               {/* Bell (Notifications) */}
               <IconButton
                 aria-label="Notifications"
@@ -231,10 +244,10 @@ const Header = ({
                   const queryString = questionid ? `?questionid=${questionid}` : '';
 
                   const pathParts = location.pathname.split('/').filter(Boolean);
-                  const forbidden = ['auth', 'login', 'signup', 'request-invite', 'select-college'];
+                  const potentialCategory = pathParts[0];
 
-                  if (pathParts.length > 0 && !forbidden.includes(pathParts[0])) {
-                    navigate(`/${pathParts[0]}/auth${queryString}`);
+                  if (potentialCategory && ALLOWED_CATEGORIES.includes(potentialCategory)) {
+                    navigate(`/${potentialCategory}/auth${queryString}`);
                   } else {
                     navigate(`/auth${queryString}`);
                   }
@@ -254,10 +267,10 @@ const Header = ({
                   const queryString = questionid ? `?questionid=${questionid}` : '';
 
                   const pathParts = location.pathname.split('/').filter(Boolean);
-                  const forbidden = ['auth', 'login', 'signup', 'request-invite', 'select-college'];
+                  const potentialCategory = pathParts[0];
 
-                  if (pathParts.length > 0 && !forbidden.includes(pathParts[0])) {
-                    navigate(`/${pathParts[0]}/login${queryString}`);
+                  if (potentialCategory && ALLOWED_CATEGORIES.includes(potentialCategory)) {
+                    navigate(`/${potentialCategory}/login${queryString}`);
                   } else {
                     navigate(`/login${queryString}`);
                   }

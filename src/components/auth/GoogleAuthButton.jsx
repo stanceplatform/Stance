@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import { useGoogleLogin } from "@react-oauth/google";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { ALLOWED_CATEGORIES } from "../../utils/constants";
 
 /** Simple Google "G" */
 const GoogleG = () => (
@@ -56,12 +57,9 @@ const GoogleAuthButton = ({ mode = "signup", onError }) => {
         const pathParts = location.pathname.split('/');
         let category = null;
         // Check for /:category/auth or /:category/login
-        const forbidden = ['auth', 'login', 'signup', 'request-invite', 'select-college'];
         if (pathParts.length >= 2) {
           const potentialCategory = pathParts[1];
-          // If path is /cricket/auth, pathParts is ["", "cricket", "auth"]
-          // If path is /auth, pathParts is ["", "auth"]
-          if (potentialCategory && !forbidden.includes(potentialCategory)) {
+          if (potentialCategory && ALLOWED_CATEGORIES.includes(potentialCategory)) {
             category = potentialCategory;
           }
         }
@@ -89,8 +87,9 @@ const GoogleAuthButton = ({ mode = "signup", onError }) => {
           const pathParts = location.pathname.split('/');
           let redirectBase = '/';
           // ["", "cricket", "login"] or ["", "cricket", "auth"]
-          if (pathParts.length >= 3 && (pathParts[2] === 'login' || pathParts[2] === 'auth')) {
-            redirectBase = `/${pathParts[1]}`;
+          const potentialCategory = pathParts[1];
+          if (pathParts.length >= 3 && (pathParts[2] === 'login' || pathParts[2] === 'auth') && ALLOWED_CATEGORIES.includes(potentialCategory)) {
+            redirectBase = `/${potentialCategory}`;
           }
 
           navigate(`${redirectBase}?questionid=${questionid}`, { replace: true });
@@ -99,8 +98,9 @@ const GoogleAuthButton = ({ mode = "signup", onError }) => {
           const pathParts = location.pathname.split('/');
           let redirectBase = '/';
           // ["", "cricket", "login"] or ["", "cricket", "auth"]
-          if (pathParts.length >= 3 && (pathParts[2] === 'login' || pathParts[2] === 'auth')) {
-            redirectBase = `/${pathParts[1]}`;
+          const potentialCategory = pathParts[1];
+          if (pathParts.length >= 3 && (pathParts[2] === 'login' || pathParts[2] === 'auth') && ALLOWED_CATEGORIES.includes(potentialCategory)) {
+            redirectBase = `/${potentialCategory}`;
           }
           navigate(redirectBase, { replace: true });
         }

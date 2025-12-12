@@ -6,6 +6,7 @@ import Logo from '../components/ui/Logo';
 import CTAButton from '../components/ui/CTAButton';
 import GoogleAuthButton from '../components/auth/GoogleAuthButton';
 import bg from '../assets/bg.svg';
+import { ALLOWED_CATEGORIES } from '../utils/constants';
 
 const Landing = () => {
     const navigate = useNavigate();
@@ -54,9 +55,14 @@ const Landing = () => {
             <div className="mt-10 w-full space-y-3">
                 <div className="mb-5">
                     <Link
-                        to={location.pathname.includes('/auth') && location.pathname !== '/auth'
-                            ? location.pathname.replace('/auth', '/login')
-                            : "/login"}
+                        to={() => {
+                            const pathParts = location.pathname.split('/').filter(Boolean);
+                            const category = pathParts[0];
+                            if (category && ALLOWED_CATEGORIES.includes(category)) {
+                                return `/${category}/login`
+                            }
+                            return "/login";
+                        }}
                         className="no-underline"
                     >
                         <CTAButton
