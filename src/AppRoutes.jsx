@@ -53,7 +53,23 @@ const AppRoutes = () => {
                             }
                         />
                         <Route
+                            path="/:category/auth"
+                            element={
+                                <GuestRoute>
+                                    <Landing />
+                                </GuestRoute>
+                            }
+                        />
+                        <Route
                             path="/login"
+                            element={
+                                <GuestRoute>
+                                    <Login />
+                                </GuestRoute>
+                            }
+                        />
+                        <Route
+                            path="/:category/login"
                             element={
                                 <GuestRoute>
                                     <Login />
