@@ -174,20 +174,22 @@ class ApiService {
 
   // Questions
   async getQuestionsResponse(page = 0, size = 10, sort = 'DESC', qid = null) {
-    let url = `/questions/with-responses?page=${page}&size=${size}&sort=${sort}`;
-    if (qid) url += `&qid=${qid}`;
-    return this.request(url);
+    const params = new URLSearchParams({ page, size, sort });
+    if (qid) params.append('qid', qid);
+    return this.request(`/questions/with-responses?${params.toString()}`);
   }
 
   async getQuestions(page = 0, size = 10, sort = 'DESC') {
-    return this.request(`/questions/list?page=${page}&size=${size}&sort=${sort}`);
+    const params = new URLSearchParams({ page, size, sort });
+    return this.request(`/questions/list?${params.toString()}`);
   }
 
   // Public questions endpoint (no authentication required)
   async getQuestionsPublic(page = 0, size = 10, qid = null) {
     // Make request without Authorization header
-    let url = `${this.baseURL}/questions?page=${page}&size=${size}`;
-    if (qid) url += `&qid=${qid}`;
+    const params = new URLSearchParams({ page, size });
+    if (qid) params.append('qid', qid);
+    const url = `${this.baseURL}/questions?${params.toString()}`;
 
     const response = await fetch(url, {
       method: 'GET',
