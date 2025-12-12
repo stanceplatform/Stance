@@ -1,5 +1,6 @@
 // services/api.js
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+import { ALLOWED_CATEGORIES } from '../utils/constants';
 
 class ApiService {
   constructor() {
@@ -176,11 +177,25 @@ class ApiService {
   async getQuestionsResponse(page = 0, size = 10, sort = 'DESC', qid = null) {
     const params = new URLSearchParams({ page, size, sort });
     if (qid) params.append('qid', qid);
+
+    const pathParts = window.location.pathname.split('/').filter(Boolean);
+    const category = pathParts[0];
+    if (category && ALLOWED_CATEGORIES.includes(category)) {
+      params.append('category', category);
+    }
+
     return this.request(`/questions/with-responses?${params.toString()}`);
   }
 
   async getQuestions(page = 0, size = 10, sort = 'DESC') {
     const params = new URLSearchParams({ page, size, sort });
+
+    const pathParts = window.location.pathname.split('/').filter(Boolean);
+    const category = pathParts[0];
+    if (category && ALLOWED_CATEGORIES.includes(category)) {
+      params.append('category', category);
+    }
+
     return this.request(`/questions/list?${params.toString()}`);
   }
 
@@ -189,6 +204,13 @@ class ApiService {
     // Make request without Authorization header
     const params = new URLSearchParams({ page, size });
     if (qid) params.append('qid', qid);
+
+    const pathParts = window.location.pathname.split('/').filter(Boolean);
+    const category = pathParts[0];
+    if (category && ALLOWED_CATEGORIES.includes(category)) {
+      params.append('category', category);
+    }
+
     const url = `${this.baseURL}/questions?${params.toString()}`;
 
     const response = await fetch(url, {
