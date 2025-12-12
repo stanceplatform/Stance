@@ -22,6 +22,7 @@ import ForgotPassword from './pages/ForgotPassword';
 import SuggestQuestion from './pages/SuggestQuestion';
 import ReportQuestion from './pages/ReportQuestion';
 import Terms from './pages/Terms';
+import Leaderboard from './pages/Leaderboard';
 import SelectCollege from './pages/SelectCollege';
 import SelectCollegeRoute from './components/auth/SelectCollegeRoute';
 import RootRoute from './components/auth/RootRoute';
@@ -163,6 +164,10 @@ const AppRoutes = () => {
                         <Route
                             path="/terms-conditions"
                             element={<Terms />}
+                        />
+                        <Route
+                            path="/leaderboard"
+                            element={<Leaderboard />}
                         />
                         <Route
                             path="/forgot-password"
