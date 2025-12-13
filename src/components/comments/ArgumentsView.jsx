@@ -1050,7 +1050,7 @@ function ArgumentsView({
 
                         <div
                           ref={isFirstComment ? firstCommentTextRef : null}
-                          className="text-[#212121] font-inter font-normal text-base leading-[24px] text-start"
+                          className="text-[#212121] font-inter font-normal text-base leading-[24px] text-start [&_p]:break-all"
                           dangerouslySetInnerHTML={{
                             __html: marked.parse(arg.text || ""),
                           }}

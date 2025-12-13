@@ -119,7 +119,7 @@ const Leaderboard = () => {
                 <div className="flex-1 min-w-0 flex flex-col justify-center h-full">
                   <div
                     className="truncate font-inter text-start font-normal text-[15px] leading-[22px] mb-2"
-                    style={{ color: user.rank === 6 ? '#212121' : '#FFFFFF' }}
+                    style={{ color: user.rank === 6 ? '#FFFFFF' : '#FFFFFF' }}
                   >
                     {user.name} {user.isCurrentUser && '(you)'}
                   </div>
