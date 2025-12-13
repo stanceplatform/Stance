@@ -9,6 +9,7 @@ const RANK_COLORS = {
   3: '#4E4E4E',
   4: '#707070',
   5: '#8D8D8D',
+  6: '#FFFFFF',
 };
 
 const RankNumber = ({ rank }) => {
@@ -50,7 +51,7 @@ const Leaderboard = () => {
             name: user.fullName,
             // If points > 100, we might want to cap it visually or just use normalized percentage
             scorePercent: maxScore > 0 ? (user.points / maxScore) * 100 : 0,
-            color: user.me ? '#F2F2F2' : (RANK_COLORS[user.rank] || 'rgba(255, 255, 255, 0.1)'),
+            color: RANK_COLORS[user.rank] || 'rgba(255, 255, 255, 0.1)',
             crown: user.rank === 1,
             isCurrentUser: user.me,
           }));
@@ -118,13 +119,13 @@ const Leaderboard = () => {
                 <div className="flex-1 min-w-0 flex flex-col justify-center h-full">
                   <div
                     className="truncate font-inter text-start font-normal text-[15px] leading-[22px] mb-2"
-                    style={{ color: user.isCurrentUser ? 'black' : '#FFFFFF' }}
+                    style={{ color: user.rank === 6 ? '#212121' : '#FFFFFF' }}
                   >
                     {user.name} {user.isCurrentUser && '(you)'}
                   </div>
 
                   {/* Progress Bar */}
-                  <div className="relative h-1 w-full rounded-full bg-black/20 overflow-hidden">
+                  <div className="relative h-1 w-full rounded-full bg-[#F2F2F2] overflow-hidden">
                     <div
                       className="absolute top-0 left-0 h-full rounded-full"
                       style={{
