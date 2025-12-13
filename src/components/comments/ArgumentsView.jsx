@@ -407,10 +407,15 @@ function ArgumentsView({
         scroller.scrollTop + scroller.clientHeight >=
         scroller.scrollHeight - 1;
 
-      if (!targetInsideScroller) {
+      const targetIsInput = e.target.closest('[contenteditable="true"]');
+
+      if (!targetInsideScroller && !targetIsInput) {
         e.preventDefault();
         return;
       }
+
+      // If it's the input, let it handle its own scrolling/behavior
+      if (targetIsInput) return;
 
       if ((atTop && deltaY > 0) || (atBottom && deltaY < 0)) {
         e.preventDefault();
