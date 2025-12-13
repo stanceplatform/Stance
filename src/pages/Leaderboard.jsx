@@ -1,24 +1,20 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CrownIcon from '../components/ui/CrownIcon';
+import apiService from '../services/api';
 
-const sampleData = [
-  { rank: 1, name: 'Ashish Singh', initials: 'AS', score: 90, color: '#212121', crown: true },
-  { rank: 2, name: 'Aditya thakare', initials: 'AT', score: 80, color: '#3A3A3A' },
-  { rank: 3, name: 'SOUMYADEEP', initials: 'S', score: 70, color: '#4E4E4E' },
-  { rank: 4, name: 'Danish Mirza', initials: 'DM', score: 60, color: '#707070' },
-  { rank: 5, name: 'Renuka Singh', initials: 'RS', score: 50, color: '#8D8D8D' },
-  { rank: 98, name: 'Chinmaya Srivastav (you)', initials: 'CS', score: 10, color: '#F2F2F2', isCurrentUser: true },
-];
+const RANK_COLORS = {
+  1: '#212121',
+  2: '#3A3A3A',
+  3: '#4E4E4E',
+  4: '#707070',
+  5: '#8D8D8D',
+};
 
 const RankNumber = ({ rank }) => {
   return (
     <div className="relative w-8 h-[48px] mr-3 flex-none flex items-center justify-center">
-      {/* Back Layer (Purple Shadow) - Shifted Left & Up slightly to appear "behind" if Top-Left light source, 
-          or if we want Yellow to be Bottom-Right. 
-          Based on image: Purple is visible on Left. Yellow is to the Right. 
-          Let's place Purple absolute at slightly negative X. 
-      */}
+      {/* Back Layer (Purple Shadow) */}
       <span
         className="absolute text-[#9105C6] font-intro font-black text-[32px] leading-[48px] select-none"
         style={{ transform: 'translate(-2px, -2px)' }}
@@ -35,10 +31,43 @@ const RankNumber = ({ rank }) => {
 
 const Leaderboard = () => {
   const navigate = useNavigate();
+  const [leaderboardData, setLeaderboardData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = "auto"; };
+
+    const fetchLeaderboard = async () => {
+      try {
+        const data = await apiService.getLeaderboardTop();
+        if (Array.isArray(data)) {
+          // Normalize scores: calculate percentage relative to the highest score
+          // Default to 100 if no data or max score is 0 to avoid division by zero
+          const maxScore = Math.max(...data.map((u) => u.points || 0), 100);
+
+          const processed = data.map((user) => ({
+            ...user,
+            name: user.fullName,
+            // If points > 100, we might want to cap it visually or just use normalized percentage
+            scorePercent: maxScore > 0 ? (user.points / maxScore) * 100 : 0,
+            color: user.me ? '#F2F2F2' : (RANK_COLORS[user.rank] || 'rgba(255, 255, 255, 0.1)'),
+            crown: user.rank === 1,
+            isCurrentUser: user.me,
+          }));
+          setLeaderboardData(processed);
+        }
+      } catch (err) {
+        console.error('Failed to fetch leaderboard', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLeaderboard();
+
+    return () => {
+      document.body.style.overflow = "auto";
+    };
   }, []);
 
   return (
@@ -60,49 +89,54 @@ const Leaderboard = () => {
       {/* Scrollable List */}
       <div className="flex-1 overflow-y-auto pb-4 px-4 pt-2 scrollbar-hide">
         <div className="flex flex-col rounded-[16px] overflow-hidden">
-          {sampleData.map((user) => (
-            <div
-              key={user.rank}
-              className={`flex items-center px-4 py-4 relative`}
-              style={{ backgroundColor: user.color }}
-            >
-              {/* Rank */}
-              <RankNumber rank={user.rank} />
+          {loading ? (
+            // Basic loading state (optional, can be better)
+            <div className="p-4 text-center text-white font-intro">Loading...</div>
+          ) : (
+            leaderboardData.map((user) => (
+              <div
+                key={user.rank} // Assuming rank is unique enough for key, or use user.userId if available
+                className={`flex items-center px-4 py-4 relative`}
+                style={{ backgroundColor: user.color }}
+              >
+                {/* Rank */}
+                <RankNumber rank={user.rank} />
 
-              {/* Avatar */}
-              <div className="relative mr-4 shrink-0">
-                <div className="w-12 h-12 rounded-full flex items-center justify-center bg-[#9105C6] text-[#F0E224] text-[20px] leading-[28px] font-semibold font-intro">
-                  {user.initials}
-                </div>
-                {user.crown && (
-                  <span className="absolute -top-0 -right-0">
-                    <CrownIcon />
-                  </span>
-                )}
-              </div>
-
-              {/* Info */}
-              <div className="flex-1 min-w-0 flex flex-col justify-center h-full">
-                <div
-                  className="truncate font-inter text-start font-normal text-[15px] leading-[22px] mb-2"
-                  style={{ color: user.isCurrentUser ? 'black' : '#FFFFFF' }}
-                >
-                  {user.name}
+                {/* Avatar */}
+                <div className="relative mr-4 shrink-0">
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center bg-[#9105C6] text-[#F0E224] text-[20px] leading-[28px] font-semibold font-intro">
+                    {user.initials}
+                  </div>
+                  {user.crown && (
+                    <span className="absolute -top-0 -right-0">
+                      <CrownIcon />
+                    </span>
+                  )}
                 </div>
 
-                {/* Progress Bar */}
-                <div className="relative h-1 w-full rounded-full bg-black/20 overflow-hidden">
+                {/* Info */}
+                <div className="flex-1 min-w-0 flex flex-col justify-center h-full">
                   <div
-                    className="absolute top-0 left-0 h-full rounded-full"
-                    style={{
-                      width: `${user.score}%`,
-                      background: 'repeating-linear-gradient(120deg, #9105C6, #9105C6 12px, #F0E224 12px, #F0E224 24px)'
-                    }}
-                  />
+                    className="truncate font-inter text-start font-normal text-[15px] leading-[22px] mb-2"
+                    style={{ color: user.isCurrentUser ? 'black' : '#FFFFFF' }}
+                  >
+                    {user.name} {user.isCurrentUser && '(you)'}
+                  </div>
+
+                  {/* Progress Bar */}
+                  <div className="relative h-1 w-full rounded-full bg-black/20 overflow-hidden">
+                    <div
+                      className="absolute top-0 left-0 h-full rounded-full"
+                      style={{
+                        width: `${user.scorePercent}%`,
+                        background: 'repeating-linear-gradient(120deg, #9105C6, #9105C6 12px, #F0E224 12px, #F0E224 24px)'
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
     </main>

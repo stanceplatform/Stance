@@ -381,6 +381,11 @@ class ApiService {
     return this.request('/feedback', { method: 'POST', body: JSON.stringify({ subject, message, type }) });
   }
 
+  // Leaderboard
+  async getLeaderboardTop() {
+    return this.request('/leaderboard/top');
+  }
+
   // Notifications
   async getNotifications(page = 0, size = 10) {
     return this.request(`/notifications?page=${page}&size=${size}`);
