@@ -18,6 +18,82 @@ import toast from "react-hot-toast";
 import { useAuth } from "../../context/AuthContext";
 import CardNavigation from "../card/CardNavigation";
 import ReportComment from "./ReportCommentSheet";
+import ReplyIcon from "../icons/ReplyIcon";
+
+// Mock Data for comments/replies
+const mockComments = [
+  {
+    id: 101,
+    text: "Helps break deep-rooted hiring bias and opens doors for underrepresented talent.",
+    user: {
+      id: 1,
+      firstName: "Aditya thakare",
+      username: "aditya",
+    },
+    likes: { count: 3, isLikedByCurrentUser: false },
+    replyCount: 3,
+    createdAt: "2024-01-01T10:00:00",
+    answer: { selectedOptionId: 101 }, // Yellow stance
+    replies: [
+      {
+        id: 102,
+        text: "**@Aditya thakare** Diversity shouldn’t come at the cost of merit. If standards drop, the whole team pays the price.",
+        user: {
+          id: 2,
+          firstName: "Rohit Kashyap",
+          username: "rohit",
+        },
+        likes: { count: 10, isLikedByCurrentUser: false },
+        replyCount: 0,
+        createdAt: "2024-01-01T10:05:00",
+        answer: { selectedOptionId: 102 }, // Purple stance
+        parentId: 101,
+        rootCommentId: 101,
+        depth: 1,
+        parentUser: {
+          id: 1,
+          firstName: "Aditya thakare",
+          username: "aditya",
+        },
+      },
+      {
+        id: 103,
+        text: "**@Rohit** Assuming diversity lowers merit is the actual bias. There is talent everywhere — access was never equal.",
+        user: {
+          id: 3,
+          firstName: "Ayesha",
+          username: "ayesha",
+        },
+        likes: { count: 18, isLikedByCurrentUser: false },
+        replyCount: 0,
+        createdAt: "2024-01-01T10:10:00",
+        answer: { selectedOptionId: 102 }, // Purple stance
+        parentId: 102,
+        rootCommentId: 101,
+        depth: 2,
+        parentUser: {
+          id: 2,
+          firstName: "Rohit Kashyap",
+          username: "rohit",
+        },
+      },
+    ],
+  },
+  {
+    id: 201, // Another root comment
+    text: "Access to food should not depend on your gender",
+    user: {
+      id: 4,
+      firstName: "Sparsh",
+      username: "sparsh",
+    },
+    likes: { count: 0, isLikedByCurrentUser: false },
+    replyCount: 0,
+    createdAt: "2024-01-01T11:00:00",
+    answer: { selectedOptionId: 102 }, // Purple stance
+    replies: [],
+  },
+];
 
 // Delete Confirmation Modal
 function ConfirmDeleteModal({ open, onCancel, onConfirm, loading }) {
@@ -219,6 +295,24 @@ function ArgumentsView({
 
   // ------------------------------------------
 
+  // Helper to flatten comments and their replies
+  const flattenComments = (comments) => {
+    let result = [];
+    comments.forEach((root) => {
+      // Add root comment
+      result.push({ ...root, depth: 0 }); // ensure root has depth 0
+
+      // Add replies if any
+      if (root.replies && Array.isArray(root.replies)) {
+        // Since replies are already a flat list in the new API contract:
+        root.replies.forEach((reply) => {
+          result.push(reply);
+        });
+      }
+    });
+    return result;
+  };
+
   const loadArguments = useCallback(async (reset = true) => {
     if (!cardId) {
       setIsLoading(false);
@@ -232,22 +326,47 @@ function ArgumentsView({
       }
       setError(null);
 
+      /* --- COMMENTED OUT REAL API FOR MOCK UI DEV ---
       const response = await fetchCardComments(cardId, 0);
       const commentsArray = response.content || [];
-
-      // Maintain the order from API response (already sorted by backend)
       setArgsList(commentsArray);
       setTotalPages(response.totalPages || 1);
       setHasMore(!response.last && (response.totalPages || 1) > 1);
+      */
+
+      // --- MOCK DATA IMPLEMENTATION ---
+      await new Promise(resolve => setTimeout(resolve, 500)); // Sim delay
+
+      // Inject mock options IDs dynamically to match current card options
+      const updatedMockComments = mockComments.map(c => {
+        // Deep copy to avoid mutating global
+        const node = JSON.parse(JSON.stringify(c));
+        // Assign first/second option ID arbitrarily for demo
+        if (node.answer) {
+          node.answer.selectedOptionId = answerOptions?.[0]?.id || node.answer.selectedOptionId;
+          if (node.id === 102) node.answer.selectedOptionId = answerOptions?.[1]?.id; // force purple for one reply
+        }
+        return node;
+      });
+
+      const flattened = flattenComments(updatedMockComments);
+      setArgsList(flattened);
+      setTotalPages(1);
+      setHasMore(false);
+      // -------------------------------
+
       setCurrentPage(0);
     } catch (err) {
       setError(err?.message || "Failed to load arguments");
     } finally {
       setIsLoading(false);
     }
-  }, [cardId]);
+  }, [cardId, answerOptions]);
 
   const loadMoreComments = useCallback(async () => {
+    // Mock: no pagination
+    return;
+    /*
     if (!cardId || !hasMore || isLoadingMore || currentPage + 1 >= totalPages) {
       return;
     }
@@ -268,6 +387,7 @@ function ArgumentsView({
     } finally {
       setIsLoadingMore(false);
     }
+    */
   }, [cardId, hasMore, isLoadingMore, currentPage, totalPages]);
 
   useEffect(() => {
@@ -928,14 +1048,19 @@ function ArgumentsView({
                         }
                       >
                         <div className="flex items-center justify-between mb-3">
-                          <span
-                            className="font-inter font-normal text-[15px] leading-[22px]"
-                            style={{ color: theme.titleColor }}
-                          >
-                            {arg.user?.firstName || arg.author || "Unknown"}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            {arg.depth > 0 && (
+                              <ReplyIcon width={16} height={16} className="" />
+                            )}
+                            <span
+                              className="font-inter font-normal text-[15px] leading-[22px]"
+                              style={{ color: theme.titleColor }}
+                            >
+                              {arg.user?.firstName || arg.author || "Unknown"}
+                            </span>
+                          </div>
                           <div className="flex items-center gap-3">
-                            {/* <div
+                            <div
                               className="flex items-center justify-center border"
                               style={{
                                 width: "59px",
@@ -966,9 +1091,9 @@ function ArgumentsView({
                                 className="text-[#121212] font-inter font-normal text-[15px] leading-[22px]"
                                 style={{ verticalAlign: "middle" }}
                               >
-                                {arg.replies || 0}
+                                {arg.replyCount || 0}
                               </span>
-                            </div> */}
+                            </div>
                             <button
                               type="button"
                               onClick={() => handleLike(arg.id)}
