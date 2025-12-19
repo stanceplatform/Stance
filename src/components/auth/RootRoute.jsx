@@ -18,7 +18,7 @@ const RootRoute = ({ children }) => {
 
   // If authenticated but collegeSelected is false or missing, redirect to select-college
   // Preserve questionid in sessionStorage if it exists in URL
-  if (isAuthenticated && user && user.collegeSelected !== true) {
+  if (isAuthenticated && user && user.collegeSelected !== true && location.pathname === '/') {
     const questionid = new URLSearchParams(location.search).get('questionid');
     if (questionid) {
       sessionStorage.setItem('redirectQuestionId', questionid);
