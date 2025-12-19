@@ -19,6 +19,8 @@ import { useAuth } from "../../context/AuthContext";
 import CardNavigation from "../card/CardNavigation";
 import ReportComment from "./ReportCommentSheet";
 import ReplyIcon from "../icons/ReplyIcon";
+import ReplyLinkIcon from "../icons/ReplyLinkIcon";
+
 
 // Mock Data for comments/replies
 const mockComments = [
@@ -198,6 +200,7 @@ function ArgumentsView({
   const [showReport, setShowReport] = useState(false);
   const [commentIdToReport, setCommentIdToReport] = useState(null);
   const [reportedComments, setReportedComments] = useState(new Set());
+  const [replyingTo, setReplyingTo] = useState(null);
 
   const { user } = useAuth();
 
@@ -746,6 +749,7 @@ function ArgumentsView({
     setTimeout(() => {
       setShowOpinionForm(false);
       setIsClosingForm(false);
+      setReplyingTo(null);
     }, 300);
   };
 
@@ -1060,7 +1064,13 @@ function ArgumentsView({
                             </span>
                           </div>
                           <div className="flex items-center gap-3">
-                            <div
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setReplyingTo(arg);
+                                setShowOpinionForm(true);
+                              }}
                               className="flex items-center justify-center border"
                               style={{
                                 width: "59px",
@@ -1093,7 +1103,7 @@ function ArgumentsView({
                               >
                                 {arg.replyCount || 0}
                               </span>
-                            </div>
+                            </button>
                             <button
                               type="button"
                               onClick={() => handleLike(arg.id)}
@@ -1167,11 +1177,13 @@ function ArgumentsView({
                           </div>
                         </div>
 
-                        {isReported && (
-                          <span className="mt-1 mb-2 self-start text-xs px-2 py-0.5 rounded-full bg-neutral-700 text-neutral-200">
-                            Reported
-                          </span>
-                        )}
+                        {
+                          isReported && (
+                            <span className="mt-1 mb-2 self-start text-xs px-2 py-0.5 rounded-full bg-neutral-700 text-neutral-200">
+                              Reported
+                            </span>
+                          )
+                        }
 
                         <div
                           ref={isFirstComment ? firstCommentTextRef : null}
@@ -1180,6 +1192,67 @@ function ArgumentsView({
                             __html: marked.parse(arg.text || ""),
                           }}
                         />
+
+                        {/* Countered Text for Root Comments */}
+                        {
+                          arg.depth === 0 && arg.replies && arg.replies.length > 0 && (
+                            <div
+                              className="font-inter mt-3 text-start text-sm font-normal"
+                              style={{ color: theme.titleColor }}
+                            >
+                              {(() => {
+                                const uniqueNames = [
+                                  ...new Set(
+                                    arg.replies
+                                      .map((r) => r.user?.firstName || r.author || "")
+                                      .filter(Boolean)
+                                  ),
+                                ];
+                                const count = uniqueNames.length;
+                                if (count === 0) return null;
+
+                                let text = "";
+                                if (count <= 3) {
+                                  text = uniqueNames.join(", ").replace(/, ([^,]*)$/, " and $1");
+                                } else {
+                                  // "Rohit and 3 others" style as requested for overflow
+                                  text = `${uniqueNames[0]} and ${count - 1} others`;
+                                }
+                                return `${text} countered`;
+                              })()}
+                            </div>
+                          )
+                        }
+
+                        {/* Reply Link */}
+                        {
+                          arg.parentUser && (
+                            <div
+                              className="flex items-center gap-2  cursor-pointer w-fit"
+                              style={{
+                                color:
+                                  theme.bgColor === "#FCF9CF"
+                                    ? "#776F08" // Yellow theme text
+                                    : "#9105C6", // Purple theme text
+                              }}
+                            >
+                              <ReplyLinkIcon
+                                width={16}
+                                height={16}
+                                fill={
+                                  theme.bgColor === "#FCF9CF"
+                                    ? "#776F08"
+                                    : "#9105C6"
+                                }
+                              />
+                              <span
+                                className="font-inter font-normal text-[14px] leading-[20px]"
+                              >
+                                to {arg.parentUser.firstName}
+                              </span>
+                            </div>
+                          )
+                        }
                       </div>
                     );
                   })}
@@ -1198,7 +1271,8 @@ function ArgumentsView({
       </div>
 
       {/* Context menu overlay */}
-      {contextMenu.open &&
+      {
+        contextMenu.open &&
         (() => {
           const selectedComment = argsList.find(
             (arg) => arg.id === contextMenu.commentId
@@ -1238,7 +1312,8 @@ function ArgumentsView({
               </div>
             </div>
           );
-        })()}
+        })()
+      }
 
       {/* Delete Confirmation Modal */}
       <ConfirmDeleteModal
@@ -1361,46 +1436,55 @@ function ArgumentsView({
       </div>
 
       {/* Opinion Form Bottom Sheet */}
-      {(showOpinionForm || isClosingForm) && (
-        <div
-          className="fixed inset-0 z-[200] flex items-end"
-          onClick={(e) => {
-            if (e.target === e.currentTarget && !isClosingForm) {
-              handleCloseForm();
-            }
-          }}
-        >
-          {/* Backdrop */}
+      {
+        (showOpinionForm || isClosingForm) && (
           <div
-            className="absolute max-w-[480px] mx-auto inset-0 bg-black/50 transition-opacity duration-300 ease-out"
-            style={{
-              opacity: isClosingForm ? 0 : 1,
-            }}
-            onClick={() => {
-              if (!isClosingForm) {
+            className="fixed inset-0 z-[200] flex items-end"
+            onClick={(e) => {
+              if (e.target === e.currentTarget && !isClosingForm) {
                 handleCloseForm();
               }
             }}
-          />
-
-          {/* Bottom Sheet */}
-          <div
-            className="relative w-full max-w-[480px] mx-auto bg-[#121212] rounded-t-2xl shadow-2xl"
-            style={{
-              animation: isClosingForm
-                ? "slideDown 0.3s ease-out forwards"
-                : "slideUp 0.3s ease-out forwards",
-            }}
-            onClick={(e) => {
-              e.stopPropagation();
-            }}
           >
-            <div className="px-3 pt-4 pb-6">
-              <OpinionForm onAddOpinion={handleAddOpinion} />
+            {/* Backdrop */}
+            <div
+              className="absolute max-w-[480px] mx-auto inset-0 bg-black/50 transition-opacity duration-300 ease-out"
+              style={{
+                opacity: isClosingForm ? 0 : 1,
+              }}
+              onClick={() => {
+                if (!isClosingForm) {
+                  handleCloseForm();
+                }
+              }}
+            />
+
+            {/* Bottom Sheet */}
+            <div
+              className="relative w-full max-w-[480px] mx-auto bg-[#121212] rounded-t-2xl shadow-2xl"
+              style={{
+                animation: isClosingForm
+                  ? "slideDown 0.3s ease-out forwards"
+                  : "slideUp 0.3s ease-out forwards",
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+            >
+              <div className="px-3 pt-4 pb-6">
+                <OpinionForm
+                  onAddOpinion={handleAddOpinion}
+                  placeholder={
+                    replyingTo
+                      ? `Add counter to ${replyingTo.user?.firstName || replyingTo.author || "User"}`
+                      : "Add your opinion..."
+                  }
+                />
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
       <style>{`
         @keyframes slideUp {
@@ -1412,7 +1496,7 @@ function ArgumentsView({
           to { transform: translateY(100%); }
         }
       `}</style>
-    </div>
+    </div >
   );
 }
 

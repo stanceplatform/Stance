@@ -1,7 +1,7 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
-function OpinionForm({ onAddOpinion }) {
+function OpinionForm({ onAddOpinion, placeholder = "Add your opinion..." }) {
   const editorRef = useRef(null);
   const [html, setHtml] = useState("");
 
@@ -241,7 +241,7 @@ function OpinionForm({ onAddOpinion }) {
         suppressContentEditableWarning
         role="textbox"
         aria-multiline="true"
-        data-placeholder="Add your opinion..."
+        data-placeholder={placeholder}
         onInput={onInput}
         onKeyDown={onKeyDown}
         onPaste={onPaste}
