@@ -246,6 +246,13 @@ class ApiService {
     });
   }
 
+  async replyToComment(parentCommentId, text) {
+    return this.request(`/comments/${parentCommentId}/reply`, {
+      method: "POST",
+      body: JSON.stringify({ text }),
+    });
+  }
+
   async likeComment(commentId) {
     return this.request(`/comments/${commentId}/like`, { method: 'POST', body: '' });
   }

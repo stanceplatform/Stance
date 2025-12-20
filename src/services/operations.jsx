@@ -134,6 +134,16 @@ export const postCommentOnCard = async (questionId, commentText) => {
   }
 };
 
+export const postReplyToComment = async (parentCommentId, commentText) => {
+  try {
+    return await apiService.replyToComment(parentCommentId, commentText);
+  } catch (error) {
+    console.error("Error posting reply:", error);
+    toast.error(getApiErrorMessage(error));
+    throw error;
+  }
+};
+
 export const createCard = async (cardData) => {
   // TODO: Implement create card API
   return { success: true };

@@ -8,6 +8,7 @@ import ProgressBarWithLabels from "../charts/ProgressBar";
 import {
   fetchCardComments,
   postCommentOnCard,
+  postReplyToComment,
   likeComment,
   unlikeComment,
   apiService,
@@ -664,14 +665,27 @@ function ArgumentsView({
   const handleAddOpinion = async (newOpinion) => {
     try {
       setIsSubmitting(true);
-      const addedComment = await postCommentOnCard(
-        cardId,
-        newOpinion.content
-      );
+      let addedComment;
+
+      if (replyingTo) {
+        // Reply flow
+        addedComment = await postReplyToComment(
+          replyingTo.id,
+          newOpinion.content
+        );
+      } else {
+        // New root comment flow
+        addedComment = await postCommentOnCard(
+          cardId,
+          newOpinion.content
+        );
+      }
 
       // Reload all comments to maintain API order
       const response = await fetchCardComments(cardId, 0);
-      setArgsList(response.content || []);
+      const commentsArray = response.content || [];
+      const flattened = flattenComments(commentsArray);
+      setArgsList(flattened);
       setTotalPages(response.totalPages || 1);
       setHasMore(!response.last && (response.totalPages || 1) > 1);
       setCurrentPage(0);
