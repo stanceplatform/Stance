@@ -22,80 +22,7 @@ import ReplyIcon from "../icons/ReplyIcon";
 import ReplyLinkIcon from "../icons/ReplyLinkIcon";
 
 
-// Mock Data for comments/replies
-const mockComments = [
-  {
-    id: 101,
-    text: "Helps break deep-rooted hiring bias and opens doors for underrepresented talent.",
-    user: {
-      id: 1,
-      firstName: "Aditya thakare",
-      username: "aditya",
-    },
-    likes: { count: 3, isLikedByCurrentUser: false },
-    replyCount: 3,
-    createdAt: "2024-01-01T10:00:00",
-    answer: { selectedOptionId: 101 }, // Yellow stance
-    replies: [
-      {
-        id: 102,
-        text: "**@Aditya thakare** Diversity shouldn’t come at the cost of merit. If standards drop, the whole team pays the price.",
-        user: {
-          id: 2,
-          firstName: "Rohit Kashyap",
-          username: "rohit",
-        },
-        likes: { count: 10, isLikedByCurrentUser: false },
-        replyCount: 0,
-        createdAt: "2024-01-01T10:05:00",
-        answer: { selectedOptionId: 102 }, // Purple stance
-        parentId: 101,
-        rootCommentId: 101,
-        depth: 1,
-        parentUser: {
-          id: 1,
-          firstName: "Aditya thakare",
-          username: "aditya",
-        },
-      },
-      {
-        id: 103,
-        text: "**@Rohit** Assuming diversity lowers merit is the actual bias. There is talent everywhere — access was never equal.",
-        user: {
-          id: 3,
-          firstName: "Ayesha",
-          username: "ayesha",
-        },
-        likes: { count: 18, isLikedByCurrentUser: false },
-        replyCount: 0,
-        createdAt: "2024-01-01T10:10:00",
-        answer: { selectedOptionId: 102 }, // Purple stance
-        parentId: 102,
-        rootCommentId: 101,
-        depth: 2,
-        parentUser: {
-          id: 2,
-          firstName: "Rohit Kashyap",
-          username: "rohit",
-        },
-      },
-    ],
-  },
-  {
-    id: 201, // Another root comment
-    text: "Access to food should not depend on your gender",
-    user: {
-      id: 4,
-      firstName: "Sparsh",
-      username: "sparsh",
-    },
-    likes: { count: 0, isLikedByCurrentUser: false },
-    replyCount: 0,
-    createdAt: "2024-01-01T11:00:00",
-    answer: { selectedOptionId: 102 }, // Purple stance
-    replies: [],
-  },
-];
+
 
 // Delete Confirmation Modal
 function ConfirmDeleteModal({ open, onCancel, onConfirm, loading }) {
@@ -309,7 +236,10 @@ function ArgumentsView({
       if (root.replies && Array.isArray(root.replies)) {
         // Since replies are already a flat list in the new API contract:
         root.replies.forEach((reply) => {
-          result.push(reply);
+          // Only add valid replies (skip 'counters' metadata objects if any)
+          if (reply.id) {
+            result.push(reply);
+          }
         });
       }
     });
@@ -329,34 +259,12 @@ function ArgumentsView({
       }
       setError(null);
 
-      /* --- COMMENTED OUT REAL API FOR MOCK UI DEV ---
       const response = await fetchCardComments(cardId, 0);
       const commentsArray = response.content || [];
-      setArgsList(commentsArray);
+      const flattened = flattenComments(commentsArray);
+      setArgsList(flattened);
       setTotalPages(response.totalPages || 1);
       setHasMore(!response.last && (response.totalPages || 1) > 1);
-      */
-
-      // --- MOCK DATA IMPLEMENTATION ---
-      await new Promise(resolve => setTimeout(resolve, 500)); // Sim delay
-
-      // Inject mock options IDs dynamically to match current card options
-      const updatedMockComments = mockComments.map(c => {
-        // Deep copy to avoid mutating global
-        const node = JSON.parse(JSON.stringify(c));
-        // Assign first/second option ID arbitrarily for demo
-        if (node.answer) {
-          node.answer.selectedOptionId = answerOptions?.[0]?.id || node.answer.selectedOptionId;
-          if (node.id === 102) node.answer.selectedOptionId = answerOptions?.[1]?.id; // force purple for one reply
-        }
-        return node;
-      });
-
-      const flattened = flattenComments(updatedMockComments);
-      setArgsList(flattened);
-      setTotalPages(1);
-      setHasMore(false);
-      // -------------------------------
 
       setCurrentPage(0);
     } catch (err) {
