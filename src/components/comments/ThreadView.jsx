@@ -16,6 +16,8 @@ function getCommentTheme(selectedOptionId, answerOptions) {
       titleColor: "#776F08",
       borderColor: "#F0E224",
       headerBg: "#F0E224", // Requested yellow header
+      contextBg: "#FCF9CF",
+      contextTextColor: "#212121",
     };
   }
 
@@ -26,6 +28,8 @@ function getCommentTheme(selectedOptionId, answerOptions) {
       titleColor: "#5B037C",
       borderColor: "#BF24F9",
       headerBg: "#9105C6", // Requested purple header
+      contextBg: "#BF24F9", // Requested bright purple context
+      contextTextColor: "#FFFFFF",
     };
   }
 
@@ -35,6 +39,8 @@ function getCommentTheme(selectedOptionId, answerOptions) {
     titleColor: "#5B037C",
     borderColor: "#BF24F9",
     headerBg: "#9105C6",
+    contextBg: "#BF24F9",
+    contextTextColor: "#FFFFFF",
   };
 }
 
@@ -60,7 +66,7 @@ const ThreadView = ({
             backgroundColor: getCommentTheme(selectedThread.comment.answer?.selectedOptionId, answerOptions).headerBg,
           }}
         >
-          <div className="flex-1 pr-4 text-start">
+          <div className="flex-1 pr-2  text-start">
             <p
               className="text-white mb-1"
               style={{
@@ -83,7 +89,7 @@ const ThreadView = ({
                 fontStyle: "normal" // "Regular" is font-weight 400
               }}
             >
-              {question.text}
+              {question}
             </h3>
           </div>
           <button onClick={onClose} className="text-white/80 hover:text-white flex-shrink-0">
@@ -93,14 +99,16 @@ const ThreadView = ({
 
         {/* Root Comment Context */}
         <div
-          className="px-4 pb-6 pt-4 shrink-0 mb-4 rounded-b-2xl"
+          className="p-4 shrink-0 mb-4 rounded-b-2xl"
           style={{
-            backgroundColor: getCommentTheme(selectedThread.comment.answer?.selectedOptionId, answerOptions).bgColor,
+            backgroundColor: getCommentTheme(selectedThread.comment.answer?.selectedOptionId, answerOptions).contextBg,
           }}
         >
           <div
             className="font-inter font-normal text-base leading-[24px] text-start [&_p]:break-all"
-            style={{ color: "#212121" }}
+            style={{
+              color: getCommentTheme(selectedThread.comment.answer?.selectedOptionId, answerOptions).contextTextColor
+            }}
             dangerouslySetInnerHTML={{
               __html: marked.parse(selectedThread.comment.text || ""),
             }}
