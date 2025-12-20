@@ -400,9 +400,12 @@ function ArgumentsView({
 
 
     setCollapsedOffset(offset);
-    setCurrentOffset(offset);
-    setIsExpanded(false);
-  }, [isOpen, argsList.length]);
+
+    // Only reset to collapsed position if NOT already expanded
+    if (!isExpanded) {
+      setCurrentOffset(offset);
+    }
+  }, [isOpen, argsList.length, isExpanded]);
 
   // Body lock + global pull-to-refresh blocker
   useEffect(() => {
