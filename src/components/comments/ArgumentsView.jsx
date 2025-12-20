@@ -1441,10 +1441,8 @@ function ArgumentsView({
         onClose={handleCloseThread}
         question={question}
         answerOptions={answerOptions}
-        onReply={(commentToReplyTo) => {
-          setReplyingTo(commentToReplyTo);
-          handleCloseThread();
-          setShowOpinionForm(true);
+        onPostReply={async (text, targetComment) => {
+          await postReplyToComment(text, targetComment.id, setArgsList, setReplyingTo, setIsLoading, cardId, user);
         }}
         onLike={handleLike}
         onNext={onNext}
