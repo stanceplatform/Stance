@@ -9,6 +9,7 @@ import {
   fetchCardComments,
   postCommentOnCard,
   postReplyToComment,
+  fetchReplies,
   likeComment,
   unlikeComment,
   apiService,
@@ -21,6 +22,7 @@ import CardNavigation from "../card/CardNavigation";
 import ReportComment from "./ReportCommentSheet";
 import ReplyIcon from "../icons/ReplyIcon";
 import ReplyLinkIcon from "../icons/ReplyLinkIcon";
+import ThreadView from "./ThreadView";
 
 
 
@@ -129,6 +131,7 @@ function ArgumentsView({
   const [commentIdToReport, setCommentIdToReport] = useState(null);
   const [reportedComments, setReportedComments] = useState(new Set());
   const [replyingTo, setReplyingTo] = useState(null);
+  const [selectedThread, setSelectedThread] = useState(null); // { comment, replies: [] }
 
   const { user } = useAuth();
 
@@ -737,6 +740,23 @@ function ArgumentsView({
     }
   };
 
+  const handleOpenThread = async (comment) => {
+    try {
+      setIsLoading(true);
+      const replies = await fetchReplies(comment.id);
+      setSelectedThread({ comment, replies });
+    } catch (err) {
+      console.error("Failed to load thread:", err);
+      toast.error("Failed to load thread.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCloseThread = () => {
+    setSelectedThread(null);
+  };
+
   // --------- CONTEXT MENU ACTIONS ------------
 
   const handleDeleteComment = () => {
@@ -1122,8 +1142,12 @@ function ArgumentsView({
                         {
                           arg.depth === 0 && arg.replies && arg.replies.length > 0 && (
                             <div
-                              className="font-inter mt-3 text-start text-sm font-normal"
+                              className="font-inter mt-3 text-start text-sm font-normal cursor-pointer hover:underline"
                               style={{ color: theme.titleColor }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleOpenThread(arg);
+                              }}
                             >
                               {(() => {
                                 const uniqueNames = [
@@ -1410,6 +1434,20 @@ function ArgumentsView({
           </div>
         )
       }
+
+      {/* Thread View Overlay */}
+      <ThreadView
+        selectedThread={selectedThread}
+        onClose={handleCloseThread}
+        question={question}
+        answerOptions={answerOptions}
+        onReply={(commentToReplyTo) => {
+          setReplyingTo(commentToReplyTo);
+          handleCloseThread();
+          setShowOpinionForm(true);
+        }}
+        onLike={handleLike}
+      />
 
       <style>{`
         @keyframes slideUp {

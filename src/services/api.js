@@ -239,6 +239,10 @@ class ApiService {
     return this.request(`/comments/question/${questionId}?page=${page}&size=${size}&sort=${sortParam}`);
   }
 
+  async getReplies(mainCommentId) {
+    return this.request(`/comments/main/${mainCommentId}/replies`);
+  }
+
   async addComment(questionId, text) {
     return this.request(`/comments/question/${questionId}`, {
       method: 'POST',

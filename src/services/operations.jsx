@@ -144,6 +144,16 @@ export const postReplyToComment = async (parentCommentId, commentText) => {
   }
 };
 
+export const fetchReplies = async (mainCommentId) => {
+  try {
+    return await apiService.getReplies(mainCommentId);
+  } catch (error) {
+    console.error("Error fetching replies:", error);
+    // toast.error(getApiErrorMessage(error)); // Optional: suppress error toast for background fetch
+    throw error;
+  }
+};
+
 export const createCard = async (cardData) => {
   // TODO: Implement create card API
   return { success: true };
