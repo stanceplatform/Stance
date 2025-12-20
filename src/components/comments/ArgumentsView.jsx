@@ -1447,6 +1447,8 @@ function ArgumentsView({
           setShowOpinionForm(true);
         }}
         onLike={handleLike}
+        onNext={onNext}
+        onPrevious={onPrevious}
       />
 
       <style>{`

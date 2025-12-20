@@ -2,6 +2,7 @@ import React from "react";
 import { marked } from "marked";
 import ReplyIcon from "../icons/ReplyIcon";
 import ReplyLinkIcon from "../icons/ReplyLinkIcon";
+import CloseIcon from "../icons/CloseIcon";
 
 // Theme helper function - duplicated from ArgumentsView to keep component self-contained
 function getCommentTheme(selectedOptionId, answerOptions) {
@@ -14,6 +15,7 @@ function getCommentTheme(selectedOptionId, answerOptions) {
       bgColor: "#FCF9CF",
       titleColor: "#776F08",
       borderColor: "#F0E224",
+      headerBg: "#F0E224", // Requested yellow header
     };
   }
 
@@ -23,6 +25,7 @@ function getCommentTheme(selectedOptionId, answerOptions) {
       bgColor: "#F8E6FE",
       titleColor: "#5B037C",
       borderColor: "#BF24F9",
+      headerBg: "#9105C6", // Requested purple header
     };
   }
 
@@ -31,6 +34,7 @@ function getCommentTheme(selectedOptionId, answerOptions) {
     bgColor: "#F8E6FE",
     titleColor: "#5B037C",
     borderColor: "#BF24F9",
+    headerBg: "#9105C6",
   };
 }
 
@@ -41,38 +45,55 @@ const ThreadView = ({
   answerOptions,
   onReply, // function(commentToReplyTo)
   onLike,  // function(commentId)
+  onNext,
+  onPrevious
 }) => {
   if (!selectedThread) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] bg-black bg-opacity-50 flex flex-col justify-end sm:justify-center">
-      <div className="bg-white w-full max-w-[480px] mx-auto h-full flex flex-col overflow-hidden relative shadow-2xl">
+    <div className="fixed inset-0 z-[100] flex flex-col justify-end sm:justify-center">
+      <div className="bg-white w-full max-w-[480px] mx-auto h-full  flex flex-col overflow-hidden relative shadow-2xl">
         {/* Header */}
         <div
           className="p-4 flex items-start justify-between shrink-0"
           style={{
-            backgroundColor: getCommentTheme(selectedThread.comment.answer?.selectedOptionId, answerOptions).titleColor,
+            backgroundColor: getCommentTheme(selectedThread.comment.answer?.selectedOptionId, answerOptions).headerBg,
           }}
         >
-          <div className="flex-1">
-            <p className="text-sm font-semibold mb-1 opacity-90 text-white">
+          <div className="flex-1 pr-4 text-start">
+            <p
+              className="text-white mb-1"
+              style={{
+                fontFamily: "Inter",
+                fontWeight: 700,
+                fontSize: "13px",
+                lineHeight: "100%",
+                fontStyle: "normal" // "Bold" is font-weight 700
+              }}
+            >
               {selectedThread.comment.user?.firstName || "User"}’s argument on
             </p>
-            <h3 className="text-sm font-medium leading-tight text-white">
+            <h3
+              className="text-white leading-tight"
+              style={{
+                fontFamily: "Inter",
+                fontWeight: 400,
+                fontSize: "13px",
+                lineHeight: "100%",
+                fontStyle: "normal" // "Regular" is font-weight 400
+              }}
+            >
               {question.text}
             </h3>
           </div>
-          <button onClick={onClose} className="text-white/80 hover:text-white ml-2">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
+          <button onClick={onClose} className="text-white/80 hover:text-white flex-shrink-0">
+            <CloseIcon width={40} height={40} />
           </button>
         </div>
 
         {/* Root Comment Context */}
         <div
-          className="px-4 pb-6 pt-4 shrink-0 mb-4"
+          className="px-4 pb-6 pt-4 shrink-0 mb-4 rounded-b-2xl"
           style={{
             backgroundColor: getCommentTheme(selectedThread.comment.answer?.selectedOptionId, answerOptions).bgColor,
           }}
@@ -253,19 +274,72 @@ const ThreadView = ({
         </div>
 
         {/* Bottom Input Area for Thread */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-100 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-          <button
-            onClick={() => {
-              onReply(selectedThread.comment);
-            }}
-            className="w-full py-3 rounded-xl font-bold text-center shadow-lg active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
-            style={{
-              backgroundColor: "#FDE047",
-              color: "black"
-            }}
-          >
-            Counter {selectedThread.comment.user?.firstName || "User"}
-          </button>
+        <div
+          className="absolute bottom-0 left-0 right-0 max-w-[480px] mx-auto h-16 pointer-events-none z-50"
+          style={{
+            background:
+              "linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.3) 50%, rgba(0, 0, 0, 1) 100%)",
+          }}
+        />
+        <div className="absolute bottom-0 left-0 right-0 p-4 z-50">
+          <div className="flex items-center" style={{ gap: "8px" }}>
+            <button
+              className="flex items-center justify-center w-12 h-12 rounded-[40px] bg-white shadow-md p-3"
+              onClick={() => {
+                onPrevious?.();
+              }}
+            >
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M14.55 19.0056L7.5 11.9999L14.55 4.99414L15.81 6.26989L10.0958 11.9999L15.81 17.7299L14.55 19.0056Z"
+                  fill="#212121"
+                />
+              </svg>
+            </button>
+
+            <button
+              onClick={() => {
+                onReply(selectedThread.comment);
+              }}
+              className="flex-1 flex items-center justify-center font-inter font-medium text-[18px] leading-[32px] rounded-[40px] shadow-lg active:scale-[0.98] transition-transform"
+              style={{
+                paddingTop: "8px",
+                paddingRight: "24px",
+                paddingBottom: "8px",
+                paddingLeft: "24px",
+                backgroundColor: getCommentTheme(selectedThread.comment.answer?.selectedOptionId, answerOptions).headerBg === "#9105C6" ? "#F0E224" : "#9105C6",
+                color: getCommentTheme(selectedThread.comment.answer?.selectedOptionId, answerOptions).headerBg === "#9105C6" ? "#212121" : "#FFFFFF"
+              }}
+            >
+              Counter {selectedThread.comment.user?.firstName || "User"}
+            </button>
+
+            <button
+              className="flex items-center justify-center w-12 h-12 rounded-[40px] bg-white shadow-md p-3"
+              onClick={() => {
+                onNext?.();
+              }}
+            >
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M16.4999 11.9999L9.44994 19.0056L8.18994 17.7299L13.9042 11.9999L8.18994 6.26989L9.44994 4.99414L16.4999 11.9999Z"
+                  fill="#212121"
+                />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
     </div>
