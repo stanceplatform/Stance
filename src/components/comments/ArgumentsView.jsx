@@ -1462,6 +1462,7 @@ function ArgumentsView({
                       ? `Add counter to ${replyingTo.user?.firstName || replyingTo.author || "User"}`
                       : "Add your opinion..."
                   }
+                  autoFocus={true}
                 />
               </div>
             </div>

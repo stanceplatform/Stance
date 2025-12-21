@@ -325,6 +325,7 @@ const ThreadView = ({
               <OpinionForm
                 onAddOpinion={handlePostReply}
                 placeholder={replyPlaceholder}
+                autoFocus={true}
               />
             </div>
           ) : (

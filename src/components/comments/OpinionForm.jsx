@@ -1,7 +1,7 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
-function OpinionForm({ onAddOpinion, placeholder = "Add your opinion..." }) {
+function OpinionForm({ onAddOpinion, placeholder = "Add your opinion...", autoFocus = false }) {
   const editorRef = useRef(null);
   const [html, setHtml] = useState("");
 
@@ -29,11 +29,19 @@ function OpinionForm({ onAddOpinion, placeholder = "Add your opinion..." }) {
   };
 
   useLayoutEffect(resize, [html]);
+
   useEffect(() => {
     const onResize = () => resize();
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
+
+  // Auto-focus logic
+  useEffect(() => {
+    if (autoFocus && editorRef.current) {
+      editorRef.current.focus();
+    }
+  }, [autoFocus]);
 
   // --- Bold (live) ---
   const toggleBold = () => {
