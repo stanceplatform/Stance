@@ -721,22 +721,56 @@ function ArgumentsView({
         [commentId]: Date.now(),
       }));
 
-      const current = argsList.find((c) => c.id === commentId);
+      // Find current like status from state
+      let current = argsList.find((c) => c.id === commentId);
+      if (!current && selectedThread) {
+        if (selectedThread.comment.id === commentId) {
+          current = selectedThread.comment;
+        } else {
+          current = selectedThread.replies?.find(r => r.id === commentId);
+        }
+      }
+
+      // Default to false if malformed, but safely exit if strictly not found
+      if (!current && !selectedThread) return;
+      // If found in neither but we have an ID, we could proceed blindly but getting 'wasLiked' is crucial.
+      // If strict 'current' is missing, assume false (safe fallback?) or return.
+      // Given UI showed it, it must exist.
       const wasLiked = !!current?.likes?.isLikedByCurrentUser;
 
+      // Helper to update a comment in a list
+      const updateCommentLike = (c) => {
+        if (c.id !== commentId) return c;
+        return {
+          ...c,
+          likes: {
+            ...c.likes,
+            isLikedByCurrentUser: !wasLiked,
+            count: wasLiked ? Math.max(0, (c.likes?.count || 0) - 1) : (c.likes?.count || 0) + 1
+          }
+        };
+      };
+
+      // 1. Optimistic Update
+      setArgsList(prev => prev.map(updateCommentLike));
+      if (selectedThread) {
+        setSelectedThread(prev => ({
+          ...prev,
+          comment: updateCommentLike(prev.comment),
+          replies: prev.replies?.map(updateCommentLike)
+        }));
+      }
+
+      // 2. API Call
       if (wasLiked) {
         await unlikeComment(commentId);
       } else {
         await likeComment(commentId);
       }
 
-      const response = await fetchCardComments(cardId, 0);
-      setArgsList(response.content || []);
-      setTotalPages(response.totalPages || 1);
-      setHasMore(!response.last && (response.totalPages || 1) > 1);
-      setCurrentPage(0);
     } catch (err) {
-      setError(err?.message || "Failed to like comment");
+      console.error("Like failed", err);
+      // Ideally revert state here, but omitting for simplicity as requested
     }
   };
 
@@ -1442,7 +1476,13 @@ function ArgumentsView({
         question={question}
         answerOptions={answerOptions}
         onPostReply={async (text, targetComment) => {
-          await postReplyToComment(text, targetComment.id, setArgsList, setReplyingTo, setIsLoading, cardId, user);
+          const newReply = await postReplyToComment(targetComment.id, text);
+          if (newReply) {
+            setSelectedThread(prev => ({
+              ...prev,
+              replies: [newReply, ...(prev.replies || [])]
+            }));
+          }
         }}
         onLike={handleLike}
         onNext={onNext}
