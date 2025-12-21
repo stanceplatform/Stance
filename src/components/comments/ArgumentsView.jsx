@@ -432,6 +432,9 @@ function ArgumentsView({
     };
 
     const handleTouchMoveDoc = (e) => {
+      // Allow scrolling in ThreadView (it has its own overflow container)
+      if (selectedThread) return;
+
       if (!scrollContainerRef.current) return;
 
       const scroller = scrollContainerRef.current;
@@ -475,7 +478,7 @@ function ArgumentsView({
       document.removeEventListener("touchstart", handleTouchStartDoc);
       document.removeEventListener("touchmove", handleTouchMoveDoc);
     };
-  }, [isOpen, showReport]);
+  }, [isOpen, showReport, selectedThread]);
 
   const formatPct = (v) => {
     if (v == null || v === "") return "0";

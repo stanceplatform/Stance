@@ -373,7 +373,7 @@ const ThreadView = ({
                     color: getCommentTheme(mainComment.answer?.selectedOptionId, answerOptions).headerBg === "#9105C6" ? "#212121" : "#FFFFFF"
                   }}
                 >
-                  Counter {mainComment.user?.firstName || "User"}
+                  Counter {(mainComment.user?.firstName || "User").split(" ")[0]}
                 </button>
 
                 <button
