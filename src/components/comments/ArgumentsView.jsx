@@ -242,7 +242,8 @@ function ArgumentsView({
         root.replies.forEach((reply) => {
           // Only add valid replies (skip 'counters' metadata objects if any)
           if (reply.id) {
-            result.push(reply);
+            // Attach root comment reference for navigation
+            result.push({ ...reply, _rootComment: root });
           }
         });
       }
@@ -780,8 +781,22 @@ function ArgumentsView({
   const handleOpenThread = async (comment) => {
     try {
       setIsLoading(true);
-      const replies = await fetchReplies(comment.id);
-      setSelectedThread({ comment, replies });
+      const fetchedReplies = await fetchReplies(comment.id);
+
+      // Enrich fetched replies with local data (specifically parentUser) if available
+      // The main list endpoint seems to return parentUser, while the replies specific endpoint might not.
+      if (comment.replies && Array.isArray(comment.replies)) {
+        fetchedReplies.forEach(fetchedReply => {
+          if (!fetchedReply.parentUser) {
+            const local = comment.replies.find(r => r.id === fetchedReply.id);
+            if (local && local.parentUser) {
+              fetchedReply.parentUser = local.parentUser;
+            }
+          }
+        });
+      }
+
+      setSelectedThread({ comment, replies: fetchedReplies });
     } catch (err) {
       console.error("Failed to load thread:", err);
       toast.error("Failed to load thread.");
@@ -1171,7 +1186,10 @@ function ArgumentsView({
                           ref={isFirstComment ? firstCommentTextRef : null}
                           className="text-[#212121] font-inter font-normal text-base leading-[24px] text-start [&_p]:break-all"
                           dangerouslySetInnerHTML={{
-                            __html: marked.parse(arg.text || ""),
+                            __html: marked.parse(
+                              (arg.parentUser ? `**@${arg.parentUser.firstName}** ` : "") +
+                              (arg.text || "")
+                            ),
                           }}
                         />
 
@@ -1220,6 +1238,12 @@ function ArgumentsView({
                                   theme.bgColor === "#FCF9CF"
                                     ? "#776F08" // Yellow theme text
                                     : "#9105C6", // Purple theme text
+                              }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (arg._rootComment) {
+                                  handleOpenThread(arg._rootComment);
+                                }
                               }}
                             >
                               <ReplyLinkIcon

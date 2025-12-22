@@ -17,7 +17,7 @@ function getCommentTheme(selectedOptionId, answerOptions) {
       titleColor: "#776F08",
       borderColor: "#F0E224",
       headerBg: "#F0E224", // Requested yellow header
-      contextBg: "#FCF9CF",
+      contextBg: "#F0E224", // Updated to vibrant yellow
       contextTextColor: "#212121",
     };
   }
@@ -28,7 +28,7 @@ function getCommentTheme(selectedOptionId, answerOptions) {
       bgColor: "#F8E6FE",
       titleColor: "#5B037C",
       borderColor: "#BF24F9",
-      headerBg: "#9105C6", // Requested purple header
+      headerBg: "#BF24F9", // Updated to vibrant purple
       contextBg: "#BF24F9", // Requested bright purple context
       contextTextColor: "#FFFFFF",
     };
@@ -39,7 +39,7 @@ function getCommentTheme(selectedOptionId, answerOptions) {
     bgColor: "#F8E6FE",
     titleColor: "#5B037C",
     borderColor: "#BF24F9",
-    headerBg: "#9105C6",
+    headerBg: "#BF24F9",
     contextBg: "#BF24F9",
     contextTextColor: "#FFFFFF",
   };
@@ -90,24 +90,9 @@ const ThreadView = ({
       <div className="bg-white w-full max-w-[480px] mx-auto h-full  flex flex-col overflow-hidden relative shadow-2xl">
         {/* Header */}
         <div
-          className="p-4 flex items-start justify-between shrink-0"
-          style={{
-            backgroundColor: getCommentTheme(mainComment.answer?.selectedOptionId, answerOptions).headerBg,
-          }}
+          className="p-4 flex items-center justify-between shrink-0 bg-[#121212]"
         >
-          <div className="flex-1 pr-2  text-start">
-            <p
-              className="text-white mb-1"
-              style={{
-                fontFamily: "Inter",
-                fontWeight: 700,
-                fontSize: "13px",
-                lineHeight: "100%",
-                fontStyle: "normal" // "Bold" is font-weight 700
-              }}
-            >
-              {mainComment.user?.firstName || "User"}’s argument on
-            </p>
+          <div className="flex-1 pr-2 text-start items-center">
             <h3
               className="text-white leading-tight"
               style={{
@@ -133,6 +118,19 @@ const ThreadView = ({
             backgroundColor: getCommentTheme(mainComment.answer?.selectedOptionId, answerOptions).contextBg,
           }}
         >
+          <p
+            className="mb-2 text-start"
+            style={{
+              fontFamily: "Inter",
+              fontWeight: 700,
+              fontSize: "13px",
+              lineHeight: "100%",
+              fontStyle: "normal", // "Bold" is font-weight 700
+              color: getCommentTheme(mainComment.answer?.selectedOptionId, answerOptions).contextTextColor
+            }}
+          >
+            {mainComment.user?.firstName || "User"}’s argument on
+          </p>
           <div
             className="font-inter font-normal text-base leading-[24px] text-start [&_p]:break-all"
             style={{
@@ -276,35 +274,14 @@ const ThreadView = ({
                 <div
                   className="text-[#212121] font-inter font-normal text-base leading-[24px] text-start [&_p]:break-all"
                   dangerouslySetInnerHTML={{
-                    __html: marked.parse(reply.text || ""),
+                    __html: marked.parse(
+                      (reply.parentUser ? `**@${reply.parentUser.firstName}** ` : "") +
+                      (reply.text || "")
+                    ),
                   }}
                 />
 
-                {/* Reply Link Indicator */}
-                {reply.parentUser && (
-                  <div
-                    className="flex items-center gap-2 mt-3 cursor-pointer w-fit"
-                    style={{
-                      color:
-                        replyTheme.bgColor === "#FCF9CF"
-                          ? "#776F08"
-                          : "#9105C6",
-                    }}
-                  >
-                    <ReplyLinkIcon
-                      width={16}
-                      height={16}
-                      fill={
-                        replyTheme.bgColor === "#FCF9CF"
-                          ? "#776F08"
-                          : "#9105C6"
-                      }
-                    />
-                    <span className="font-inter font-normal text-[14px] leading-[20px]">
-                      to {reply.parentUser.firstName}
-                    </span>
-                  </div>
-                )}
+
               </div>
             )
           })}
@@ -369,8 +346,8 @@ const ThreadView = ({
                     paddingRight: "24px",
                     paddingBottom: "8px",
                     paddingLeft: "24px",
-                    backgroundColor: getCommentTheme(mainComment.answer?.selectedOptionId, answerOptions).headerBg === "#9105C6" ? "#F0E224" : "#9105C6",
-                    color: getCommentTheme(mainComment.answer?.selectedOptionId, answerOptions).headerBg === "#9105C6" ? "#212121" : "#FFFFFF"
+                    backgroundColor: getCommentTheme(mainComment.answer?.selectedOptionId, answerOptions).headerBg === "#BF24F9" ? "#F0E224" : "#BF24F9",
+                    color: getCommentTheme(mainComment.answer?.selectedOptionId, answerOptions).headerBg === "#BF24F9" ? "#212121" : "#FFFFFF"
                   }}
                 >
                   Counter {(mainComment.user?.firstName || "User").split(" ")[0]}
