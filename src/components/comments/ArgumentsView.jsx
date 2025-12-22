@@ -1508,6 +1508,7 @@ function ArgumentsView({
         onClose={handleCloseThread}
         question={question}
         answerOptions={answerOptions}
+        userChoice={userChoice}
         onPostReply={async (text, targetComment) => {
           const newReply = await postReplyToComment(targetComment.id, text);
           if (newReply) {

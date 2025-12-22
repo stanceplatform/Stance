@@ -50,6 +50,7 @@ const ThreadView = ({
   onClose,
   question,
   answerOptions,
+  userChoice, // New prop
   onPostReply, // function(text, parentCommentId)
   onLike,  // function(commentId)
   onNext,
@@ -354,8 +355,18 @@ const ThreadView = ({
                     paddingRight: "24px",
                     paddingBottom: "8px",
                     paddingLeft: "24px",
-                    backgroundColor: getCommentTheme(mainComment.answer?.selectedOptionId, answerOptions).headerBg === "#BF24F9" ? "#F0E224" : "#BF24F9",
-                    color: getCommentTheme(mainComment.answer?.selectedOptionId, answerOptions).headerBg === "#BF24F9" ? "#212121" : "#FFFFFF"
+                    backgroundColor:
+                      userChoice === 1
+                        ? "#F0E224"
+                        : userChoice === 2
+                          ? "#9105C6"
+                          : "#F0E224",
+                    color:
+                      userChoice === 1
+                        ? "#212121"
+                        : userChoice === 2
+                          ? "#FFFFFF"
+                          : "#212121",
                   }}
                 >
                   Counter {(mainComment.user?.firstName || "User").split(" ")[0]}
