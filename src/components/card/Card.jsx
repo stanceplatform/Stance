@@ -19,6 +19,7 @@ const ANGLE_GUARD = 0.6;              // require mostly-horizontal: |dx| > 0.6*|
 const Card = () => {
   const { data: questionsData = [], loading, error } = useApi(fetchAllCards)
   const [questions, setQuestions] = useState([])
+  const [isInitializing, setIsInitializing] = useState(true)
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [nextBackgroundImage, setNextBackgroundImage] = useState(null)
   const [direction, setDirection] = useState('next')
@@ -222,10 +223,17 @@ const Card = () => {
   };
 
   useEffect(() => {
-    if (!questionsData?.length) return;
+    if (loading) return
 
-    // Only run this initialization logic if we haven't set up questions yet
-    if (questions.length > 0) return;
+    if (!questionsData?.length) {
+      setIsInitializing(false)
+      return
+    }
+
+    if (questions.length > 0) {
+      setIsInitializing(false)
+      return
+    }
 
     const sanitize = (data) => data.map(q => ({
       ...q,
@@ -266,10 +274,11 @@ const Card = () => {
       }
 
       setQuestions(processed);
+      setIsInitializing(false)
     };
 
     initializeQuestions();
-  }, [questionsData, questionIdParam, questions.length]);
+  }, [questionsData, questionIdParam, questions.length, loading]);
 
   useEffect(() => {
     if (!questions.length) return
@@ -322,7 +331,7 @@ const Card = () => {
 
   return (
     <div className="flex overflow-hidden flex-col mx-auto w-full max-w-[480px] max-h-screen-dvh relative" >
-      {loading ? (
+      {(loading || isInitializing) ? (
         <div className="flex items-center justify-center h-screen">
           <div className="text-white">Loading...</div>
         </div>
