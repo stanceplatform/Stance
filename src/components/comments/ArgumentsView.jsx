@@ -1486,10 +1486,15 @@ function ArgumentsView({
                   onAddOpinion={handleAddOpinion}
                   placeholder={
                     replyingTo
-                      ? `Add counter to ${replyingTo.user?.firstName || replyingTo.author || "User"}`
+                      ? "your counter..."
                       : "Add your opinion..."
                   }
                   autoFocus={true}
+                  initialValue={
+                    replyingTo
+                      ? `<strong>@${replyingTo.user?.firstName || replyingTo.author || "User"}</strong><span style="font-weight: 400;"> </span>`
+                      : ""
+                  }
                 />
               </div>
             </div>

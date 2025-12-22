@@ -301,8 +301,13 @@ const ThreadView = ({
             <div className="bg-[#1e1e1e] p-2 rounded-t-2xl shadow-2xl animate-slideUp">
               <OpinionForm
                 onAddOpinion={handlePostReply}
-                placeholder={replyPlaceholder}
+                placeholder="your counter..."
                 autoFocus={true}
+                initialValue={
+                  replyingTo
+                    ? `<strong>@${replyingTo.user?.firstName || replyingTo.author || "User"}</strong><span style="font-weight: 400;"> </span>`
+                    : `<strong>@${(mainComment.user?.firstName || "User").split(" ")[0]}</strong><span style="font-weight: 400;"> </span>`
+                }
               />
             </div>
           ) : (

@@ -1,9 +1,9 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
-function OpinionForm({ onAddOpinion, placeholder = "Add your opinion...", autoFocus = false }) {
+function OpinionForm({ onAddOpinion, placeholder = "Add your opinion...", autoFocus = false, initialValue = "" }) {
   const editorRef = useRef(null);
-  const [html, setHtml] = useState("");
+  const [html, setHtml] = useState(initialValue || "");
 
   // ---- Config ----
   const MAX_CHARS = 400;
@@ -36,12 +36,27 @@ function OpinionForm({ onAddOpinion, placeholder = "Add your opinion...", autoFo
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
+  // Update editor content when initialValue changes (and editor is empty or matches previous init)
+  useEffect(() => {
+    if (initialValue && editorRef.current) {
+      // Only set if different to avoid cursor jumping if we were to support controlled input later
+      if (editorRef.current.innerHTML !== initialValue) {
+        editorRef.current.innerHTML = initialValue;
+        setHtml(initialValue);
+        placeCaretAtEnd(editorRef.current);
+      }
+    }
+  }, [initialValue]);
+
   // Auto-focus logic
   useEffect(() => {
     if (autoFocus && editorRef.current) {
       editorRef.current.focus();
+      if (initialValue) {
+        placeCaretAtEnd(editorRef.current);
+      }
     }
-  }, [autoFocus]);
+  }, [autoFocus, initialValue]);
 
   // --- Bold (live) ---
   const toggleBold = () => {
@@ -55,6 +70,17 @@ function OpinionForm({ onAddOpinion, placeholder = "Add your opinion...", autoFo
       e.preventDefault();
       toggleBold();
       return;
+    }
+
+    // Guard: Prevent deleting the immutable initial value (prefix)
+    if (initialValue && e.key === "Backspace") {
+      const currentText = getVisibleText(editorRef.current.innerHTML);
+      const initialText = getVisibleText(initialValue);
+      // If current text length is same (or less) than initial, prevent delete
+      if (currentText.length <= initialText.length) {
+        e.preventDefault();
+        return;
+      }
     }
 
     // Character limit guard for typing
@@ -217,7 +243,17 @@ function OpinionForm({ onAddOpinion, placeholder = "Add your opinion...", autoFo
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const content = htmlToMarkdown(html).trim();
+    let content = htmlToMarkdown(html).trim();
+
+    // Strip the initial prefilled value if present to avoid duplication
+    // (The system/UI often prepends the parent user mention automatically)
+    if (initialValue) {
+      const initialMd = htmlToMarkdown(initialValue).trim();
+      if (content.startsWith(initialMd)) {
+        content = content.slice(initialMd.length).trim();
+      }
+    }
+
     if (!content) return;
 
     const maybePromise = onAddOpinion?.({
@@ -240,8 +276,21 @@ function OpinionForm({ onAddOpinion, placeholder = "Add your opinion...", autoFo
     }
   };
 
+  // Check if content matches initial value (ignoring minor HTML differences if needed)
+  // We use a simple check: if the visible text length is same as initial visible text
+  // OR if exact HTML string match.
+  const isPristine = html === initialValue;
+
   return (
     <form onSubmit={handleSubmit} className="flex gap-2 justify-center items-start pt-3 w-full rounded-lg">
+      <style>{`
+        .nf-editor-trailing-placeholder::after {
+          content: attr(data-placeholder);
+          color: #9CA3AF; /* gray-400 */
+          pointer-events: none;
+        }
+      `}</style>
+
       {/* Editor */}
       <div
         ref={editorRef}
@@ -260,6 +309,7 @@ function OpinionForm({ onAddOpinion, placeholder = "Add your opinion...", autoFo
           "resize-none transition-[height] duration-150 ease-out",
           "nf-nice-scrollbar",
           "overflow-hidden",
+          isPristine && initialValue ? "nf-editor-trailing-placeholder" : ""
         ].join(" ")}
         style={{
           minHeight: 24,
