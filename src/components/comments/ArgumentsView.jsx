@@ -1511,6 +1511,14 @@ function ArgumentsView({
         onPostReply={async (text, targetComment) => {
           const newReply = await postReplyToComment(targetComment.id, text);
           if (newReply) {
+            // Optimistic update: manually prepend the mention so it shows immediately
+            // (The backend/fetch might do this later, but we need it now)
+            if (targetComment.user?.firstName) {
+              newReply.text = newReply.text;
+            }
+            // Also ensure parentUser is attached for consistency
+            newReply.parentUser = targetComment.user;
+
             setSelectedThread(prev => ({
               ...prev,
               replies: [newReply, ...(prev.replies || [])]

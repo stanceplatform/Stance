@@ -298,7 +298,10 @@ const ThreadView = ({
         {/* Bottom Input / Action Area */}
         <div className="absolute bottom-0 left-0 right-0 max-w-[480px] mx-auto z-50">
           {showReplyForm ? (
-            <div className="bg-[#1e1e1e] p-2 rounded-t-2xl shadow-2xl animate-slideUp">
+            <div
+              className="bg-[#1e1e1e] p-2 rounded-t-2xl shadow-2xl"
+              style={{ animation: "slideUp 0.3s ease-out forwards" }}
+            >
               <OpinionForm
                 onAddOpinion={handlePostReply}
                 placeholder="your counter..."
@@ -382,6 +385,12 @@ const ThreadView = ({
           )}
         </div>
       </div>
+      <style>{`
+        @keyframes slideUp {
+          from { transform: translateY(100%); }
+          to { transform: translateY(0); }
+        }
+      `}</style>
     </div>
   );
 };
