@@ -37,7 +37,7 @@ export default function SwipeHintOverlay({ storageKey = STORAGE_KEY, onDismiss, 
   if (!open) return null;
 
   return (
-    <div role="dialog" aria-modal="true" aria-label="Navigation hint" className="fixed inset-0 z-[60]">
+    <div role="dialog" aria-modal="true" aria-label="Navigation hint" className="fixed inset-0 z-[60] max-w-[480px] mx-auto">
       {/* Backdrop (white translucent + slight blur) */}
       <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px]" />
 
