@@ -24,9 +24,18 @@ export default function NotificationItem({ notification }) {
   // Keep avatar logic but leave initials blank (still show purple circle)
   const initials = "S";
 
-  const Wrapper = clickable && link ? Link : "div";
+  // Transform /questions/:id -> /?questionid=:id
+  let finalLink = link;
+  if (link && link.startsWith("/questions/")) {
+    const match = link.match(/\/questions\/(\d+)/);
+    if (match && match[1]) {
+      finalLink = `/?questionid=${match[1]}`;
+    }
+  }
+
+  const Wrapper = clickable && finalLink ? Link : "div";
   const wrapperProps =
-    clickable && link ? { to: link } : {};
+    clickable && finalLink ? { to: finalLink } : {};
 
   return (
     <Wrapper
