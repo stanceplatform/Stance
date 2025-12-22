@@ -55,7 +55,7 @@ const GoogleAuthButton = ({ mode = "signup", onError }) => {
 
         // Extract category from URL if present
         const pathParts = location.pathname.split('/');
-        let category = null;
+        let category = "regular";
         // Check for /:category/auth or /:category/login
         if (pathParts.length >= 2) {
           const potentialCategory = pathParts[1];
