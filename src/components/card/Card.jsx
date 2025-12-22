@@ -233,6 +233,8 @@ const Card = () => {
     }));
 
     const initializeQuestions = async () => {
+      let finalData = questionsData;
+
       // If we have a specific question ID requested
       if (questionIdParam) {
         const existsInInitial = questionsData.some(q => String(q.id) === questionIdParam);
@@ -244,8 +246,7 @@ const Card = () => {
             const existsInRetry = retryData?.some(q => String(q.id) === questionIdParam);
 
             if (existsInRetry) {
-              setQuestions(sanitize(retryData));
-              return;
+              finalData = retryData;
             }
           } catch (err) {
             console.error('Retry fetch failed', err);
@@ -253,8 +254,18 @@ const Card = () => {
         }
       }
 
-      // Fallback or default case: usage of initial data
-      setQuestions(sanitize(questionsData));
+      // Sanitize and Reorder
+      let processed = sanitize(finalData);
+
+      if (questionIdParam) {
+        const idx = processed.findIndex(q => String(q.id) === questionIdParam);
+        if (idx > -1) {
+          const [target] = processed.splice(idx, 1);
+          processed.unshift(target);
+        }
+      }
+
+      setQuestions(processed);
     };
 
     initializeQuestions();
