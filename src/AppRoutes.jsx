@@ -1,9 +1,7 @@
 import React from 'react';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import { GoogleOAuthProvider } from '@react-oauth/google';
-import Card from './components/card/Card';
 import NotificationsPage from './components/notification/NotificationPage';
-import ThankYou from './components/thankyou/ThankYou';
 import { AuthProvider } from './context/AuthContext';
 import Landing from './pages/Landing';
 import { GOOGLE_CLIENT_ID } from './config/google';
@@ -14,7 +12,6 @@ import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import GuestRoute from './components/auth/GuestRoute';
-import ReportIssuePage from './pages/ReportIssuePage';
 import NeedHelpPage from './pages/NeedHelpPage';
 import CommunityGuidelinesPage from './pages/CommunityGuidelinesPage';
 import ResetPassword from './pages/ResetPassword';

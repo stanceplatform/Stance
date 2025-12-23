@@ -4,8 +4,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useSearchParams } from 'react-router-dom'
 import { fetchAllCards } from '../../services/operations'
 import { useApi } from '../../hooks/useApi'
-
-import ThankYou from '../thankyou/ThankYou'
 import CardNavigation from './CardNavigation'
 import QuestionSection from './QuestionSection'
 import { useCurrentQuestion } from '../../context/CurrentQuestionContext'
