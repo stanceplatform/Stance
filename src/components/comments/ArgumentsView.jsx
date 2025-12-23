@@ -1197,7 +1197,7 @@ function ArgumentsView({
                         {
                           arg.depth === 0 && arg.replies && arg.replies.length > 0 && (
                             <div
-                              className="font-inter mt-3 text-start text-sm font-normal cursor-pointer hover:underline"
+                              className="font-inter mt-2 text-start text-sm font-normal cursor-pointer hover:underline"
                               style={{ color: theme.titleColor }}
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -1232,7 +1232,7 @@ function ArgumentsView({
                         {
                           arg.parentUser && (
                             <div
-                              className="flex items-center gap-2  cursor-pointer w-fit"
+                              className="flex items-center gap-2 mt-2 cursor-pointer w-fit"
                               style={{
                                 color:
                                   theme.bgColor === "#FCF9CF"
