@@ -4,6 +4,8 @@ import React, {
   useEffect,
   useRef,
 } from "react";
+import { createPortal } from "react-dom";
+import { useSearchParams } from "react-router-dom";
 import ProgressBarWithLabels from "../charts/ProgressBar";
 import {
   fetchCardComments,
@@ -134,6 +136,7 @@ function ArgumentsView({
   const [selectedThread, setSelectedThread] = useState(null); // { comment, replies: [] }
 
   const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams(); // Hook for URL params
 
   // sheet drag + state
   const [isExpanded, setIsExpanded] = useState(false); // false = collapsed (first comment), true = full list
@@ -226,6 +229,28 @@ function ArgumentsView({
     const timer = setTimeout(() => setEnableTransition(true), 0);
     return () => clearTimeout(timer);
   }, []);
+
+  // Deep linking logic
+  useEffect(() => {
+    if (!isOpen || isLoading || argsList.length === 0) return;
+
+    // "threadId" param to open a specific thread
+    const threadId = searchParams.get("threadId");
+
+    // Only try to open if we haven't already selected one, or if it doesn't match
+    if (threadId && (!selectedThread || String(selectedThread.comment.id) !== threadId)) {
+      const targetComment = argsList.find((c) => String(c.id) === threadId);
+      if (targetComment) {
+        // If depth 0, it's a root comment -> open thread
+        if (targetComment.depth === 0) {
+          handleOpenThread(targetComment);
+        } else if (targetComment._rootComment) {
+          // If it's a reply, find its root
+          handleOpenThread(targetComment._rootComment);
+        }
+      }
+    }
+  }, [isOpen, isLoading, argsList, searchParams, selectedThread]); // Re-run when argsList loads or params change
 
   // ------------------------------------------
 
@@ -807,6 +832,12 @@ function ArgumentsView({
 
   const handleCloseThread = () => {
     setSelectedThread(null);
+    // Remove threadId from URL so it doesn't re-open or persist
+    setSearchParams(prev => {
+      const newParams = new URLSearchParams(prev);
+      newParams.delete("threadId");
+      return newParams;
+    });
   };
 
   // --------- CONTEXT MENU ACTIONS ------------
@@ -1502,34 +1533,67 @@ function ArgumentsView({
         )
       }
 
-      {/* Thread View Overlay */}
-      <ThreadView
-        selectedThread={selectedThread}
-        onClose={handleCloseThread}
-        question={question}
-        answerOptions={answerOptions}
-        userChoice={userChoice}
-        onPostReply={async (text, targetComment) => {
-          const newReply = await postReplyToComment(targetComment.id, text);
-          if (newReply) {
-            // Optimistic update: manually prepend the mention so it shows immediately
-            // (The backend/fetch might do this later, but we need it now)
-            if (targetComment.user?.firstName) {
-              newReply.text = newReply.text;
-            }
-            // Also ensure parentUser is attached for consistency
-            newReply.parentUser = targetComment.user;
+      {/* ThreadView rendered in a Portal to avoid parent transforms/clipping */}
+      {selectedThread && createPortal(
+        <ThreadView
+          selectedThread={selectedThread}
+          onClose={handleCloseThread}
+          question={question}
+          answerOptions={answerOptions}
+          userChoice={userChoice}
+          onPostReply={async (text, targetComment) => {
+            const newReply = await postReplyToComment(targetComment.id, text);
+            if (newReply) {
+              // Optimistic update: manually prepend the mention so it shows immediately
+              // (The backend/fetch might do this later, but we need it now)
+              if (targetComment.user?.firstName) {
+                newReply.text = `**@${targetComment.user.firstName}** ${newReply.text}`;
+              }
+              // Also attach parentUser for correct avatar display
+              newReply.parentUser = targetComment.user;
 
-            setSelectedThread(prev => ({
-              ...prev,
-              replies: [newReply, ...(prev.replies || [])]
-            }));
-          }
-        }}
-        onLike={handleLike}
-        onNext={onNext}
-        onPrevious={onPrevious}
-      />
+              // Update local state for immediate feedback
+              setArgsList((prev) => {
+                const updated = [...prev];
+                // Find root comment index
+                const rootIdx = updated.findIndex((c) => c.id === (targetComment._rootComment?.id || targetComment.id));
+
+                if (rootIdx !== -1) {
+                  // Arguments list structure: root comment -> replies
+                  // We need to insert the new reply into the flat list after the last reply of this thread
+                  // Or just simplistic: append to end of replies for that root (if they are grouped)
+                  // BUT our argsList is FLAT. We need to insert it at the correct position.
+                  // For simplicity in this view, we might just append it after the parent or at the end of its block?
+
+                  // Actually, to keep it simple and safe: Re-fetch or let ThreadView handle its internal list.
+                  // ThreadView displays 'selectedThread.replies'. We need to update that too.
+                  return updated;
+                }
+                return updated;
+              });
+
+              // Update the selectedThread state so the new reply shows up instantly in ThreadView
+              setSelectedThread((prev) => {
+                if (!prev) return null;
+                return {
+                  ...prev,
+                  replies: [...(prev.replies || []), newReply]
+                };
+              });
+
+              onNewComment?.();
+            }
+          }}
+          onLike={handleLike}
+          onNext={() => {
+            /* Next logic if needed */
+          }}
+          onPrevious={() => {
+            /* Prev logic if needed */
+          }}
+        />,
+        document.body
+      )}
 
       <style>{`
         @keyframes slideUp {
