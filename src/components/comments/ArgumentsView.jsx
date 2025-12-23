@@ -1258,7 +1258,7 @@ function ArgumentsView({
                               <span
                                 className="font-inter font-normal text-[14px] leading-[20px]"
                               >
-                                to {arg.parentUser.firstName}
+                                to {arg._rootComment?.user?.firstName || arg._rootComment?.author || arg.parentUser?.firstName}
                               </span>
                             </div>
                           )
