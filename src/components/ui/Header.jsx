@@ -4,6 +4,7 @@ import CrownIcon from "./CrownIcon";
 import { useAuth } from "../../context/AuthContext";
 import { useCurrentQuestion } from "../../context/CurrentQuestionContext";
 import { ALLOWED_CATEGORIES } from "../../utils/constants";
+import { apiService } from "../../services/api";
 
 const Header = ({
   onNotificationsClick,
@@ -22,6 +23,18 @@ const Header = ({
 
   // Get questionid from URL query params
   const questionIdFromUrl = new URLSearchParams(location.search).get('questionid');
+
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      apiService.getNotificationCount()
+        .then(data => {
+          setUnreadCount(data.unreadCount || 0);
+        })
+        .catch(err => console.error("Failed to fetch notification count", err));
+    }
+  }, [isAuthenticated]);
 
   useEffect(() => {
     const handler = (e) => {
@@ -101,16 +114,23 @@ const Header = ({
                 }}
                 title="Notifications"
               >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <g clipPath="url(#clip0_680_1110)">
-                    <path d="M23.4 16.0801L22.92 15.8281C21.534 15.0983 20.0438 13.6456 20.0438 12.1756V9.7501C20.0438 6.3286 20.0438 0.600098 11.9438 0.600098C3.84754 0.600098 3.84754 6.3301 3.84754 9.7501V12.1756C3.84754 13.7296 2.47954 15.1576 1.20754 15.8281L0.727539 16.0816V18.9001H7.74754C7.74304 18.9758 7.72729 19.0501 7.72729 19.1258C7.73104 21.4853 9.64204 23.3971 12.0015 23.4001C14.361 23.3963 16.2728 21.4853 16.2773 19.1258C16.2773 19.0501 16.2615 18.9751 16.257 18.8993H23.4008L23.4 16.0801ZM14.4758 19.1258C14.4735 20.4923 13.3665 21.5986 12 21.6001C10.6335 21.5986 9.52654 20.4916 9.52429 19.1258C9.52429 19.0516 9.55654 18.9758 9.56404 18.9001H14.436C14.4435 18.9758 14.4758 19.0516 14.4758 19.1258ZM2.59579 17.1001C4.18954 16.0681 5.64754 14.2538 5.64754 12.1756V9.7501C5.64754 5.5861 6.11329 2.4001 11.946 2.4001C17.7818 2.4001 18.246 5.5861 18.246 9.7501V12.1756C18.246 14.1878 19.8165 16.0231 21.528 17.1001H2.59354H2.59579Z" fill="currentColor" />
-                  </g>
-                  <defs>
-                    <clipPath id="clip0_680_1110">
-                      <rect width="24" height="24" fill="white" />
-                    </clipPath>
-                  </defs>
-                </svg>
+                <div className="relative">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <g clipPath="url(#clip0_680_1110)">
+                      <path d="M23.4 16.0801L22.92 15.8281C21.534 15.0983 20.0438 13.6456 20.0438 12.1756V9.7501C20.0438 6.3286 20.0438 0.600098 11.9438 0.600098C3.84754 0.600098 3.84754 6.3301 3.84754 9.7501V12.1756C3.84754 13.7296 2.47954 15.1576 1.20754 15.8281L0.727539 16.0816V18.9001H7.74754C7.74304 18.9758 7.72729 19.0501 7.72729 19.1258C7.73104 21.4853 9.64204 23.3971 12.0015 23.4001C14.361 23.3963 16.2728 21.4853 16.2773 19.1258C16.2773 19.0501 16.2615 18.9751 16.257 18.8993H23.4008L23.4 16.0801ZM14.4758 19.1258C14.4735 20.4923 13.3665 21.5986 12 21.6001C10.6335 21.5986 9.52654 20.4916 9.52429 19.1258C9.52429 19.0516 9.55654 18.9758 9.56404 18.9001H14.436C14.4435 18.9758 14.4758 19.0516 14.4758 19.1258ZM2.59579 17.1001C4.18954 16.0681 5.64754 14.2538 5.64754 12.1756V9.7501C5.64754 5.5861 6.11329 2.4001 11.946 2.4001C17.7818 2.4001 18.246 5.5861 18.246 9.7501V12.1756C18.246 14.1878 19.8165 16.0231 21.528 17.1001H2.59354H2.59579Z" fill="currentColor" />
+                    </g>
+                    <defs>
+                      <clipPath id="clip0_680_1110">
+                        <rect width="24" height="24" fill="white" />
+                      </clipPath>
+                    </defs>
+                  </svg>
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-2 left-2 bg-white text-[#9105C6] text-[10px] font-inter font-bold px-1 min-w-[16px] h-4 rounded-full flex items-center justify-center border border-[#9105C6] group-hover:border-[#3A0250] transition-colors shadow-sm">
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </span>
+                  )}
+                </div>
 
               </IconButton>
 

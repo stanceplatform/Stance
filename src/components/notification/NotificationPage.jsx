@@ -52,6 +52,15 @@ export default function NotificationsPage() {
       setItems(prev => (nextPage === 0 ? mapped : [...prev, ...mapped]));
       setHasMore(mapped.length > 0); // naïve; adjust if API returns total/lastPage
       setPage(nextPage);
+
+      // Mark all as read after first page load
+      if (nextPage === 0 && mapped.length > 0) {
+        try {
+          await apiService.markAllNotificationsAsRead();
+        } catch (err) {
+          console.error("Failed to mark notifications as read", err);
+        }
+      }
     } catch (e) {
       setError(e?.data?.message || e.message || "Failed to load notifications");
       setHasMore(false);

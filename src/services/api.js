@@ -401,6 +401,16 @@ class ApiService {
   async getNotifications(page = 0, size = 10) {
     return this.request(`/notifications?page=${page}&size=${size}`);
   }
+
+  async getNotificationCount() {
+    return this.request('/notifications/count');
+  }
+
+  async markAllNotificationsAsRead() {
+    return this.request('/notifications/mark-all-read', {
+      method: 'PUT'
+    });
+  }
 }
 
 export const apiService = new ApiService();
