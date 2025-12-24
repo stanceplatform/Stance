@@ -152,6 +152,14 @@ const AppRoutes = () => {
                                 </ProtectedRoute>
                             }
                         />
+                        {/* <Route
+                            path="/leaderboard"
+                            element={
+                                <ProtectedRoute>
+                                    <Leaderboard />
+                                </ProtectedRoute>
+                            }
+                        /> */}
 
                         {/* Public */}
                         <Route
@@ -161,10 +169,6 @@ const AppRoutes = () => {
                         <Route
                             path="/terms-conditions"
                             element={<Terms />}
-                        />
-                        <Route
-                            path="/leaderboard"
-                            element={<Leaderboard />}
                         />
                         <Route
                             path="/forgot-password"
