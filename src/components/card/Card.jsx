@@ -4,8 +4,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useSearchParams } from 'react-router-dom'
 import { fetchAllCards } from '../../services/operations'
 import { useApi } from '../../hooks/useApi'
-
-import ThankYou from '../thankyou/ThankYou'
 import CardNavigation from './CardNavigation'
 import QuestionSection from './QuestionSection'
 import { useCurrentQuestion } from '../../context/CurrentQuestionContext'
@@ -19,6 +17,7 @@ const ANGLE_GUARD = 0.6;              // require mostly-horizontal: |dx| > 0.6*|
 const Card = () => {
   const { data: questionsData = [], loading, error } = useApi(fetchAllCards)
   const [questions, setQuestions] = useState([])
+  const [isInitializing, setIsInitializing] = useState(true)
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [nextBackgroundImage, setNextBackgroundImage] = useState(null)
   const [direction, setDirection] = useState('next')
@@ -57,9 +56,7 @@ const Card = () => {
   const tracking = useRef(false)
   const blocked = useRef(false) // prevent double-trigger while animating
 
-  useEffect(() => {
-    if (questionsData) setQuestions(questionsData)
-  }, [questionsData])
+
 
   useEffect(() => {
     if (questions.length > 0 && !showSuggestQuestion) {
@@ -224,15 +221,62 @@ const Card = () => {
   };
 
   useEffect(() => {
-    if (questionsData?.length) {
-      setQuestions(
-        questionsData.map(q => ({
-          ...q,
-          backgroundImageUrl: toSafeBg(q.backgroundImageUrl),
-        }))
-      );
+    if (loading) return
+
+    if (!questionsData?.length) {
+      setIsInitializing(false)
+      return
     }
-  }, [questionsData]);
+
+    if (questions.length > 0) {
+      setIsInitializing(false)
+      return
+    }
+
+    const sanitize = (data) => data.map(q => ({
+      ...q,
+      backgroundImageUrl: toSafeBg(q.backgroundImageUrl),
+    }));
+
+    const initializeQuestions = async () => {
+      let finalData = questionsData;
+
+      // If we have a specific question ID requested
+      if (questionIdParam) {
+        const existsInInitial = questionsData.some(q => String(q.id) === questionIdParam);
+
+        if (!existsInInitial) {
+          try {
+            // Attempt to fetch with the specific ID
+            const retryData = await fetchAllCards(questionIdParam);
+            const existsInRetry = retryData?.some(q => String(q.id) === questionIdParam);
+
+            if (existsInRetry) {
+              finalData = retryData;
+            }
+          } catch (err) {
+            console.error('Retry fetch failed', err);
+          }
+        }
+      }
+
+      // Sanitize and Reorder
+      let processed = sanitize(finalData);
+
+      if (questionIdParam) {
+        const idx = processed.findIndex(q => String(q.id) === questionIdParam);
+        if (idx > -1) {
+          const [target] = processed.splice(idx, 1);
+          processed.unshift(target);
+        }
+      }
+
+      setQuestions(processed);
+      setIsInitializing(false)
+    };
+
+    initializeQuestions();
+  }, [questionsData, questionIdParam, questions.length, loading]);
 
   useEffect(() => {
     if (!questions.length) return
@@ -282,9 +326,10 @@ const Card = () => {
   ])
 
 
+
   return (
     <div className="flex overflow-hidden flex-col mx-auto w-full max-w-[480px] max-h-screen-dvh relative" >
-      {loading ? (
+      {(loading || isInitializing) ? (
         <div className="flex items-center justify-center h-screen">
           <div className="text-white">Loading...</div>
         </div>
@@ -346,7 +391,7 @@ const Card = () => {
           </motion.div>
         </div>
       ) : (
-        <ThankYou />
+        <ShareStanceThanks onNext={handleNextQuestion} onPrevious={handlePreviousQuestion} />
       )}
 
       {/* Login/Signup Modal for navigation */}

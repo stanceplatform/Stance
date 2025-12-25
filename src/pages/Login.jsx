@@ -32,11 +32,20 @@ const Login = () => {
       await login(form);
       // Get questionid from URL query params or sessionStorage and redirect to /?questionid=XXX
       const questionid = searchParams.get('questionid') || sessionStorage.getItem('redirectQuestionId');
+
+      // Check if we are on a category login page: /:category/login
+      const pathParts = location.pathname.split('/');
+      // ["", "cricket", "login"]
+      let redirectBase = '/';
+      if (pathParts.length >= 3 && pathParts[2] === 'login') {
+        redirectBase = `/${pathParts[1]}`;
+      }
+
       if (questionid) {
         sessionStorage.removeItem('redirectQuestionId');
-        navigate(`/?questionid=${questionid}`, { replace: true });
+        navigate(`${redirectBase}?questionid=${questionid}`, { replace: true });
       } else {
-        navigate('/', { replace: true });
+        navigate(redirectBase, { replace: true });
       }
     } catch (error) {
       // This will now show the exact API error message

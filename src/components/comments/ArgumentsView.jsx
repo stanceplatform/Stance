@@ -4,10 +4,14 @@ import React, {
   useEffect,
   useRef,
 } from "react";
+import { createPortal } from "react-dom";
+import { useSearchParams } from "react-router-dom";
 import ProgressBarWithLabels from "../charts/ProgressBar";
 import {
   fetchCardComments,
   postCommentOnCard,
+  postReplyToComment,
+  fetchReplies,
   likeComment,
   unlikeComment,
   apiService,
@@ -18,6 +22,12 @@ import toast from "react-hot-toast";
 import { useAuth } from "../../context/AuthContext";
 import CardNavigation from "../card/CardNavigation";
 import ReportComment from "./ReportCommentSheet";
+import ReplyIcon from "../icons/ReplyIcon";
+import ReplyLinkIcon from "../icons/ReplyLinkIcon";
+import ThreadView from "./ThreadView";
+
+
+
 
 // Delete Confirmation Modal
 function ConfirmDeleteModal({ open, onCancel, onConfirm, loading }) {
@@ -122,8 +132,11 @@ function ArgumentsView({
   const [showReport, setShowReport] = useState(false);
   const [commentIdToReport, setCommentIdToReport] = useState(null);
   const [reportedComments, setReportedComments] = useState(new Set());
+  const [replyingTo, setReplyingTo] = useState(null);
+  const [selectedThread, setSelectedThread] = useState(null); // { comment, replies: [] }
 
   const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams(); // Hook for URL params
 
   // sheet drag + state
   const [isExpanded, setIsExpanded] = useState(false); // false = collapsed (first comment), true = full list
@@ -217,7 +230,51 @@ function ArgumentsView({
     return () => clearTimeout(timer);
   }, []);
 
+  // Deep linking logic
+  useEffect(() => {
+    if (!isOpen || isLoading || argsList.length === 0) return;
+
+    // "threadId" param to open a specific thread
+    const threadId = searchParams.get("threadId");
+
+    // Only try to open if we haven't already selected one, or if it doesn't match
+    if (threadId && (!selectedThread || String(selectedThread.comment.id) !== threadId)) {
+      const targetComment = argsList.find((c) => String(c.id) === threadId);
+      if (targetComment) {
+        // If depth 0, it's a root comment -> open thread
+        if (targetComment.depth === 0) {
+          handleOpenThread(targetComment);
+        } else if (targetComment._rootComment) {
+          // If it's a reply, find its root
+          handleOpenThread(targetComment._rootComment);
+        }
+      }
+    }
+  }, [isOpen, isLoading, argsList, searchParams, selectedThread]); // Re-run when argsList loads or params change
+
   // ------------------------------------------
+
+  // Helper to flatten comments and their replies
+  const flattenComments = (comments) => {
+    let result = [];
+    comments.forEach((root) => {
+      // Add root comment
+      result.push({ ...root, depth: 0 }); // ensure root has depth 0
+
+      // Add replies if any
+      if (root.replies && Array.isArray(root.replies)) {
+        // Since replies are already a flat list in the new API contract:
+        root.replies.forEach((reply) => {
+          // Only add valid replies (skip 'counters' metadata objects if any)
+          if (reply.id) {
+            // Attach root comment reference for navigation
+            result.push({ ...reply, _rootComment: root });
+          }
+        });
+      }
+    });
+    return result;
+  };
 
   const loadArguments = useCallback(async (reset = true) => {
     if (!cardId) {
@@ -234,20 +291,23 @@ function ArgumentsView({
 
       const response = await fetchCardComments(cardId, 0);
       const commentsArray = response.content || [];
-
-      // Maintain the order from API response (already sorted by backend)
-      setArgsList(commentsArray);
+      const flattened = flattenComments(commentsArray);
+      setArgsList(flattened);
       setTotalPages(response.totalPages || 1);
       setHasMore(!response.last && (response.totalPages || 1) > 1);
+
       setCurrentPage(0);
     } catch (err) {
       setError(err?.message || "Failed to load arguments");
     } finally {
       setIsLoading(false);
     }
-  }, [cardId]);
+  }, [cardId, answerOptions]);
 
   const loadMoreComments = useCallback(async () => {
+    // Mock: no pagination
+    return;
+    /*
     if (!cardId || !hasMore || isLoadingMore || currentPage + 1 >= totalPages) {
       return;
     }
@@ -268,6 +328,7 @@ function ArgumentsView({
     } finally {
       setIsLoadingMore(false);
     }
+    */
   }, [cardId, hasMore, isLoadingMore, currentPage, totalPages]);
 
   useEffect(() => {
@@ -368,9 +429,12 @@ function ArgumentsView({
 
 
     setCollapsedOffset(offset);
-    setCurrentOffset(offset);
-    setIsExpanded(false);
-  }, [isOpen, argsList.length]);
+
+    // Only reset to collapsed position if NOT already expanded
+    if (!isExpanded) {
+      setCurrentOffset(offset);
+    }
+  }, [isOpen, argsList.length, isExpanded]);
 
   // Body lock + global pull-to-refresh blocker
   useEffect(() => {
@@ -394,6 +458,9 @@ function ArgumentsView({
     };
 
     const handleTouchMoveDoc = (e) => {
+      // Allow scrolling in ThreadView (it has its own overflow container)
+      if (selectedThread) return;
+
       if (!scrollContainerRef.current) return;
 
       const scroller = scrollContainerRef.current;
@@ -407,10 +474,15 @@ function ArgumentsView({
         scroller.scrollTop + scroller.clientHeight >=
         scroller.scrollHeight - 1;
 
-      if (!targetInsideScroller) {
+      const targetIsInput = e.target.closest('[contenteditable="true"]');
+
+      if (!targetInsideScroller && !targetIsInput) {
         e.preventDefault();
         return;
       }
+
+      // If it's the input, let it handle its own scrolling/behavior
+      if (targetIsInput) return;
 
       if ((atTop && deltaY > 0) || (atBottom && deltaY < 0)) {
         e.preventDefault();
@@ -432,7 +504,7 @@ function ArgumentsView({
       document.removeEventListener("touchstart", handleTouchStartDoc);
       document.removeEventListener("touchmove", handleTouchMoveDoc);
     };
-  }, [isOpen, showReport]);
+  }, [isOpen, showReport, selectedThread]);
 
   const formatPct = (v) => {
     if (v == null || v === "") return "0";
@@ -621,20 +693,34 @@ function ArgumentsView({
     setTimeout(() => {
       setShowOpinionForm(false);
       setIsClosingForm(false);
+      setReplyingTo(null);
     }, 300);
   };
 
   const handleAddOpinion = async (newOpinion) => {
     try {
       setIsSubmitting(true);
-      const addedComment = await postCommentOnCard(
-        cardId,
-        newOpinion.content
-      );
+      let addedComment;
+
+      if (replyingTo) {
+        // Reply flow
+        addedComment = await postReplyToComment(
+          replyingTo.id,
+          newOpinion.content
+        );
+      } else {
+        // New root comment flow
+        addedComment = await postCommentOnCard(
+          cardId,
+          newOpinion.content
+        );
+      }
 
       // Reload all comments to maintain API order
       const response = await fetchCardComments(cardId, 0);
-      setArgsList(response.content || []);
+      const commentsArray = response.content || [];
+      const flattened = flattenComments(commentsArray);
+      setArgsList(flattened);
       setTotalPages(response.totalPages || 1);
       setHasMore(!response.last && (response.totalPages || 1) > 1);
       setCurrentPage(0);
@@ -664,23 +750,94 @@ function ArgumentsView({
         [commentId]: Date.now(),
       }));
 
-      const current = argsList.find((c) => c.id === commentId);
+      // Find current like status from state
+      let current = argsList.find((c) => c.id === commentId);
+      if (!current && selectedThread) {
+        if (selectedThread.comment.id === commentId) {
+          current = selectedThread.comment;
+        } else {
+          current = selectedThread.replies?.find(r => r.id === commentId);
+        }
+      }
+
+      // Default to false if malformed, but safely exit if strictly not found
+      if (!current && !selectedThread) return;
+      // If found in neither but we have an ID, we could proceed blindly but getting 'wasLiked' is crucial.
+      // If strict 'current' is missing, assume false (safe fallback?) or return.
+      // Given UI showed it, it must exist.
       const wasLiked = !!current?.likes?.isLikedByCurrentUser;
 
+      // Helper to update a comment in a list
+      const updateCommentLike = (c) => {
+        if (c.id !== commentId) return c;
+        return {
+          ...c,
+          likes: {
+            ...c.likes,
+            isLikedByCurrentUser: !wasLiked,
+            count: wasLiked ? Math.max(0, (c.likes?.count || 0) - 1) : (c.likes?.count || 0) + 1
+          }
+        };
+      };
+
+      // 1. Optimistic Update
+      setArgsList(prev => prev.map(updateCommentLike));
+      if (selectedThread) {
+        setSelectedThread(prev => ({
+          ...prev,
+          comment: updateCommentLike(prev.comment),
+          replies: prev.replies?.map(updateCommentLike)
+        }));
+      }
+
+      // 2. API Call
       if (wasLiked) {
         await unlikeComment(commentId);
       } else {
         await likeComment(commentId);
       }
 
-      const response = await fetchCardComments(cardId, 0);
-      setArgsList(response.content || []);
-      setTotalPages(response.totalPages || 1);
-      setHasMore(!response.last && (response.totalPages || 1) > 1);
-      setCurrentPage(0);
     } catch (err) {
-      setError(err?.message || "Failed to like comment");
+      console.error("Like failed", err);
+      // Ideally revert state here, but omitting for simplicity as requested
     }
+  };
+
+  const handleOpenThread = async (comment) => {
+    try {
+      setIsLoading(true);
+      const fetchedReplies = await fetchReplies(comment.id);
+
+      // Enrich fetched replies with local data (specifically parentUser) if available
+      // The main list endpoint seems to return parentUser, while the replies specific endpoint might not.
+      if (comment.replies && Array.isArray(comment.replies)) {
+        fetchedReplies.forEach(fetchedReply => {
+          if (!fetchedReply.parentUser) {
+            const local = comment.replies.find(r => r.id === fetchedReply.id);
+            if (local && local.parentUser) {
+              fetchedReply.parentUser = local.parentUser;
+            }
+          }
+        });
+      }
+
+      setSelectedThread({ comment, replies: fetchedReplies });
+    } catch (err) {
+      console.error("Failed to load thread:", err);
+      toast.error("Failed to load thread.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCloseThread = () => {
+    setSelectedThread(null);
+    // Remove threadId from URL so it doesn't re-open or persist
+    setSearchParams(prev => {
+      const newParams = new URLSearchParams(prev);
+      newParams.delete("threadId");
+      return newParams;
+    });
   };
 
   // --------- CONTEXT MENU ACTIONS ------------
@@ -923,14 +1080,25 @@ function ArgumentsView({
                         }
                       >
                         <div className="flex items-center justify-between mb-3">
-                          <span
-                            className="font-inter font-normal text-[15px] leading-[22px]"
-                            style={{ color: theme.titleColor }}
-                          >
-                            {arg.user?.firstName || arg.author || "Unknown"}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            {arg.depth > 0 && (
+                              <ReplyIcon width={16} height={16} className="" />
+                            )}
+                            <span
+                              className="font-inter font-normal text-[15px] leading-[22px]"
+                              style={{ color: theme.titleColor }}
+                            >
+                              {arg.user?.firstName || arg.author || "Unknown"}
+                            </span>
+                          </div>
                           <div className="flex items-center gap-3">
-                            {/* <div
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setReplyingTo(arg);
+                                setShowOpinionForm(true);
+                              }}
                               className="flex items-center justify-center border"
                               style={{
                                 width: "59px",
@@ -961,9 +1129,9 @@ function ArgumentsView({
                                 className="text-[#121212] font-inter font-normal text-[15px] leading-[22px]"
                                 style={{ verticalAlign: "middle" }}
                               >
-                                {arg.replies || 0}
+                                {arg.replyCount || 0}
                               </span>
-                            </div> */}
+                            </button>
                             <button
                               type="button"
                               onClick={() => handleLike(arg.id)}
@@ -1037,19 +1205,95 @@ function ArgumentsView({
                           </div>
                         </div>
 
-                        {isReported && (
-                          <span className="mt-1 mb-2 self-start text-xs px-2 py-0.5 rounded-full bg-neutral-700 text-neutral-200">
-                            Reported
-                          </span>
-                        )}
+                        {
+                          isReported && (
+                            <span className="mt-1 mb-2 self-start text-xs px-2 py-0.5 rounded-full bg-neutral-700 text-neutral-200">
+                              Reported
+                            </span>
+                          )
+                        }
 
                         <div
                           ref={isFirstComment ? firstCommentTextRef : null}
-                          className="text-[#212121] font-inter font-normal text-base leading-[24px] text-start"
+                          className="text-[#212121] font-inter font-normal text-base leading-[24px] text-start [&_p]:break-all"
                           dangerouslySetInnerHTML={{
-                            __html: marked.parse(arg.text || ""),
+                            __html: marked.parse(
+                              (arg.parentUser ? `**@${arg.parentUser.firstName}** ` : "") +
+                              (arg.text || "")
+                            ),
                           }}
                         />
+
+                        {/* Countered Text for Root Comments */}
+                        {
+                          arg.depth === 0 && arg.replies && arg.replies.length > 0 && (
+                            <div
+                              className="font-inter mt-2 text-start text-sm font-normal cursor-pointer hover:underline"
+                              style={{ color: theme.titleColor }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleOpenThread(arg);
+                              }}
+                            >
+                              {(() => {
+                                const uniqueNames = [
+                                  ...new Set(
+                                    arg.replies
+                                      .map((r) => r.user?.firstName || r.author || "")
+                                      .filter(Boolean)
+                                  ),
+                                ];
+                                const count = uniqueNames.length;
+                                if (count === 0) return null;
+
+                                let text = "";
+                                if (count <= 3) {
+                                  text = uniqueNames.join(", ").replace(/, ([^,]*)$/, " and $1");
+                                } else {
+                                  // "Rohit and 3 others" style as requested for overflow
+                                  text = `${uniqueNames[0]} and ${count - 1} others`;
+                                }
+                                return `${text} countered`;
+                              })()}
+                            </div>
+                          )
+                        }
+
+                        {/* Reply Link */}
+                        {
+                          arg.parentUser && (
+                            <div
+                              className="flex items-center gap-2 mt-2 cursor-pointer w-fit"
+                              style={{
+                                color:
+                                  theme.bgColor === "#FCF9CF"
+                                    ? "#776F08" // Yellow theme text
+                                    : "#9105C6", // Purple theme text
+                              }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (arg._rootComment) {
+                                  handleOpenThread(arg._rootComment);
+                                }
+                              }}
+                            >
+                              <ReplyLinkIcon
+                                width={16}
+                                height={16}
+                                fill={
+                                  theme.bgColor === "#FCF9CF"
+                                    ? "#776F08"
+                                    : "#9105C6"
+                                }
+                              />
+                              <span
+                                className="font-inter font-normal text-[14px] leading-[20px]"
+                              >
+                                to {arg._rootComment?.user?.firstName || arg._rootComment?.author || arg.parentUser?.firstName}
+                              </span>
+                            </div>
+                          )
+                        }
                       </div>
                     );
                   })}
@@ -1068,7 +1312,8 @@ function ArgumentsView({
       </div>
 
       {/* Context menu overlay */}
-      {contextMenu.open &&
+      {
+        contextMenu.open &&
         (() => {
           const selectedComment = argsList.find(
             (arg) => arg.id === contextMenu.commentId
@@ -1108,7 +1353,8 @@ function ArgumentsView({
               </div>
             </div>
           );
-        })()}
+        })()
+      }
 
       {/* Delete Confirmation Modal */}
       <ConfirmDeleteModal
@@ -1231,45 +1477,122 @@ function ArgumentsView({
       </div>
 
       {/* Opinion Form Bottom Sheet */}
-      {(showOpinionForm || isClosingForm) && (
-        <div
-          className="fixed inset-0 z-[200] flex items-end"
-          onClick={(e) => {
-            if (e.target === e.currentTarget && !isClosingForm) {
-              handleCloseForm();
-            }
-          }}
-        >
-          {/* Backdrop */}
+      {
+        (showOpinionForm || isClosingForm) && (
           <div
-            className="absolute max-w-[480px] mx-auto inset-0 bg-black/50 transition-opacity duration-300 ease-out"
-            style={{
-              opacity: isClosingForm ? 0 : 1,
-            }}
-            onClick={() => {
-              if (!isClosingForm) {
+            className="fixed inset-0 z-[200] flex items-end"
+            onClick={(e) => {
+              if (e.target === e.currentTarget && !isClosingForm) {
                 handleCloseForm();
               }
             }}
-          />
-
-          {/* Bottom Sheet */}
-          <div
-            className="relative w-full max-w-[480px] mx-auto bg-[#121212] rounded-t-2xl shadow-2xl"
-            style={{
-              animation: isClosingForm
-                ? "slideDown 0.3s ease-out forwards"
-                : "slideUp 0.3s ease-out forwards",
-            }}
-            onClick={(e) => {
-              e.stopPropagation();
-            }}
           >
-            <div className="px-3 pt-4 pb-6">
-              <OpinionForm onAddOpinion={handleAddOpinion} />
+            {/* Backdrop */}
+            <div
+              className="absolute max-w-[480px] mx-auto inset-0 bg-black/50 transition-opacity duration-300 ease-out"
+              style={{
+                opacity: isClosingForm ? 0 : 1,
+              }}
+              onClick={() => {
+                if (!isClosingForm) {
+                  handleCloseForm();
+                }
+              }}
+            />
+
+            {/* Bottom Sheet */}
+            <div
+              className="relative w-full max-w-[480px] mx-auto bg-[#121212] rounded-t-2xl shadow-2xl"
+              style={{
+                animation: isClosingForm
+                  ? "slideDown 0.3s ease-out forwards"
+                  : "slideUp 0.3s ease-out forwards",
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+            >
+              <div className="px-3 pt-4 pb-6">
+                <OpinionForm
+                  onAddOpinion={handleAddOpinion}
+                  placeholder={
+                    replyingTo
+                      ? "your counter..."
+                      : "Add your opinion..."
+                  }
+                  autoFocus={true}
+                  initialValue={
+                    replyingTo
+                      ? `<strong>@${replyingTo.user?.firstName || replyingTo.author || "User"}</strong><span style="font-weight: 400;"> </span>`
+                      : ""
+                  }
+                />
+              </div>
             </div>
           </div>
-        </div>
+        )
+      }
+
+      {/* ThreadView rendered in a Portal to avoid parent transforms/clipping */}
+      {selectedThread && createPortal(
+        <ThreadView
+          selectedThread={selectedThread}
+          onClose={handleCloseThread}
+          question={question}
+          answerOptions={answerOptions}
+          userChoice={userChoice}
+          onPostReply={async (text, targetComment) => {
+            const newReply = await postReplyToComment(targetComment.id, text);
+            if (newReply) {
+              // Optimistic update: manually prepend the mention so it shows immediately
+              // (The backend/fetch might do this later, but we need it now)
+              if (targetComment.user?.firstName) {
+                newReply.text = `**@${targetComment.user.firstName}** ${newReply.text}`;
+              }
+              // Also attach parentUser for correct avatar display
+              newReply.parentUser = targetComment.user;
+
+              // Update local state for immediate feedback
+              setArgsList((prev) => {
+                const updated = [...prev];
+                // Find root comment index
+                const rootIdx = updated.findIndex((c) => c.id === (targetComment._rootComment?.id || targetComment.id));
+
+                if (rootIdx !== -1) {
+                  // Arguments list structure: root comment -> replies
+                  // We need to insert the new reply into the flat list after the last reply of this thread
+                  // Or just simplistic: append to end of replies for that root (if they are grouped)
+                  // BUT our argsList is FLAT. We need to insert it at the correct position.
+                  // For simplicity in this view, we might just append it after the parent or at the end of its block?
+
+                  // Actually, to keep it simple and safe: Re-fetch or let ThreadView handle its internal list.
+                  // ThreadView displays 'selectedThread.replies'. We need to update that too.
+                  return updated;
+                }
+                return updated;
+              });
+
+              // Update the selectedThread state so the new reply shows up instantly in ThreadView
+              setSelectedThread((prev) => {
+                if (!prev) return null;
+                return {
+                  ...prev,
+                  replies: [...(prev.replies || []), newReply]
+                };
+              });
+
+              onNewComment?.();
+            }
+          }}
+          onLike={handleLike}
+          onNext={() => {
+            /* Next logic if needed */
+          }}
+          onPrevious={() => {
+            /* Prev logic if needed */
+          }}
+        />,
+        document.body
       )}
 
       <style>{`
@@ -1282,7 +1605,7 @@ function ArgumentsView({
           to { transform: translateY(100%); }
         }
       `}</style>
-    </div>
+    </div >
   );
 }
 

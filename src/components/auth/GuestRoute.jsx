@@ -16,7 +16,7 @@ const GuestRoute = ({ children }) => {
   if (isAuthenticated) {
     // Get questionid from URL or sessionStorage
     const questionid = new URLSearchParams(location.search).get('questionid') || sessionStorage.getItem('redirectQuestionId');
-    
+
     // If collegeSelected is false or missing, redirect to select-college page
     if (user && user.collegeSelected !== true) {
       if (questionid) {
@@ -24,12 +24,21 @@ const GuestRoute = ({ children }) => {
       }
       return <Navigate to="/select-college" replace />;
     }
-    // Otherwise, go to home (dashboard) with questionid if it exists
+    // Otherwise, go to home (dashboard) or category page with questionid if it exists
+
+    // Check if we are coming from a category route like /cricket/login
+    // path parts: ["", "cricket", "login"]
+    const pathParts = location.pathname.split('/');
+    let redirectBase = '/';
+    if (pathParts.length >= 3 && (pathParts[2] === 'auth' || pathParts[2] === 'login')) {
+      redirectBase = `/${pathParts[1]}`;
+    }
+
     if (questionid) {
       sessionStorage.removeItem('redirectQuestionId');
-      return <Navigate to={`/?questionid=${questionid}`} replace />;
+      return <Navigate to={`${redirectBase}?questionid=${questionid}`} replace />;
     }
-    return <Navigate to="/" replace />;
+    return <Navigate to={redirectBase} replace />;
   }
 
   // not logged in -> show the page

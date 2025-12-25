@@ -1,13 +1,19 @@
 // components/SwipeHintOverlay.jsx
 import React, { useEffect, useState, useCallback } from 'react';
+import { useAuth } from '../../context/AuthContext';
 
 const STORAGE_KEY = 'stance:swipe-hint-seen';
 
 export default function SwipeHintOverlay({ storageKey = STORAGE_KEY, onDismiss, forceShow = false }) {
   const [open, setOpen] = useState(false);
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+
+    // REQUIREMENT: Only show if user is logged in
+    if (!isAuthenticated && !forceShow) return;
+
     const seen = window.localStorage.getItem(storageKey) === '1';
     if (!seen || forceShow) {
       setOpen(true);
@@ -18,7 +24,7 @@ export default function SwipeHintOverlay({ storageKey = STORAGE_KEY, onDismiss, 
       document.documentElement.classList.remove('overflow-hidden');
       document.body.classList.remove('overflow-hidden');
     };
-  }, [storageKey, forceShow]);
+  }, [storageKey, forceShow, isAuthenticated]);
 
   const handleDismiss = useCallback(() => {
     if (typeof window !== 'undefined') window.localStorage.setItem(storageKey, '1');
@@ -31,7 +37,7 @@ export default function SwipeHintOverlay({ storageKey = STORAGE_KEY, onDismiss, 
   if (!open) return null;
 
   return (
-    <div role="dialog" aria-modal="true" aria-label="Navigation hint" className="fixed inset-0 z-[60]">
+    <div role="dialog" aria-modal="true" aria-label="Navigation hint" className="fixed inset-0 z-[60] max-w-[480px] mx-auto">
       {/* Backdrop (white translucent + slight blur) */}
       <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px]" />
 

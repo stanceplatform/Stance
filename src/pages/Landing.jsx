@@ -6,6 +6,7 @@ import Logo from '../components/ui/Logo';
 import CTAButton from '../components/ui/CTAButton';
 import GoogleAuthButton from '../components/auth/GoogleAuthButton';
 import bg from '../assets/bg.svg';
+import { ALLOWED_CATEGORIES } from '../utils/constants';
 
 const Landing = () => {
     const navigate = useNavigate();
@@ -53,7 +54,17 @@ const Landing = () => {
             {/* CTAs */}
             <div className="mt-10 w-full space-y-3">
                 <div className="mb-5">
-                    <Link to="/login" className="no-underline">
+                    <Link
+                        to={() => {
+                            const pathParts = location.pathname.split('/').filter(Boolean);
+                            const category = pathParts[0];
+                            if (category && ALLOWED_CATEGORIES.includes(category)) {
+                                return `/${category}/login`
+                            }
+                            return "/login";
+                        }}
+                        className="no-underline"
+                    >
                         <CTAButton
                             as="div"
                             variant="primary"
@@ -70,18 +81,21 @@ const Landing = () => {
                     <GoogleAuthButton mode="signup" onError={setError} />
                 </div>
 
-                <div>
-                    <Link to="/request-invite" className="no-underline">
-                        <CTAButton
-                            as="div"
-                            variant="secondary"
-                        >
-                            <span className="font-inter font-[500] text-[18px] leading-[32px] tracking-[0.88px] text-white">
-                                Sign up
-                            </span>
-                        </CTAButton>
-                    </Link>
-                </div>
+                {/* Show Sign up button only if on the main /auth route (no category) */}
+                {location.pathname === '/auth' && (
+                    <div>
+                        <Link to="/request-invite" className="no-underline">
+                            <CTAButton
+                                as="div"
+                                variant="secondary"
+                            >
+                                <span className="font-inter font-[500] text-[18px] leading-[32px] tracking-[0.88px] text-white">
+                                    Sign up
+                                </span>
+                            </CTAButton>
+                        </Link>
+                    </div>
+                )}
 
                 <div className="pt-1 text-center">
                     <Link

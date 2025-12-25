@@ -1,5 +1,6 @@
 // services/api.js
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+import { ALLOWED_CATEGORIES } from '../utils/constants';
 
 class ApiService {
   constructor() {
@@ -173,18 +174,45 @@ class ApiService {
   // ===== Domain APIs =====
 
   // Questions
-  async getQuestionsResponse(page = 0, size = 10, sort = 'DESC') {
-    return this.request(`/questions/with-responses?page=${page}&size=${size}&sort=${sort}`);
+  async getQuestionsResponse(page = 0, size = 10, sort = 'DESC', qid = null) {
+    const params = new URLSearchParams({ page, size, sort });
+    if (qid) params.append('qid', qid);
+
+    const pathParts = window.location.pathname.split('/').filter(Boolean);
+    const category = pathParts[0];
+    if (category && ALLOWED_CATEGORIES.includes(category)) {
+      params.append('category', category);
+    }
+
+    return this.request(`/questions/with-responses?${params.toString()}`);
   }
 
   async getQuestions(page = 0, size = 10, sort = 'DESC') {
-    return this.request(`/questions/list?page=${page}&size=${size}&sort=${sort}`);
+    const params = new URLSearchParams({ page, size, sort });
+
+    const pathParts = window.location.pathname.split('/').filter(Boolean);
+    const category = pathParts[0];
+    if (category && ALLOWED_CATEGORIES.includes(category)) {
+      params.append('category', category);
+    }
+
+    return this.request(`/questions/list?${params.toString()}`);
   }
 
   // Public questions endpoint (no authentication required)
-  async getQuestionsPublic(page = 0, size = 10) {
+  async getQuestionsPublic(page = 0, size = 10, qid = null) {
     // Make request without Authorization header
-    const url = `${this.baseURL}/questions?page=${page}&size=${size}`;
+    const params = new URLSearchParams({ page, size });
+    if (qid) params.append('qid', qid);
+
+    const pathParts = window.location.pathname.split('/').filter(Boolean);
+    const category = pathParts[0];
+    if (category && ALLOWED_CATEGORIES.includes(category)) {
+      params.append('category', category);
+    }
+
+    const url = `${this.baseURL}/questions?${params.toString()}`;
+
     const response = await fetch(url, {
       method: 'GET',
       headers: {
@@ -211,9 +239,20 @@ class ApiService {
     return this.request(`/comments/question/${questionId}?page=${page}&size=${size}&sort=${sortParam}`);
   }
 
+  async getReplies(mainCommentId) {
+    return this.request(`/comments/main/${mainCommentId}/replies`);
+  }
+
   async addComment(questionId, text) {
     return this.request(`/comments/question/${questionId}`, {
       method: 'POST',
+      body: JSON.stringify({ text }),
+    });
+  }
+
+  async replyToComment(parentCommentId, text) {
+    return this.request(`/comments/${parentCommentId}/reply`, {
+      method: "POST",
       body: JSON.stringify({ text }),
     });
   }
@@ -316,10 +355,10 @@ class ApiService {
     return this.request('/auth/me', { method: 'GET' });
   }
 
-  async oauth2Callback({ provider, code, email, name, profilePicture, providerId }) {
+  async oauth2Callback({ provider, code, email, name, profilePicture, providerId, category }) {
     const data = await this.request('/auth/oauth2/callback', {
       method: 'POST',
-      body: JSON.stringify({ provider, code, email, name, profilePicture, providerId }),
+      body: JSON.stringify({ provider, code, email, name, profilePicture, providerId, category }),
     });
 
     if (data?.token) this.setToken(data.token);
@@ -353,9 +392,24 @@ class ApiService {
     return this.request('/feedback', { method: 'POST', body: JSON.stringify({ subject, message, type }) });
   }
 
+  // Leaderboard
+  async getLeaderboardTop() {
+    return this.request('/leaderboard/top');
+  }
+
   // Notifications
   async getNotifications(page = 0, size = 10) {
     return this.request(`/notifications?page=${page}&size=${size}`);
+  }
+
+  async getNotificationCount() {
+    return this.request('/notifications/count');
+  }
+
+  async markAllNotificationsAsRead() {
+    return this.request('/notifications/mark-all-read', {
+      method: 'PUT'
+    });
   }
 }
 

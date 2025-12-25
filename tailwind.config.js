@@ -9,10 +9,20 @@ export default {
   theme: {
     extend: {
       colors: {
-        'yellow-700': '#776F08',
-        'yellow-900': '#333104',
-        'yellow-500': '#D2C40F',
-        'purple-900': '#280137',
+        primary: {
+          purple: '#9105C6', // Purple
+          yellow: '#F0E224', // Yellow
+        },
+        secondary: {
+          'purple-dark': '#5B037C', // Dark Purple
+          'purple-bright': '#BF24F9', // Bright Purple
+          'purple-light': '#F8E6FE', // Light Purple
+          'purple-deep': '#3A0250', // Deep Purple
+          'yellow-dark': '#565006', // Dark Yellow
+          'yellow-medium': '#776F08', // Medium Yellow
+          'yellow-light': '#F5EC70', // Light Yellow
+          'yellow-pale': '#FCF9CF', // Very Light Yellow
+        },
       },
       fontFamily: {
         inter: ['Inter', 'sans-serif'],
