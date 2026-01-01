@@ -133,7 +133,7 @@ const ThreadView = ({
             {mainComment.user?.firstName || "User"}’s argument on
           </p>
           <div
-            className="font-inter font-normal text-base leading-[24px] text-start [&_p]:break-all"
+            className="font-inter font-normal text-base leading-[24px] text-start [&_p]:break-words"
             style={{
               color: getCommentTheme(mainComment.answer?.selectedOptionId, answerOptions).contextTextColor
             }}
