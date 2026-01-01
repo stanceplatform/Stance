@@ -95,7 +95,7 @@ const Header = ({
           {isAuthenticated ? (
             <>
               {/* Leaderboard Avatar */}
-              <button
+              {/* <button
                 onClick={() => navigate('/leaderboard')}
                 className="relative w-8 h-8 rounded-full bg-[#F0E224] text-[#9105C6] flex items-center justify-center font-intro font-bold text-sm shadow-sm hover:scale-105 transition-transform"
                 title="Leaderboard"
@@ -104,7 +104,7 @@ const Header = ({
                 <span className="absolute -top-1 -right-1">
                   <CrownIcon />
                 </span>
-              </button>
+              </button> */}
 
               {/* Bell (Notifications) */}
               <IconButton
