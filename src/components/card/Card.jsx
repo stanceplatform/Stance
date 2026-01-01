@@ -70,6 +70,14 @@ const Card = () => {
     }
   }, [questions, currentQuestionIndex, setQuestionId, showSuggestQuestion])
 
+  // Auto-refresh page every 12 hours
+  useEffect(() => {
+    const interval = setInterval(() => {
+      window.location.reload()
+    }, 43200000)
+    return () => clearInterval(interval)
+  }, [])
+
   // 🔑 also mark userResponse after vote (so revisiting shows results)
   const updateQuestionOptions = (questionId, newOptions, selectedOptionId) => {
     setQuestions(prev =>
