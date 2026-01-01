@@ -152,14 +152,14 @@ const AppRoutes = () => {
                                 </ProtectedRoute>
                             }
                         />
-                        {/* <Route
+                        <Route
                             path="/leaderboard"
                             element={
                                 <ProtectedRoute>
                                     <Leaderboard />
                                 </ProtectedRoute>
                             }
-                        /> */}
+                        />
 
                         {/* Public */}
                         <Route
