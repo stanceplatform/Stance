@@ -6,6 +6,7 @@ import apiService from "../services/api";
 import TextField from "../components/ui/TextField";
 import bg from "../assets/bg.svg";
 import { useAuth } from "../context/AuthContext";
+import analytics from "../utils/analytics";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -109,6 +110,7 @@ export default function Signup() {
       setErr("Signup link is missing or invalid.");
       return;
     }
+    analytics.trackEvent('Auth', 'Signup Attempt');
 
     setLoading(true);
     try {
@@ -131,6 +133,7 @@ export default function Signup() {
           token: res.token,
           refreshToken: res.refreshToken,
         });
+        analytics.trackEvent('Auth', 'Signup Success');
         setOk("Signup completed!");
         navigate("/");
       } else {
@@ -140,6 +143,7 @@ export default function Signup() {
       const errorMessage =
         error?.data?.message || error?.data?.error || error?.message;
       setErr(errorMessage || "Signup failed. Please try again.");
+      analytics.trackEvent('Auth', 'Signup Failure', errorMessage || "Signup failed");
     } finally {
       setLoading(false);
     }

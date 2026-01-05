@@ -8,6 +8,7 @@ import TextField from '../components/ui/TextField';
 import GoogleAuthButton from '../components/auth/GoogleAuthButton';
 import bg from '../assets/bg.svg';
 import { useAuth } from '../context/AuthContext';
+import analytics from '../utils/analytics';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -28,8 +29,10 @@ const Login = () => {
       setErr('Please enter email and password.');
       return;
     }
+    analytics.trackEvent('Auth', 'Login Attempt');
     try {
       await login(form);
+      analytics.trackEvent('Auth', 'Login Success');
       // Get questionid from URL query params or sessionStorage and redirect to /?questionid=XXX
       const questionid = searchParams.get('questionid') || sessionStorage.getItem('redirectQuestionId');
 
@@ -50,6 +53,7 @@ const Login = () => {
     } catch (error) {
       // This will now show the exact API error message
       setErr(error.message || 'Login failed');
+      analytics.trackEvent('Auth', 'Login Failure', error.message || 'Login failed');
     }
   };
 

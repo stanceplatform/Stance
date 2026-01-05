@@ -7,6 +7,7 @@ import { getApiErrorMessage } from '../../utils/apiError';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
 import LoginSignupModal from '../auth/LoginSignupModal';
+import analytics from '../../utils/analytics';
 
 // put this near the top of the file
 const formatPct = (v) => {
@@ -95,6 +96,7 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle, onNext, onPre
       onVoteUpdate?.(question.id, updated, option.id);
       setUserChoice(choiceNumber);
       setHasVoted(true);
+      analytics.trackEvent("Engagement", "Vote", `Question: ${question.id}, Option: ${option.id}`);
     } catch (error) {
       console.error('Error voting:', error);
       toast.error(getApiErrorMessage(error));
