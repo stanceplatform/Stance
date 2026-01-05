@@ -25,11 +25,14 @@ import SelectCollegeRoute from './components/auth/SelectCollegeRoute';
 import RootRoute from './components/auth/RootRoute';
 import NotFound from './pages/NotFound';
 
+import AnalyticsTracker from './components/AnalyticsTracker';
+
 const AppRoutes = () => {
     return (
         <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
             <AuthProvider>
                 <Router>
+                    <AnalyticsTracker />
                     <Routes>
                         {/* Root route - redirects to /select-college if authenticated but collegeSelected is false */}
                         <Route
