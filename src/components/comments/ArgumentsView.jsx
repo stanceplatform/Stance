@@ -1585,12 +1585,8 @@ function ArgumentsView({
             }
           }}
           onLike={handleLike}
-          onNext={() => {
-            /* Next logic if needed */
-          }}
-          onPrevious={() => {
-            /* Prev logic if needed */
-          }}
+          onNext={onNext}
+          onPrevious={onPrevious}
         />,
         document.body
       )}
