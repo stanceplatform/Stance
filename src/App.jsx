@@ -9,7 +9,7 @@ function App() {
   return (
     <>
       <Container className="max-h-screen-dvh max-w-[480px] mx-auto overflow-hidden flex items-center justify-center">
-        <AppRoutes /> {/* Use the Routes component here */}
+        <AppRoutes />
       </Container>
       <Toaster
         position="bottom-center"
