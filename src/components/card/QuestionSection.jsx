@@ -96,7 +96,16 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle, onNext, onPre
       onVoteUpdate?.(question.id, updated, option.id);
       setUserChoice(choiceNumber);
       setHasVoted(true);
-      analytics.trackEvent("Engagement", "Vote", `Question: ${question.id}, Option: ${option.id}`);
+      setHasVoted(true);
+      analytics.sendEvent("vote_cast", {
+        question_id: question.id,
+        stance: currentAnswers[choiceNumber - 1]?.value || (choiceNumber === 1 ? 'Option A' : 'Option B')
+      });
+      // Legacy tracking for backward compatibility/reference if needed, or remove. Keeping generic event as per plan note? 
+      // Plan said "I will keep the existing trackEvent... but will add a new sendEvent". 
+      // Actually, let's keep the old one too if it doesn't hurt, or replace it if it's redundant.
+      // The user specially asked for "vote_cast". Let's prioritize that.
+      // analytics.trackEvent("Engagement", "Vote", `Question: ${question.id}, Option: ${option.id}`);
     } catch (error) {
       console.error('Error voting:', error);
       toast.error(getApiErrorMessage(error));

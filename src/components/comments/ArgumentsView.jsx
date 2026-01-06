@@ -795,6 +795,10 @@ function ArgumentsView({
         await unlikeComment(commentId);
       } else {
         await likeComment(commentId);
+        analytics.sendEvent("argument_upvoted", {
+          comment_id: commentId,
+          discussion_id: cardId
+        });
       }
 
     } catch (err) {

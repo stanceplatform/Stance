@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import ReactGA from 'react-ga4';
 import analytics from '../utils/analytics';
 
@@ -16,6 +17,14 @@ const AnalyticsTracker = () => {
     // But ideally AppRoutes should init it. Let's assume initialized or call init here.
     analytics.initializeAnalytics();
   }, []);
+
+  // Track User ID
+  const { user } = useAuth();
+  useEffect(() => {
+    if (user?.uid) {
+      analytics.setUserId(user.uid);
+    }
+  }, [user]);
 
   useEffect(() => {
     // Send pageview with a custom path
