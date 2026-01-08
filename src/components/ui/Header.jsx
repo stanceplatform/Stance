@@ -25,6 +25,21 @@ const Header = ({
   const questionIdFromUrl = new URLSearchParams(location.search).get('questionid');
 
   const [unreadCount, setUnreadCount] = useState(0);
+  const [topUser, setTopUser] = useState(null);
+  // console.log(topUser);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      apiService.getLeaderboardTop()
+        .then(data => {
+          const users = data?.content || [];
+          if (users.length > 0) {
+            setTopUser(users[0]);
+          }
+        })
+        .catch(err => console.error("Failed to fetch leaderboard top", err));
+    }
+  }, [isAuthenticated]);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -96,11 +111,19 @@ const Header = ({
             <>
               {/* Leaderboard Avatar */}
               <button
-                onClick={() => navigate('/leaderboard')}
+                onClick={() => {
+                  const pathParts = location.pathname.split('/').filter(Boolean);
+                  const category = pathParts[0];
+                  if (category && ALLOWED_CATEGORIES.includes(category)) {
+                    navigate(`/${category}/leaderboard`);
+                  } else {
+                    navigate('/leaderboard');
+                  }
+                }}
                 className="relative w-8 h-8 rounded-full bg-[#F0E224] text-[#9105C6] flex items-center justify-center font-intro font-bold text-sm shadow-sm hover:scale-105 transition-transform"
-                title="Leaderboard"
+                title={topUser ? `Leaderboard Leader: ${topUser.fullName || topUser.initials}` : "Leaderboard"}
               >
-                {initials}
+                {topUser?.initials || initials}
                 <span className="absolute -top-1 -right-1">
                   <CrownIcon />
                 </span>

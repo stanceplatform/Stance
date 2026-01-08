@@ -4,6 +4,7 @@ import CrownIcon from '../components/ui/CrownIcon';
 import apiService from '../services/api';
 import CTAButton from '../components/ui/CTAButton';
 import { ALLOWED_CATEGORIES } from '../utils/constants';
+import { useAuth } from '../context/AuthContext';
 
 const RANK_COLORS = {
   1: '#212121',
@@ -37,14 +38,55 @@ const Leaderboard = () => {
   const location = useLocation();
   const [leaderboardData, setLeaderboardData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [communityName, setCommunityName] = useState('');
+  const [monthYear, setMonthYear] = useState('');
+
+  const { user: currentUser } = useAuth();
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
 
     const fetchLeaderboard = async () => {
       try {
+        const pathParts = location.pathname.split('/').filter(Boolean);
+        const category = pathParts[0];
+        const isCategoryRoute = category && ALLOWED_CATEGORIES.includes(category);
+
+        if (!isCategoryRoute) {
+          // Fetch college info for the title only if NOT on a category route
+          apiService.getLeaderboardCollege()
+            .then(data => {
+              // console.log('/leaderboard/college data:', data);
+              setCommunityName(data?.communityName);
+
+              if (data?.date) {
+                const dateObj = new Date(data.date);
+                const month = dateObj.toLocaleString('default', { month: 'short' });
+                const year = dateObj.getFullYear();
+                setMonthYear(`${month}, ${year}`);
+              } else {
+                setMonthYear('');
+              }
+            })
+            .catch(err => console.error('/leaderboard/college failed', err));
+        }
+
         const data = await apiService.getLeaderboardTop();
-        const users = data?.content || [];
+
+        if (isCategoryRoute) {
+          // Use metadata from the interest leaderboard response
+          if (data?.communityName) {
+            setCommunityName(data.communityName);
+          }
+          if (data?.month && data?.year) {
+            const dateObj = new Date(data.year, data.month - 1);
+            const month = dateObj.toLocaleString('default', { month: 'short' });
+            setMonthYear(`${month}, ${data.year}`);
+          }
+        }
+
+        // Handle nested leaderboard structure for interest response
+        const users = data?.leaderboard?.content || data?.content || [];
         if (Array.isArray(users)) {
           // Normalize scores: calculate percentage relative to the highest score
           // Default to 100 if no data or max score is 0 to avoid division by zero
@@ -62,9 +104,10 @@ const Leaderboard = () => {
           let nonUserColorIndex = 0;
 
           const processed = users.map((user) => {
+            const isMe = user.me || (currentUser?.id && (user.userId === currentUser.id || user.id === currentUser.id));
             let assignedColor;
 
-            if (user.me) {
+            if (isMe) {
               assignedColor = '#FFFFFF';
             } else {
               // Assign next available color from the list, or default to some background (e.g. transparent or Rank 6 color)
@@ -86,7 +129,7 @@ const Leaderboard = () => {
               scorePercent: maxScore > 0 ? (user.points / maxScore) * 100 : 0,
               color: assignedColor,
               crown: user.rank === 1,
-              isCurrentUser: user.me,
+              isCurrentUser: isMe,
             };
           });
           setLeaderboardData(processed);
@@ -119,7 +162,9 @@ const Leaderboard = () => {
             <path d="M22.4998 12.8999H5.17559L10.0041 17.7299L8.72984 19.0056L1.72559 11.9999L8.72984 4.99414L10.0041 6.26989L5.17559 11.0999H22.4998V12.8999Z" fill="#121212" />
           </svg>
         </button>
-        <h1 className="text-[20px] font-semibold leading-[40px] font-intro">Weekly Leaderboard</h1>
+        <h1 className="text-[20px] font-semibold leading-[40px] font-intro">
+          Top Voice {communityName} {monthYear}
+        </h1>
       </header>
 
       {/* Scrollable List */}
