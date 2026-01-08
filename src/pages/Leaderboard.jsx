@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import CrownIcon from '../components/ui/CrownIcon';
 import apiService from '../services/api';
+import CTAButton from '../components/ui/CTAButton';
+import { ALLOWED_CATEGORIES } from '../utils/constants';
 
 const RANK_COLORS = {
   1: '#212121',
@@ -32,6 +34,7 @@ const RankNumber = ({ rank }) => {
 
 const Leaderboard = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [leaderboardData, setLeaderboardData] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -120,57 +123,82 @@ const Leaderboard = () => {
       </header>
 
       {/* Scrollable List */}
-      <div className="flex-1 overflow-y-auto pb-4 px-4 pt-2 scrollbar-hide">
-        <div className="flex flex-col rounded-[16px] overflow-hidden">
-          {loading ? (
-            // Basic loading state (optional, can be better)
-            <div className="p-4 text-center text-white font-intro">Loading...</div>
-          ) : (
-            leaderboardData.map((user) => (
-              <div
-                key={user.rank} // Assuming rank is unique enough for key, or use user.userId if available
-                className={`flex items-center px-4 py-4 relative`}
-                style={{ backgroundColor: user.color }}
-              >
-                {/* Rank */}
-                <RankNumber rank={user.rank} />
+      <div className="flex-1 overflow-y-auto pb-4 px-4 mb-6 pt-2 scrollbar-hide">
+        <div className="flex flex-col justify-between h-full gap-6">
+          <div className="flex flex-col   rounded-[16px] overflow-hidden">
+            {loading ? (
+              // Basic loading state (optional, can be better)
+              <div className="p-4 text-center text-white font-intro">Loading...</div>
+            ) : (
+              leaderboardData.map((user) => (
+                <div
+                  key={user.rank} // Assuming rank is unique enough for key, or use user.userId if available
+                  className={`flex items-center px-4 py-4 relative`}
+                  style={{ backgroundColor: user.color }}
+                >
+                  {/* Rank */}
+                  <RankNumber rank={user.rank} />
 
-                {/* Avatar */}
-                <div className="relative mr-4 shrink-0">
-                  <div className="w-12 h-12 rounded-full flex items-center justify-center bg-[#9105C6] text-[#F0E224] text-[20px] leading-[28px] font-semibold font-intro">
-                    {user.initials}
-                  </div>
-                  {user.crown && (
-                    <span className="absolute -top-0 -right-0">
-                      <CrownIcon />
-                    </span>
-                  )}
-                </div>
-
-                {/* Info */}
-                <div className="flex-1 min-w-0 flex flex-col justify-center h-full">
-                  <div
-                    className="truncate font-inter text-start font-normal text-[15px] leading-[22px] mb-2"
-                    style={{ color: user.isCurrentUser ? '#000000' : '#FFFFFF' }}
-                  >
-                    {user.name} {user.isCurrentUser && '(you)'}
+                  {/* Avatar */}
+                  <div className="relative mr-4 shrink-0">
+                    <div className="w-12 h-12 rounded-full flex items-center justify-center bg-[#9105C6] text-[#F0E224] text-[20px] leading-[28px] font-semibold font-intro">
+                      {user.initials}
+                    </div>
+                    {user.crown && (
+                      <span className="absolute -top-0 -right-0">
+                        <CrownIcon />
+                      </span>
+                    )}
                   </div>
 
-                  {/* Progress Bar */}
-                  <div className="relative h-1 w-full rounded-full bg-[#F2F2F2] overflow-hidden">
+                  {/* Info */}
+                  <div className="flex-1 min-w-0 flex flex-col justify-center h-full">
                     <div
-                      className="absolute top-0 left-0 h-full rounded-full"
-                      style={{
-                        width: `${user.scorePercent}%`,
-                        background: 'repeating-linear-gradient(120deg, #9105C6, #9105C6 12px, #F0E224 12px, #F0E224 24px)'
-                      }}
-                    />
+                      className="truncate font-inter text-start font-normal text-[15px] leading-[22px] mb-2"
+                      style={{ color: user.isCurrentUser ? '#000000' : '#FFFFFF' }}
+                    >
+                      {user.name} {user.isCurrentUser && '(you)'}
+                    </div>
+
+                    {/* Progress Bar */}
+                    <div className="relative h-1 w-full rounded-full bg-[#F2F2F2] overflow-hidden">
+                      <div
+                        className="absolute top-0 left-0 h-full rounded-full"
+                        style={{
+                          width: `${user.scorePercent}%`,
+                          background: 'repeating-linear-gradient(120deg, #9105C6, #9105C6 12px, #F0E224 12px, #F0E224 24px)'
+                        }}
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))
-          )}
+              ))
+            )}
+          </div>
+
         </div>
+      </div>
+      <div className="flex-none flex flex-col px-6 pt-6 pb-8 text-start bg-white rounded-t-[48px] w-full">
+        <h2 className="text-[18px] font-intro font-bold text-[#121212] mb-1">Want to reach the top?</h2>
+        <p className="text-[15px] font-inter text-[#121212] opacity-80 mb-4">
+          Drop an argument and flex your brain.
+        </p>
+
+        <CTAButton
+          variant="primary"
+          className="w-full max-w-none"
+          onClick={() => {
+            const pathParts = location.pathname.split('/').filter(Boolean);
+            const category = pathParts[0];
+            if (category && ALLOWED_CATEGORIES.includes(category)) {
+              navigate(`/${category}`);
+            } else {
+              navigate('/');
+            }
+          }}
+        >
+          Add Argument
+        </CTAButton>
       </div>
     </main>
   );

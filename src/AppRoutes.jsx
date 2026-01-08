@@ -160,6 +160,14 @@ const AppRoutes = () => {
                                 </ProtectedRoute>
                             }
                         />
+                        <Route
+                            path="/:category/leaderboard"
+                            element={
+                                <ProtectedRoute>
+                                    <Leaderboard />
+                                </ProtectedRoute>
+                            }
+                        />
 
                         {/* Public */}
                         <Route
