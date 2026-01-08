@@ -41,21 +41,53 @@ const Leaderboard = () => {
     const fetchLeaderboard = async () => {
       try {
         const data = await apiService.getLeaderboardTop();
-        if (Array.isArray(data)) {
+        const users = data?.content || [];
+        if (Array.isArray(users)) {
           // Normalize scores: calculate percentage relative to the highest score
           // Default to 100 if no data or max score is 0 to avoid division by zero
-          const maxScore = Math.max(...data.map((u) => u.points || 0), 100);
+          const maxScore = Math.max(...users.map((u) => u.points || 0), 100);
 
-          const processed = data.map((user) => ({
-            ...user,
-            name: user.fullName,
-            // If points > 100, we might want to cap it visually or just use normalized percentage
-            scorePercent: maxScore > 0 ? (user.points / maxScore) * 100 : 0,
-            color: RANK_COLORS[user.rank] || 'rgba(255, 255, 255, 0.1)',
-            crown: user.rank === 1,
-            isCurrentUser: user.me,
-          }));
+          // Standard colors for top ranks (excluding White for rank 6/others)
+          const rankColorsList = [
+            '#212121', // 1
+            '#3A3A3A', // 2
+            '#4E4E4E', // 3
+            '#707070', // 4
+            '#8D8D8D'  // 5
+          ];
+
+          let nonUserColorIndex = 0;
+
+          const processed = users.map((user) => {
+            let assignedColor;
+
+            if (user.me) {
+              assignedColor = '#FFFFFF';
+            } else {
+              // Assign next available color from the list, or default to some background (e.g. transparent or Rank 6 color)
+              // If we run out of colors, we can fallback to RANK_COLORS[6] or similar.
+              // The user only specified behavior for "top 5" colors shifting.
+              if (nonUserColorIndex < rankColorsList.length) {
+                assignedColor = rankColorsList[nonUserColorIndex];
+                nonUserColorIndex++;
+              } else {
+                assignedColor = RANK_COLORS[6] || '#FFFFFF';
+                // Wait, rank 6 is white. If everyone else is white, that's fine.
+                // But we should ensure contrast.
+              }
+            }
+
+            return {
+              ...user,
+              name: user.fullName,
+              scorePercent: maxScore > 0 ? (user.points / maxScore) * 100 : 0,
+              color: assignedColor,
+              crown: user.rank === 1,
+              isCurrentUser: user.me,
+            };
+          });
           setLeaderboardData(processed);
+
         }
       } catch (err) {
         console.error('Failed to fetch leaderboard', err);
@@ -119,7 +151,7 @@ const Leaderboard = () => {
                 <div className="flex-1 min-w-0 flex flex-col justify-center h-full">
                   <div
                     className="truncate font-inter text-start font-normal text-[15px] leading-[22px] mb-2"
-                    style={{ color: user.rank === 6 ? '#FFFFFF' : '#FFFFFF' }}
+                    style={{ color: user.isCurrentUser ? '#000000' : '#FFFFFF' }}
                   >
                     {user.name} {user.isCurrentUser && '(you)'}
                   </div>
