@@ -39,17 +39,40 @@ const Header = ({
     }
   });
 
+  const [showLeaderboard, setShowLeaderboard] = useState(() => {
+    // Initialize from cache
+    return sessionStorage.getItem(`${leaderboardCacheKey}_show`) === 'true';
+  });
+
   useEffect(() => {
     if (isAuthenticated) {
       apiService.getLeaderboardTop()
         .then(data => {
-          const users = data?.content || [];
-          if (users.length > 0) {
-            setTopUser(users[0]);
-            sessionStorage.setItem(leaderboardCacheKey, JSON.stringify(users[0]));
+          // Handle both response structures (nested for tags, direct for global)
+          const leaderboardData = data?.leaderboard || data;
+          const users = leaderboardData?.content || [];
+          const totalUsers = leaderboardData?.totalElements || 0;
+
+          // Only show leaderboard if 5 or more users
+          if (totalUsers >= 5) {
+            setShowLeaderboard(true);
+            if (users.length > 0) {
+              setTopUser(users[0]);
+              sessionStorage.setItem(leaderboardCacheKey, JSON.stringify(users[0]));
+            }
+            sessionStorage.setItem(`${leaderboardCacheKey}_show`, 'true');
+          } else {
+            setShowLeaderboard(false);
+            setTopUser(null);
+            sessionStorage.removeItem(leaderboardCacheKey);
+            sessionStorage.removeItem(`${leaderboardCacheKey}_show`);
           }
         })
-        .catch(err => console.error("Failed to fetch leaderboard top", err));
+        .catch(err => {
+          console.error("Failed to fetch leaderboard top", err);
+          // On error, hide the icon
+          setShowLeaderboard(false);
+        });
     }
   }, [isAuthenticated, leaderboardCacheKey]);
 
@@ -121,25 +144,27 @@ const Header = ({
         <div className="flex items-center gap-2">
           {isAuthenticated ? (
             <>
-              {/* Leaderboard Avatar */}
-              <button
-                onClick={() => {
-                  const pathParts = location.pathname.split('/').filter(Boolean);
-                  const category = pathParts[0];
-                  if (category && ALLOWED_CATEGORIES.includes(category)) {
-                    navigate(`/${category}/leaderboard`);
-                  } else {
-                    navigate('/leaderboard');
-                  }
-                }}
-                className="relative w-8 h-8 rounded-full bg-[#F0E224] text-[#9105C6] flex items-center justify-center font-intro font-bold text-sm shadow-sm hover:scale-105 transition-transform"
-                title={topUser ? `Leaderboard Leader: ${topUser.fullName || topUser.initials}` : "Leaderboard"}
-              >
-                {topUser?.initials || initials}
-                <span className="absolute -top-1 -right-1">
-                  <CrownIcon />
-                </span>
-              </button>
+              {/* Leaderboard Avatar - Only show if 5 or more users */}
+              {showLeaderboard && (
+                <button
+                  onClick={() => {
+                    const pathParts = location.pathname.split('/').filter(Boolean);
+                    const category = pathParts[0];
+                    if (category && ALLOWED_CATEGORIES.includes(category)) {
+                      navigate(`/${category}/leaderboard`);
+                    } else {
+                      navigate('/leaderboard');
+                    }
+                  }}
+                  className="relative w-8 h-8 rounded-full bg-[#F0E224] text-[#9105C6] flex items-center justify-center font-intro font-bold text-sm shadow-sm hover:scale-105 transition-transform"
+                  title={topUser ? `Leaderboard Leader: ${topUser.fullName || topUser.initials}` : "Leaderboard"}
+                >
+                  {topUser?.initials || initials}
+                  <span className="absolute -top-1 -right-1">
+                    <CrownIcon />
+                  </span>
+                </button>
+              )}
 
               {/* Bell (Notifications) */}
               <IconButton
