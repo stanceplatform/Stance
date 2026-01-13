@@ -10,6 +10,8 @@ import bg from '../assets/bg.svg';
 import { useAuth } from '../context/AuthContext';
 import analytics from '../utils/analytics';
 
+import mixpanel from '../utils/mixpanel'; // Import Mixpanel
+
 const Login = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -29,9 +31,17 @@ const Login = () => {
       setErr('Please enter email and password.');
       return;
     }
+
+    // Track "Click on Submit Login Button"
+    mixpanel.trackEvent("Click on Submit Login Button");
+
     analytics.trackEvent('Auth', 'Login Attempt');
     try {
       await login(form);
+
+      // Track Success in Mixpanel is implied by "App Opened" on reload or we can add explicit "Login Success" if requested.
+      // But for now, user requested "Click on Submit Login Button".
+
       analytics.trackEvent('Auth', 'Login Success');
       // Get questionid from URL query params or sessionStorage and redirect to /?questionid=XXX
       const questionid = searchParams.get('questionid') || sessionStorage.getItem('redirectQuestionId');
@@ -126,6 +136,10 @@ const Login = () => {
         <div className="mt-4 text-center">
           <Link
             to="/forgot-password"
+            onClick={() => {
+              // Track "Click on Forget Password"
+              mixpanel.trackEvent("Click on Forget Password");
+            }}
             className="text-[16px] leading-[24px] text-white/90 underline-offset-2 hover:underline"
           >
             Forgot password?

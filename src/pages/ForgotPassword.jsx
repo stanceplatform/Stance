@@ -26,6 +26,11 @@ export default function ForgotPassword() {
     setErr(''); setMsg('');
     setLoading(true);
     try {
+      // Track "Send Reset Link"
+      import('../utils/mixpanel').then(({ default: mixpanel }) => {
+        mixpanel.trackEvent("Send Reset Link");
+      });
+
       const res = await apiService.forgotPassword(email.trim());
       setMsg(res?.message || 'A password reset link has been sent to your email.');
     } catch (error) {

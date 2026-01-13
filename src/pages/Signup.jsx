@@ -110,6 +110,12 @@ export default function Signup() {
       setErr("Signup link is missing or invalid.");
       return;
     }
+
+    // Track "Submit Signup"
+    import('../utils/mixpanel').then(({ default: mixpanel }) => {
+      mixpanel.trackEvent("Submit Signup");
+    });
+
     analytics.trackEvent('Auth', 'Signup Attempt');
 
     setLoading(true);

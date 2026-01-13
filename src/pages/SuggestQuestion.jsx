@@ -57,6 +57,12 @@ const SuggestQuestion = () => {
       });
       setMsg(res?.message || "Thanks! Your suggestion has been submitted.");
       analytics.trackEvent("Content", "Suggest Question", form.question.trim());
+
+      // Track "Submit Question"
+      import('../utils/mixpanel').then(({ default: mixpanel }) => {
+        mixpanel.trackEvent("Submit Question", { question: form.question.trim() });
+      });
+
       setForm({ question: "", option1: "", option2: "" });
       setIsError(false);
     } catch (error) {

@@ -3,6 +3,7 @@ import { useGoogleLogin } from "@react-oauth/google";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { ALLOWED_CATEGORIES } from "../../utils/constants";
+import mixpanel from '../../utils/mixpanel'; // Import mixpanel
 
 /** Simple Google "G" */
 const GoogleG = () => (
@@ -120,7 +121,14 @@ const GoogleAuthButton = ({ mode = "signup", onError }) => {
   return (
     <button
       type="button"
-      onClick={() => !loading && startGoogle()}
+      onClick={() => {
+        if (!loading) {
+          // Track "Click on Signin with Google" or "Click on Signup with Google"
+          const eventName = mode === "signup" ? "Click on Signup with Google" : "Click on Signin with Google";
+          mixpanel.trackEvent(eventName);
+          startGoogle();
+        }
+      }}
       disabled={loading}
       className={[
         "max-w-[360px] mx-auto",
@@ -138,6 +146,7 @@ const GoogleAuthButton = ({ mode = "signup", onError }) => {
     >
       {loading ? (
         <span className="inline-flex items-center gap-2">
+
           <span className="animate-spin inline-block w-4 h-4 rounded-full border-2 border-current border-t-transparent" />
           <span className="text-sm font-medium">
             {mode === "signup" ? "Signing up..." : "Signing in..."}

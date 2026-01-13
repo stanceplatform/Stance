@@ -28,6 +28,11 @@ const RequestInvite = () => {
     }
     setLoading(true);
     try {
+      // Track "Click on Send Verification Link"
+      import('../utils/mixpanel').then(({ default: mixpanel }) => {
+        mixpanel.trackEvent("Click on Send Verification Link");
+      });
+
       const res = await apiService.requestInvite(email);
       if (res?.success) {
         setOk(res?.message || "You've been added to the waitlist. We'll notify you by email within 48 hours if your request is approved. Please keep an eye on your inbox.");

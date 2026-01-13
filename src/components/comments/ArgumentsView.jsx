@@ -5,6 +5,7 @@ import React, {
   useRef,
 } from "react";
 import mixpanel from "../../utils/mixpanel";
+import analytics from "../../utils/analytics";
 import { createPortal } from "react-dom";
 import { useSearchParams } from "react-router-dom";
 import ProgressBarWithLabels from "../charts/ProgressBar";
@@ -159,6 +160,7 @@ function ArgumentsView({
   });
 
   const touchStartYRef = useRef(0); // for global pull-to-refresh guard
+  const hasTrackedScrollRef = useRef(false); // Track if scroll event has been fired
 
   // ---------- LONG PRESS MENU STATE ----------
   const [contextMenu, setContextMenu] = useState({
@@ -334,9 +336,17 @@ function ArgumentsView({
 
   useEffect(() => {
     if (isOpen) {
+      // Reset scroll tracker
+      hasTrackedScrollRef.current = false;
+
+      // Track "View Comments"
+      import('../../utils/mixpanel').then(({ default: mixpanel }) => {
+        mixpanel.trackEvent("View Comments", { question_id: cardId });
+      });
+
       loadArguments();
     }
-  }, [isOpen, loadArguments]);
+  }, [isOpen, loadArguments, cardId]);
 
   // Infinite scroll: detect when user reaches bottom
   useEffect(() => {
@@ -347,6 +357,15 @@ function ArgumentsView({
 
     const handleScroll = () => {
       const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
+
+      // Track "Scroll Comments" (once per view session)
+      if (!hasTrackedScrollRef.current && scrollTop > 50) {
+        hasTrackedScrollRef.current = true;
+        import('../../utils/mixpanel').then(({ default: mixpanel }) => {
+          mixpanel.trackEvent("Scroll Comments", { question_id: cardId });
+        });
+      }
+
       const threshold = 100; // Load more when 100px from bottom
 
       if (scrollHeight - scrollTop - clientHeight < threshold) {
@@ -1115,6 +1134,10 @@ function ArgumentsView({
                               type="button"
                               onClick={(e) => {
                                 e.stopPropagation();
+                                // Track "Click on Add Counter Argument" (Reply)
+                                import('../../utils/mixpanel').then(({ default: mixpanel }) => {
+                                  mixpanel.trackEvent("Click on \"Add Counter Argument\"");
+                                });
                                 setReplyingTo(arg);
                                 setShowOpinionForm(true);
                               }}
@@ -1365,7 +1388,13 @@ function ArgumentsView({
                 )}
                 <button
                   className="block w-full text-left py-1.5 text-[#111827]"
-                  onClick={handleReportComment}
+                  onClick={() => {
+                    // Track "Click on Report" (Comment)
+                    import('../../utils/mixpanel').then(({ default: mixpanel }) => {
+                      mixpanel.trackEvent("Click on Report", { type: "comment" });
+                    });
+                    handleReportComment();
+                  }}
                 >
                   Report
                 </button>
@@ -1467,6 +1496,10 @@ function ArgumentsView({
                     : "#212121",
             }}
             onClick={() => {
+              // Track "Click on Add Argument"
+              import('../../utils/mixpanel').then(({ default: mixpanel }) => {
+                mixpanel.trackEvent("Click on \"Add Argument\"");
+              });
               setShowOpinionForm(true);
             }}
           >

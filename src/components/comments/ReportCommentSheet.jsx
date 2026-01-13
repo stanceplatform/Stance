@@ -77,6 +77,12 @@ export default function ReportComment({
 
     try {
       setLoading(true);
+
+      // Track "Report Submitted" (Comment)
+      import('../../utils/mixpanel').then(({ default: mixpanel }) => {
+        mixpanel.trackEvent("Report Submitted", { type: "comment", reason });
+      });
+
       const payload = { reason, description: description.trim() };
       // keep your existing endpoint
       const res = await apiService.reportComment(commentId, payload);

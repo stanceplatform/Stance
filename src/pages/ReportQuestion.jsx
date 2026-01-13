@@ -44,6 +44,11 @@ export default function ReportQuestion() {
 
     setLoading(true)
     try {
+      // Track "Report Submitted" (Question)
+      import('../utils/mixpanel').then(({ default: mixpanel }) => {
+        mixpanel.trackEvent("Report Submitted", { type: "question", reason });
+      });
+
       await apiService.reportQuestion(questionId, {
         reason,
         description: description.trim(),
