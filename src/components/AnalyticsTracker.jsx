@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import ReactGA from 'react-ga4';
 import analytics from '../utils/analytics';
 import hotjar from '../utils/hotjar';
+import mixpanel from '../utils/mixpanel';
 
 const AnalyticsTracker = () => {
   const location = useLocation();
@@ -20,6 +21,9 @@ const AnalyticsTracker = () => {
 
     // Initialize Hotjar
     hotjar.initializeHotjar();
+
+    // Initialize Mixpanel
+    mixpanel.initializeMixpanel();
   }, []);
 
   // Track User ID
@@ -33,6 +37,14 @@ const AnalyticsTracker = () => {
       hotjar.identifyUser(user.uid, {
         email: user.email,
         displayName: user.displayName || 'Unknown'
+      });
+
+      // Identify user in Mixpanel
+      mixpanel.identifyUser(user.uid, {
+        $email: user.email,
+        $name: user.displayName || 'Unknown',
+        // Add any other useful profile properties here
+        last_login: new Date().toISOString()
       });
     }
   }, [user]);
