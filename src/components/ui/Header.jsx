@@ -25,6 +25,21 @@ const Header = ({
   const questionIdFromUrl = new URLSearchParams(location.search).get('questionid');
 
   const [unreadCount, setUnreadCount] = useState(0);
+  const [topUser, setTopUser] = useState(null);
+  // console.log(topUser);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      apiService.getLeaderboardTop()
+        .then(data => {
+          const users = data?.content || [];
+          if (users.length > 0) {
+            setTopUser(users[0]);
+          }
+        })
+        .catch(err => console.error("Failed to fetch leaderboard top", err));
+    }
+  }, [isAuthenticated]);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -95,16 +110,24 @@ const Header = ({
           {isAuthenticated ? (
             <>
               {/* Leaderboard Avatar */}
-              {/* <button
-                onClick={() => navigate('/leaderboard')}
+              <button
+                onClick={() => {
+                  const pathParts = location.pathname.split('/').filter(Boolean);
+                  const category = pathParts[0];
+                  if (category && ALLOWED_CATEGORIES.includes(category)) {
+                    navigate(`/${category}/leaderboard`);
+                  } else {
+                    navigate('/leaderboard');
+                  }
+                }}
                 className="relative w-8 h-8 rounded-full bg-[#F0E224] text-[#9105C6] flex items-center justify-center font-intro font-bold text-sm shadow-sm hover:scale-105 transition-transform"
-                title="Leaderboard"
+                title={topUser ? `Leaderboard Leader: ${topUser.fullName || topUser.initials}` : "Leaderboard"}
               >
-                {initials}
+                {topUser?.initials || initials}
                 <span className="absolute -top-1 -right-1">
                   <CrownIcon />
                 </span>
-              </button> */}
+              </button>
 
               {/* Bell (Notifications) */}
               <IconButton
@@ -198,6 +221,24 @@ const Header = ({
 
                     {/* Menu items */}
                     <div className="flex flex-col py-1">
+                      <button
+                        className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-[#212121] text-sm"
+                        onClick={() => {
+                          // Track "Click on Suggest a question"
+                          import('../../utils/mixpanel').then(({ default: mixpanel }) => {
+                            mixpanel.trackEvent("Click on Suggest a question");
+                          });
+
+                          navigate("/suggestquestion");
+                          setOpen(false);
+                        }}
+                      >
+                        <span className="text-lg">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M3 17.25V21H6.75L17.81 9.94L14.06 6.19L3 17.25ZM20.71 7.04C21.1 6.65 21.1 6.02 20.71 5.63L18.37 3.29C17.98 2.9 17.35 2.9 16.96 3.29L15.13 5.12L18.88 8.87L20.71 7.04Z" fill="#212121" />
+                          </svg>
+                        </span>Suggest a question
+                      </button>
                       <button
                         className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-[#212121] text-sm"
                         onClick={() => {

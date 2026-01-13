@@ -394,7 +394,19 @@ class ApiService {
 
   // Leaderboard
   async getLeaderboardTop() {
+    const pathParts = window.location.pathname.split('/').filter(Boolean);
+    const category = pathParts[0];
+
+    console.log('Checking category:', category);
+    if (category && ALLOWED_CATEGORIES.includes(category)) {
+      return this.request(`/leaderboard/interest?tag=${category}`);
+    }
+
     return this.request('/leaderboard/top');
+  }
+
+  async getLeaderboardCollege() {
+    return this.request('/leaderboard/college');
   }
 
   // Notifications
