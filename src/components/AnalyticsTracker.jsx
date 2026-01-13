@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import ReactGA from 'react-ga4';
 import analytics from '../utils/analytics';
+import hotjar from '../utils/hotjar';
 
 const AnalyticsTracker = () => {
   const location = useLocation();
@@ -16,13 +17,23 @@ const AnalyticsTracker = () => {
     // Ensure initialized if not already (safeguard)
     // But ideally AppRoutes should init it. Let's assume initialized or call init here.
     analytics.initializeAnalytics();
+
+    // Initialize Hotjar
+    hotjar.initializeHotjar();
   }, []);
 
   // Track User ID
   const { user } = useAuth();
   useEffect(() => {
     if (user?.uid) {
+      // Set user ID in Google Analytics
       analytics.setUserId(user.uid);
+
+      // Identify user in Hotjar with additional attributes
+      hotjar.identifyUser(user.uid, {
+        email: user.email,
+        displayName: user.displayName || 'Unknown'
+      });
     }
   }, [user]);
 

@@ -15,6 +15,7 @@
     "@fortawesome/free-regular-svg-icons": "^6.6.0",
     "@fortawesome/free-solid-svg-icons": "^6.6.0",
     "@fortawesome/react-fontawesome": "^0.2.2",
+    "@hotjar/browser": "^1.0.9",
     "@react-oauth/google": "^0.12.1",
     "framer-motion": "^11.11.10",
     "marked": "^15.0.5",
