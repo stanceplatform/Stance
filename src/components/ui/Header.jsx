@@ -25,8 +25,19 @@ const Header = ({
   const questionIdFromUrl = new URLSearchParams(location.search).get('questionid');
 
   const [unreadCount, setUnreadCount] = useState(0);
-  const [topUser, setTopUser] = useState(null);
-  // console.log(topUser);
+  // Use a cache key based on the category (e.g., 'cricket') or 'global'
+  const pathParts = location.pathname.split('/').filter(Boolean);
+  const currentCategory = pathParts[0] && ALLOWED_CATEGORIES.includes(pathParts[0]) ? pathParts[0] : 'global';
+  const leaderboardCacheKey = `topUser_${currentCategory}`;
+
+  const [topUser, setTopUser] = useState(() => {
+    try {
+      const cached = sessionStorage.getItem(leaderboardCacheKey);
+      return cached ? JSON.parse(cached) : null;
+    } catch (e) {
+      return null;
+    }
+  });
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -35,11 +46,12 @@ const Header = ({
           const users = data?.content || [];
           if (users.length > 0) {
             setTopUser(users[0]);
+            sessionStorage.setItem(leaderboardCacheKey, JSON.stringify(users[0]));
           }
         })
         .catch(err => console.error("Failed to fetch leaderboard top", err));
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, leaderboardCacheKey]);
 
   useEffect(() => {
     if (isAuthenticated) {
