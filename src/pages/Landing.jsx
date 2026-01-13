@@ -55,14 +55,14 @@ const Landing = () => {
             <div className="mt-10 w-full space-y-3">
                 <div className="mb-5">
                     <Link
-                        to={() => {
+                        to={(() => {
                             const pathParts = location.pathname.split('/').filter(Boolean);
                             const category = pathParts[0];
                             if (category && ALLOWED_CATEGORIES.includes(category)) {
                                 return `/${category}/login`
                             }
                             return "/login";
-                        }}
+                        })()}
                         className="no-underline"
                     >
                         <CTAButton

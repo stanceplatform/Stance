@@ -225,8 +225,8 @@ const Leaderboard = () => {
       </div>
       <div className="flex-none flex flex-col px-6 pt-6 pb-8 text-start bg-white rounded-t-[48px] w-full">
         <h2 className="text-[18px] font-intro font-bold text-[#121212] mb-1">Want to reach the top?</h2>
-        <p className="text-[15px] font-inter text-[#121212] opacity-80 mb-4">
-          Drop an argument and flex your brain.
+        <p className="text-[15px] font-semibold font-inter text-[#121212] opacity-80 mb-3">
+          Stay consistent, post strong arguments, upvote others, and earn upvotes to climb the leaderboard.
         </p>
 
         <CTAButton
@@ -242,7 +242,7 @@ const Leaderboard = () => {
             }
           }}
         >
-          Add Argument
+          Start Your Progress
         </CTAButton>
       </div>
     </main>
