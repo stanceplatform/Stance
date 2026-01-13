@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
+import mixpanel from '../../utils/mixpanel';
 import { AnimatePresence, motion } from 'framer-motion';
 import { voteOnCard } from '../../services/operations';
 import ArgumentsView from '../comments/ArgumentsView';
@@ -72,6 +73,17 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle, onNext, onPre
     }
   }, [question.id, question.userResponse, setHasVoted]);
 
+  // Track "Question Viewed" (Client Rule: Core Loop Event 1)
+  useEffect(() => {
+    if (question?.id) {
+      mixpanel.trackEvent("Question Viewed", {
+        question_id: question.id,
+        topic: question.topic || "General", // Assuming topic exists or default
+        // position_in_session: index // We don't have index easily here, omitted for now or can compute if passed prop
+      });
+    }
+  }, [question.id]);
+
   const handleVote = async (option, choiceNumber) => {
     if (hasVoted || isVoting) return;
 
@@ -96,10 +108,16 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle, onNext, onPre
       onVoteUpdate?.(question.id, updated, option.id);
       setUserChoice(choiceNumber);
       setHasVoted(true);
-      setHasVoted(true);
+      // setHasVoted(true); // Duplicate removed
       analytics.sendEvent("vote_cast", {
         question_id: question.id,
         stance: currentAnswers[choiceNumber - 1]?.value || (choiceNumber === 1 ? 'Option A' : 'Option B')
+      });
+
+      // Track "Vote Submitted" (Client Rule: Core Loop Event 2)
+      mixpanel.trackEvent("Vote Submitted", {
+        question_id: question.id,
+        option: option.id // or choiceNumber if mapped
       });
       // Legacy tracking for backward compatibility/reference if needed, or remove. Keeping generic event as per plan note? 
       // Plan said "I will keep the existing trackEvent... but will add a new sendEvent". 

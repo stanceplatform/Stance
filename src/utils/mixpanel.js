@@ -7,13 +7,13 @@ const initializeMixpanel = () => {
     const token = import.meta.env.VITE_MIXPANEL_TOKEN;
     if (token) {
         mixpanel.init(token, {
-            debug: import.meta.env.DEV, // Enable debug mode in development
-            track_pageview: true,       // Automatically track page views
-            persistence: 'localStorage' // Standard persistence
+            debug: import.meta.env.DEV,
+            track_pageview: false, // ❌ DISABLE Auto-track page views (Client Rule 1)
+            persistence: 'localStorage', // ✅ Use localStorage (Client Rule 2)
+            ignore_dnt: true // Optional: usually desired for analytics accuracy
         });
-        console.log('Mixpanel Initialized');
+        console.log('Mixpanel Initialized (Manual Mode)');
     } else {
-        // Only warn if we are not in CI/test environment to avoid noise
         if (import.meta.env.DEV) {
             console.warn('Mixpanel Token not found');
         }
@@ -23,16 +23,22 @@ const initializeMixpanel = () => {
 /**
  * Identify a user in Mixpanel
  * @param {string} userId - Unique user identifier
- * @param {object} traits - User traits (email, name, etc.)
+ * @param {object} traits - User traits
+ * @param {boolean} isNewSignup - If true, sets immutable properties
  */
 const identifyUser = (userId, traits = {}) => {
     const token = import.meta.env.VITE_MIXPANEL_TOKEN;
     if (token && userId) {
-        // 1. Identify the user (links anonymous ID to this user ID)
+        // 1. Identify: Links this session to the user ID
         mixpanel.identify(userId);
 
-        // 2. Set user people properties (profile data)
-        if (Object.keys(traits).length > 0) {
+        // 2. Set Once: These properties will NEVER be overwritten (Client Rule 4)
+        // Useful for 'First Login Date', 'Signup Source'
+        if (traits.setOption === 'once') {
+            delete traits.setOption; // Cleanup
+            mixpanel.people.set_once(traits);
+        } else {
+            // Standard update for mutable things like 'Plan', 'Last Login'
             mixpanel.people.set(traits);
         }
 

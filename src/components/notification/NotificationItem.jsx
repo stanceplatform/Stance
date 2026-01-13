@@ -12,9 +12,12 @@ import { Link } from "react-router-dom";
  *   link?: string              // e.g. "/questions/2#comment-45"
  * }
  */
+import mixpanel from '../../utils/mixpanel'; // Import Mixpanel
+
 export default function NotificationItem({ notification }) {
   // New fields from backend
   const {
+    type, // We need 'type' for the tracking
     html: contentHtml = "",
     clickable,
     isUnread,
@@ -37,9 +40,18 @@ export default function NotificationItem({ notification }) {
   const wrapperProps =
     clickable && finalLink ? { to: finalLink } : {};
 
+  const handleClick = () => {
+    if (clickable) {
+      mixpanel.trackEvent("Notification Clicked", {
+        notification_type: type
+      });
+    }
+  };
+
   return (
     <Wrapper
       {...wrapperProps}
+      onClick={handleClick}
       className={`block focus:outline-none max-h-dvh ${clickable ? "cursor-pointer" : "cursor-default"
         }`}
       aria-label="Notification item"

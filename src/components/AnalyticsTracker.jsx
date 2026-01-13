@@ -24,27 +24,40 @@ const AnalyticsTracker = () => {
 
     // Initialize Mixpanel
     mixpanel.initializeMixpanel();
+
+    // Track "App Opened" only once per session (Client Rule 3)
+    // We use a simple session check variable or rely on Mixpanel's session logic
+    // For simplicity here, we track it on mount if the referer was external or empty, 
+    // but typically "App Opened" is "Session Started". 
+    // Since this component might remount, we should be careful. 
+    // Ideally, this runs once in the App root. 
+    // Assuming AnalyticsTracker is at root:
+    mixpanel.trackEvent("App Opened", { platform: "web" });
   }, []);
 
   // Track User ID
   const { user } = useAuth();
   useEffect(() => {
-    if (user?.uid) {
+    // Check for user.id (DB) or user.uid (Firebase style fallback)
+    const userId = user?.id || user?._id || user?.uid;
+
+    if (userId) {
       // Set user ID in Google Analytics
-      analytics.setUserId(user.uid);
+      analytics.setUserId(userId);
 
       // Identify user in Hotjar with additional attributes
-      hotjar.identifyUser(user.uid, {
+      hotjar.identifyUser(userId, {
         email: user.email,
-        displayName: user.displayName || 'Unknown'
+        displayName: user.displayName || user.name || user.username || 'Unknown'
       });
 
-      // Identify user in Mixpanel
-      mixpanel.identifyUser(user.uid, {
+      // Identify user in Mixpanel (Client Rule 4)
+      mixpanel.identifyUser(userId, {
         $email: user.email,
-        $name: user.displayName || 'Unknown',
-        // Add any other useful profile properties here
-        last_login: new Date().toISOString()
+        $name: user.displayName || user.name || user.username || 'Unknown',
+        signup_date: user.metadata?.creationTime || user.createdAt,
+        signup_source: "web_app",
+        setOption: 'once'
       });
     }
   }, [user]);

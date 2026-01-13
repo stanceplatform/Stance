@@ -4,6 +4,7 @@ import React, {
   useEffect,
   useRef,
 } from "react";
+import mixpanel from "../../utils/mixpanel";
 import { createPortal } from "react-dom";
 import { useSearchParams } from "react-router-dom";
 import ProgressBarWithLabels from "../charts/ProgressBar";
@@ -727,6 +728,15 @@ function ArgumentsView({
 
       onNewComment?.();
       handleCloseForm();
+
+      // Track "Argument Posted" (Client Rule: Core Loop Event 3)
+      mixpanel.trackEvent("Argument Posted", {
+        question_id: cardId,
+        length_bucket:
+          newOpinion.content.length < 100 ? "short" :
+            newOpinion.content.length < 300 ? "medium" : "long"
+      });
+
     } catch (err) {
       throw err;
     } finally {
@@ -798,6 +808,11 @@ function ArgumentsView({
         analytics.sendEvent("argument_upvoted", {
           comment_id: commentId,
           discussion_id: cardId
+        });
+
+        // Track "Answer Upvoted" (Client Rule: Core Loop Event 4)
+        mixpanel.trackEvent("Answer Upvoted", {
+          question_id: cardId
         });
       }
 
