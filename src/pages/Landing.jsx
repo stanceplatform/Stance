@@ -100,6 +100,12 @@ const Landing = () => {
                 <div className="pt-1 text-center">
                     <Link
                         to="/forgot-password"
+                        onClick={() => {
+                            // Track "Click on Forget Password"
+                            import('../utils/mixpanel').then(({ default: mixpanel }) => {
+                                mixpanel.trackEvent("Click on Forget Password");
+                            });
+                        }}
                         className="font-inter text-[16px] leading-[24px] text-white hover:underline"
                     >
                         Forgot password?

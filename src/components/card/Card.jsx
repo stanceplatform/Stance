@@ -137,6 +137,10 @@ const Card = () => {
     }
 
     if (currentQuestionIndex === questions.length - 1) {
+      // Track "Open Suggest Question Screen"
+      import('../../utils/mixpanel').then(({ default: mixpanel }) => {
+        mixpanel.trackEvent("Open Suggest Question Screen");
+      });
       setShowSuggestQuestion(true)
       return
     }
@@ -209,9 +213,17 @@ const Card = () => {
 
     if (dx <= -SWIPE_THRESHOLD) {
       // swipe left => next
+      // Track "Swipe Next"
+      import('../../utils/mixpanel').then(({ default: mixpanel }) => {
+        mixpanel.trackEvent("Swipe Next");
+      });
       handleNextQuestion()
     } else if (dx >= SWIPE_THRESHOLD) {
       // swipe right => prev
+      // Track "Swipe Previous"
+      import('../../utils/mixpanel').then(({ default: mixpanel }) => {
+        mixpanel.trackEvent("Swipe Previous");
+      });
       handlePreviousQuestion()
     }
   }

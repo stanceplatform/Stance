@@ -38,6 +38,11 @@ const SuggestQuestion = ({ onNext, onPrevious }) => {
 
     setLoading(true);
     try {
+      // Track "Submit Question"
+      import('../../utils/mixpanel').then(({ default: mixpanel }) => {
+        mixpanel.trackEvent("Submit Question");
+      });
+
       const res = await apiService.suggestQuestion({
         question: form.question.trim(),
         option1: form.option1.trim(),

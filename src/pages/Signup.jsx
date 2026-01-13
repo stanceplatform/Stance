@@ -6,6 +6,7 @@ import apiService from "../services/api";
 import TextField from "../components/ui/TextField";
 import bg from "../assets/bg.svg";
 import { useAuth } from "../context/AuthContext";
+import analytics from "../utils/analytics";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -110,6 +111,13 @@ export default function Signup() {
       return;
     }
 
+    // Track "Submit Signup"
+    import('../utils/mixpanel').then(({ default: mixpanel }) => {
+      mixpanel.trackEvent("Submit Signup");
+    });
+
+    analytics.trackEvent('Auth', 'Signup Attempt');
+
     setLoading(true);
     try {
       // Build payload; include collegeId only when College is shown/valid
@@ -131,6 +139,7 @@ export default function Signup() {
           token: res.token,
           refreshToken: res.refreshToken,
         });
+        analytics.trackEvent('Auth', 'Signup Success');
         setOk("Signup completed!");
         navigate("/");
       } else {
@@ -140,6 +149,7 @@ export default function Signup() {
       const errorMessage =
         error?.data?.message || error?.data?.error || error?.message;
       setErr(errorMessage || "Signup failed. Please try again.");
+      analytics.trackEvent('Auth', 'Signup Failure', errorMessage || "Signup failed");
     } finally {
       setLoading(false);
     }

@@ -1,5 +1,6 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
+import analytics from "../../utils/analytics";
 
 function OpinionForm({ onAddOpinion, placeholder = "Add your opinion...", autoFocus = false, initialValue = "" }) {
   const editorRef = useRef(null);
@@ -263,6 +264,8 @@ function OpinionForm({ onAddOpinion, placeholder = "Add your opinion...", autoFo
       avatarSrc:
         "https://cdn.builder.io/api/v1/image/assets/TEMP/33a5dea577ac14e31cec813fd4a4b43ff2ab5237f0420b782d586ab5e3cc90f9?placeholderIfAbsent=true&apiKey=9667f82c7e1b4746ad9299d82be6adf4",
     });
+
+    analytics.sendEvent("argument_posted", { length: content.length });
 
     if (maybePromise && typeof maybePromise.catch === "function") {
       maybePromise.catch(() => toast.error("Failed to send argument"));

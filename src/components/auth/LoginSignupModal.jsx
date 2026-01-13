@@ -4,6 +4,7 @@ import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../../context/AuthContext';
 import { decodeJWT } from '../../utils/jwt';
 import { ALLOWED_CATEGORIES } from '../../utils/constants';
+import mixpanel from '../../utils/mixpanel'; // Import Mixpanel
 
 const LoginSignupModal = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
@@ -11,6 +12,13 @@ const LoginSignupModal = ({ isOpen, onClose }) => {
   const { loginWithGoogle } = useAuth();
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  // Track "Open Signup form"
+  React.useEffect(() => {
+    if (isOpen) {
+      mixpanel.trackEvent("Open Signup form");
+    }
+  }, [isOpen]);
 
   // Get questionid from URL query params
   const questionid = new URLSearchParams(location.search).get('questionid');
@@ -109,6 +117,9 @@ const LoginSignupModal = ({ isOpen, onClose }) => {
   };
 
   const handleSignupClick = () => {
+    // Track "Click on Signup (Simple)"
+    mixpanel.trackEvent("Click on Signup (Simple)");
+
     onClose();
     if (questionid) {
       sessionStorage.setItem('redirectQuestionId', questionid);
@@ -127,6 +138,9 @@ const LoginSignupModal = ({ isOpen, onClose }) => {
   };
 
   const handleLoginClick = () => {
+    // Track "Click on Login" (from modal)
+    mixpanel.trackEvent("Click on Login", { source: "modal" });
+
     onClose();
     if (questionid) {
       sessionStorage.setItem('redirectQuestionId', questionid);

@@ -6,6 +6,7 @@ import { useSearchParams } from "react-router-dom"
 import HeaderSecondary from "../components/ui/HeaderSecondary"
 import apiService from "../services/api"
 import toast from "react-hot-toast"
+import analytics from "../utils/analytics"
 
 const REASONS = ["Hurtful", "Inappropriate content", "Personal attack", "Misinformation", "Irrelevant to me"]
 
@@ -43,10 +44,16 @@ export default function ReportQuestion() {
 
     setLoading(true)
     try {
+      // Track "Report Submitted" (Question)
+      import('../utils/mixpanel').then(({ default: mixpanel }) => {
+        mixpanel.trackEvent("Report Submitted", { type: "question", reason });
+      });
+
       await apiService.reportQuestion(questionId, {
         reason,
         description: description.trim(),
       })
+      analytics.trackEvent("Content", "Report Question", reason);
       setMsg("Your report has been submitted.")
       toast.success("Your report has been submitted.")
       setIsError(false)

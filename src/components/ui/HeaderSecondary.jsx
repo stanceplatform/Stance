@@ -14,6 +14,11 @@ const HeaderSecondary = ({ onBack }) => {
   };
 
   const handleBack = () => {
+    // Track "Click on back button"
+    import('../../utils/mixpanel').then(({ default: mixpanel }) => {
+      mixpanel.trackEvent("Click on back button");
+    });
+
     if (typeof onBack === "function") {
       onBack();
     } else {

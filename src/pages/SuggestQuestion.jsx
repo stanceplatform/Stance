@@ -4,6 +4,7 @@ import apiService from "../services/api";
 import HeaderSecondary from "../components/ui/HeaderSecondary";
 import { useAuth } from "../context/AuthContext";
 import LoginSignupModal from "../components/auth/LoginSignupModal";
+import analytics from "../utils/analytics";
 
 const SuggestQuestion = () => {
   const { isAuthenticated } = useAuth();
@@ -55,6 +56,13 @@ const SuggestQuestion = () => {
         option2: form.option2.trim(),
       });
       setMsg(res?.message || "Thanks! Your suggestion has been submitted.");
+      analytics.trackEvent("Content", "Suggest Question", form.question.trim());
+
+      // Track "Submit Question"
+      import('../utils/mixpanel').then(({ default: mixpanel }) => {
+        mixpanel.trackEvent("Submit Question", { question: form.question.trim() });
+      });
+
       setForm({ question: "", option1: "", option2: "" });
       setIsError(false);
     } catch (error) {

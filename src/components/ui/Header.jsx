@@ -133,6 +133,11 @@ const Header = ({
               <IconButton
                 aria-label="Notifications"
                 onClick={(e) => {
+                  // Track "Click on Notification Icon"
+                  import('../../utils/mixpanel').then(({ default: mixpanel }) => {
+                    mixpanel.trackEvent("Click on Notification Icon");
+                  });
+
                   navigate("/notification");
                 }}
                 title="Notifications"
@@ -181,7 +186,15 @@ const Header = ({
               <div className="relative" ref={menuRef}>
                 <IconButton
                   aria-label="More options"
-                  onClick={() => setOpen((v) => !v)}
+                  onClick={() => {
+                    // Track "Click on 3 dots"
+                    if (!open) { // Only track when opening
+                      import('../../utils/mixpanel').then(({ default: mixpanel }) => {
+                        mixpanel.trackEvent("Click on 3 dots");
+                      });
+                    }
+                    setOpen((v) => !v);
+                  }}
                   title="More"
                   active={open}
                 >
@@ -211,6 +224,11 @@ const Header = ({
                       <button
                         className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-[#212121] text-sm"
                         onClick={() => {
+                          // Track "Click on Posting Guidelines"
+                          import('../../utils/mixpanel').then(({ default: mixpanel }) => {
+                            mixpanel.trackEvent("Click on Posting Guidelines");
+                          });
+
                           navigate("/guidelines");
                           setOpen(false);
                         }}
@@ -224,6 +242,11 @@ const Header = ({
                       <button
                         className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-[#212121] text-sm"
                         onClick={() => {
+                          // Track "Click on Report"
+                          import('../../utils/mixpanel').then(({ default: mixpanel }) => {
+                            mixpanel.trackEvent("Click on Report");
+                          });
+
                           const qs = questionId ? `?questionId=${questionId}` : "";
                           navigate(`/report${qs}`);
                           setOpen(false);
@@ -240,6 +263,11 @@ const Header = ({
                       <button
                         className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-[#212121] text-sm"
                         onClick={() => {
+                          // Track "Click on Help"
+                          import('../../utils/mixpanel').then(({ default: mixpanel }) => {
+                            mixpanel.trackEvent("Click on Help");
+                          });
+
                           navigate("/help");
                           setOpen(false);
                         }}
@@ -280,6 +308,11 @@ const Header = ({
               {/* Sign up button */}
               <button
                 onClick={() => {
+                  // Track "Click on Signup at the top"
+                  import('../../utils/mixpanel').then(({ default: mixpanel }) => {
+                    mixpanel.trackEvent("Click on Signup at the top");
+                  });
+
                   const questionid = questionIdFromUrl || questionId;
                   if (questionid) {
                     sessionStorage.setItem('redirectQuestionId', questionid);
@@ -303,6 +336,11 @@ const Header = ({
               {/* Log in button */}
               <button
                 onClick={() => {
+                  // Track "Click on Login at the top"
+                  import('../../utils/mixpanel').then(({ default: mixpanel }) => {
+                    mixpanel.trackEvent("Click on Login at the top");
+                  });
+
                   const questionid = questionIdFromUrl || questionId;
                   if (questionid) {
                     sessionStorage.setItem('redirectQuestionId', questionid);

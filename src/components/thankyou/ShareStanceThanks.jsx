@@ -32,6 +32,12 @@ export default function ShareStanceThanks({
     }
 
     if (onSuggest) return onSuggest();
+
+    // Track "Click on Suggest Question"
+    import('../../utils/mixpanel').then(({ default: mixpanel }) => {
+      mixpanel.trackEvent("Click on Suggest Question");
+    });
+
     navigate("/suggestquestion"); // same tab
   };
 
