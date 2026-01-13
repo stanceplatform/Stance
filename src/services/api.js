@@ -402,7 +402,7 @@ class ApiService {
       return this.request(`/leaderboard/interest?tag=${category}`);
     }
 
-    return this.request('/leaderboard/top');
+    return this.request('/leaderboard/college');
   }
 
   async getLeaderboardCollege() {
