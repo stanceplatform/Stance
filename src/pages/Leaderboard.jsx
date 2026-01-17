@@ -44,7 +44,7 @@ const Leaderboard = () => {
   const { user: currentUser } = useAuth();
 
   useEffect(() => {
-    document.body.style.overflow = "hidden";
+
 
     const fetchLeaderboard = async () => {
       try {
@@ -143,16 +143,15 @@ const Leaderboard = () => {
     };
 
     fetchLeaderboard();
-
     return () => {
       document.body.style.overflow = "auto";
     };
   }, []);
 
   return (
-    <main className="flex flex-col mx-auto w-full max-w-[480px] min-h-dvh max-h-dvh relative bg-gradient-to-b from-[#F0E224] to-black">
+    <main className="flex flex-col mx-auto w-full max-w-[480px] min-h-dvh relative bg-gradient-to-b from-[#F0E224] to-black">
       {/* Fixed Header */}
-      <header className="flex-none flex items-center px-4 py-4 bg-transparent text-[#121212] relative z-10">
+      <header className="fixed top-0 left-0 right-0 mx-auto w-full max-w-[480px] flex-none flex items-center px-4 py-4 bg-[#F0E224] text-[#121212] z-50">
         <button
           onClick={() => navigate(-1)}
           className="mr-2 p-1 focus:outline-none"
@@ -168,8 +167,8 @@ const Leaderboard = () => {
       </header>
 
       {/* Scrollable List */}
-      <div className="flex-1 overflow-y-auto pb-4 px-4 mb-6 pt-2 scrollbar-hide">
-        <div className="flex flex-col justify-between h-full gap-6">
+      <div className="flex-1 pb-4 px-4 mb-6 pt-24">
+        <div className="flex flex-col justify-between gap-6">
           <div className="flex flex-col   rounded-[16px] overflow-hidden">
             {loading ? (
               // Basic loading state (optional, can be better)
@@ -223,7 +222,7 @@ const Leaderboard = () => {
 
         </div>
       </div>
-      <div className="flex-none flex flex-col px-6 pt-6 pb-8 text-start bg-white rounded-t-[48px] w-full">
+      <div className="flex-none flex flex-col  px-6 pt-6 pb-8 text-start bg-white rounded-t-[48px] w-full">
         <h2 className="text-[18px] font-intro font-bold text-[#121212] mb-1">Want to reach the top?</h2>
         <p className="text-[15px] font-semibold font-inter text-[#121212] opacity-80 mb-3">
           Stay consistent, post strong arguments, upvote others, and earn upvotes to climb the leaderboard.
