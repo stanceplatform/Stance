@@ -181,7 +181,29 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle, onNext, onPre
     <section className="w-full ">
       {!hasVoted && (
         <div className="absolute bottom-0 flex flex-col justify-end w-full px-4">
-          <h2 className="text-left font-intro font-semibold text-white text-[28px] leading-[40px] tracking-[0.01em] mt-5 z-0">
+          {question.suggestedBy && (
+            <div className="flex items-center gap-1 mb-3 z-10 px-0.5">
+              <span className="text-[#FFFFFF]  font-inter font-normal text-[13px]">Suggested by</span>
+              <div className="flex items-center gap-1">
+                {question.suggestedBy.profileImageUrl ? (
+                  <img
+                    src={question.suggestedBy.profileImageUrl}
+                    alt=""
+                    className="w-5 h-5 rounded-[40px] object-cover border border-white/10"
+                  />
+                ) : (
+                  <div className="w-5 h-5 rounded-[40px] bg-white/20 flex items-center justify-center text-[8px] text-white font-bold border border-white/20">
+                    {question.suggestedBy.name?.[0] || 'U'}
+                  </div>
+                )}
+                <span className="text-[#FFFFFF] font-inter font-bold text-[13px]">
+                  {question.suggestedBy.name}
+                </span>
+              </div>
+            </div>
+          )}
+
+          <h2 className="text-left font-intro font-semibold text-white text-[28px] leading-[40px] tracking-[0.01em] mt-1 z-0">
             {question.question}
           </h2>
 
@@ -225,6 +247,7 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle, onNext, onPre
           onClose={() => { }}
           cardId={question.id}
           question={question.question}
+          suggestedBy={question.suggestedBy}
           answerOptions={currentAnswers}
           userChoice={userChoice}
           totalStances={totalStances}

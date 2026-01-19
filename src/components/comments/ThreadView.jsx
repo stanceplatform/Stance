@@ -49,6 +49,7 @@ const ThreadView = ({
   selectedThread,
   onClose,
   question,
+  suggestedBy,
   answerOptions,
   userChoice, // New prop
   onPostReply, // function(text, parentCommentId)
@@ -94,6 +95,7 @@ const ThreadView = ({
           className="p-4 flex items-center justify-between shrink-0 bg-[#121212]"
         >
           <div className="flex-1 pr-2 text-start items-center">
+
             <h3
               className="text-white leading-tight"
               style={{
@@ -273,7 +275,7 @@ const ThreadView = ({
                 </div>
 
                 <div
-                  className="text-[#212121] font-inter font-normal text-base leading-[24px] text-start [&_p]:break-all"
+                  className="text-[#212121] font-inter font-normal text-base leading-[24px] text-start"
                   dangerouslySetInnerHTML={{
                     __html: marked.parse(
                       (reply.parentUser ? `**@${reply.parentUser.firstName}** ` : "") +

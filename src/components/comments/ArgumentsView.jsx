@@ -1,9 +1,4 @@
-import React, {
-  useState,
-  useCallback,
-  useEffect,
-  useRef,
-} from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import mixpanel from "../../utils/mixpanel";
 import analytics from "../../utils/analytics";
 import { createPortal } from "react-dom";
@@ -27,9 +22,6 @@ import ReportComment from "./ReportCommentSheet";
 import ReplyIcon from "../icons/ReplyIcon";
 import ReplyLinkIcon from "../icons/ReplyLinkIcon";
 import ThreadView from "./ThreadView";
-
-
-
 
 // Delete Confirmation Modal
 function ConfirmDeleteModal({ open, onCancel, onConfirm, loading }) {
@@ -108,6 +100,7 @@ function ArgumentsView({
   onClose,
   cardId,
   question,
+  suggestedBy,
   answerOptions,
   userChoice,
   totalStances,
@@ -241,7 +234,10 @@ function ArgumentsView({
     const threadId = searchParams.get("threadId");
 
     // Only try to open if we haven't already selected one, or if it doesn't match
-    if (threadId && (!selectedThread || String(selectedThread.comment.id) !== threadId)) {
+    if (
+      threadId &&
+      (!selectedThread || String(selectedThread.comment.id) !== threadId)
+    ) {
       const targetComment = argsList.find((c) => String(c.id) === threadId);
       if (targetComment) {
         // If depth 0, it's a root comment -> open thread
@@ -279,33 +275,36 @@ function ArgumentsView({
     return result;
   };
 
-  const loadArguments = useCallback(async (reset = true) => {
-    if (!cardId) {
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      if (reset) {
-        setIsLoading(true);
-        setCurrentPage(0);
+  const loadArguments = useCallback(
+    async (reset = true) => {
+      if (!cardId) {
+        setIsLoading(false);
+        return;
       }
-      setError(null);
 
-      const response = await fetchCardComments(cardId, 0);
-      const commentsArray = response.content || [];
-      const flattened = flattenComments(commentsArray);
-      setArgsList(flattened);
-      setTotalPages(response.totalPages || 1);
-      setHasMore(!response.last && (response.totalPages || 1) > 1);
+      try {
+        if (reset) {
+          setIsLoading(true);
+          setCurrentPage(0);
+        }
+        setError(null);
 
-      setCurrentPage(0);
-    } catch (err) {
-      setError(err?.message || "Failed to load arguments");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [cardId, answerOptions]);
+        const response = await fetchCardComments(cardId, 0);
+        const commentsArray = response.content || [];
+        const flattened = flattenComments(commentsArray);
+        setArgsList(flattened);
+        setTotalPages(response.totalPages || 1);
+        setHasMore(!response.last && (response.totalPages || 1) > 1);
+
+        setCurrentPage(0);
+      } catch (err) {
+        setError(err?.message || "Failed to load arguments");
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [cardId, answerOptions],
+  );
 
   const loadMoreComments = useCallback(async () => {
     // Mock: no pagination
@@ -340,7 +339,7 @@ function ArgumentsView({
       hasTrackedScrollRef.current = false;
 
       // Track "View Comments"
-      import('../../utils/mixpanel').then(({ default: mixpanel }) => {
+      import("../../utils/mixpanel").then(({ default: mixpanel }) => {
         mixpanel.trackEvent("View Comments", { question_id: cardId });
       });
 
@@ -361,7 +360,7 @@ function ArgumentsView({
       // Track "Scroll Comments" (once per view session)
       if (!hasTrackedScrollRef.current && scrollTop > 50) {
         hasTrackedScrollRef.current = true;
-        import('../../utils/mixpanel').then(({ default: mixpanel }) => {
+        import("../../utils/mixpanel").then(({ default: mixpanel }) => {
           mixpanel.trackEvent("Scroll Comments", { question_id: cardId });
         });
       }
@@ -373,8 +372,8 @@ function ArgumentsView({
       }
     };
 
-    scrollContainer.addEventListener('scroll', handleScroll);
-    return () => scrollContainer.removeEventListener('scroll', handleScroll);
+    scrollContainer.addEventListener("scroll", handleScroll);
+    return () => scrollContainer.removeEventListener("scroll", handleScroll);
   }, [isOpen, isExpanded, hasMore, isLoadingMore, loadMoreComments]);
 
   // Initialize collapsed offset when this sheet opens
@@ -397,13 +396,9 @@ function ArgumentsView({
     const MAX_VISIBLE = 385;
 
     const factor = (approxLines - 1) / 5;
-    const lineBasedVisible =
-      MIN_VISIBLE + factor * (MAX_VISIBLE - MIN_VISIBLE);
+    const lineBasedVisible = MIN_VISIBLE + factor * (MAX_VISIBLE - MIN_VISIBLE);
 
-    const visibleHeight = Math.min(
-      lineBasedVisible,
-      Math.round(vh * 0.55)
-    );
+    const visibleHeight = Math.min(lineBasedVisible, Math.round(vh * 0.55));
 
     // ✨ tweakable gap between first card bottom and "Add argument"
     const SHORT_LINES_THRESHOLD = 3; // <=3 lines = short
@@ -446,7 +441,6 @@ function ArgumentsView({
     let offset = vh - visibleHeight;
 
     offset += BASE_BOTTOM_GAP; // bigger value = more space under card
-
 
     setCollapsedOffset(offset);
 
@@ -491,8 +485,7 @@ function ArgumentsView({
 
       const atTop = scroller.scrollTop <= 0;
       const atBottom =
-        scroller.scrollTop + scroller.clientHeight >=
-        scroller.scrollHeight - 1;
+        scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 1;
 
       const targetIsInput = e.target.closest('[contenteditable="true"]');
 
@@ -533,8 +526,7 @@ function ArgumentsView({
     const abs = Math.abs(num);
     const intPart = Math.trunc(num);
     const firstDecimal = Math.floor(abs * 10) % 10;
-    const hasAnyFraction =
-      Math.round((abs - Math.floor(abs)) * 100) !== 0;
+    const hasAnyFraction = Math.round((abs - Math.floor(abs)) * 100) !== 0;
     if (!hasAnyFraction || firstDecimal === 0) return String(intPart);
     return num.toFixed(1);
   };
@@ -726,14 +718,11 @@ function ArgumentsView({
         // Reply flow
         addedComment = await postReplyToComment(
           replyingTo.id,
-          newOpinion.content
+          newOpinion.content,
         );
       } else {
         // New root comment flow
-        addedComment = await postCommentOnCard(
-          cardId,
-          newOpinion.content
-        );
+        addedComment = await postCommentOnCard(cardId, newOpinion.content);
       }
 
       // Reload all comments to maintain API order
@@ -752,10 +741,12 @@ function ArgumentsView({
       mixpanel.trackEvent("Argument Posted", {
         question_id: cardId,
         length_bucket:
-          newOpinion.content.length < 100 ? "short" :
-            newOpinion.content.length < 300 ? "medium" : "long"
+          newOpinion.content.length < 100
+            ? "short"
+            : newOpinion.content.length < 300
+              ? "medium"
+              : "long",
       });
-
     } catch (err) {
       throw err;
     } finally {
@@ -785,7 +776,7 @@ function ArgumentsView({
         if (selectedThread.comment.id === commentId) {
           current = selectedThread.comment;
         } else {
-          current = selectedThread.replies?.find(r => r.id === commentId);
+          current = selectedThread.replies?.find((r) => r.id === commentId);
         }
       }
 
@@ -804,18 +795,20 @@ function ArgumentsView({
           likes: {
             ...c.likes,
             isLikedByCurrentUser: !wasLiked,
-            count: wasLiked ? Math.max(0, (c.likes?.count || 0) - 1) : (c.likes?.count || 0) + 1
-          }
+            count: wasLiked
+              ? Math.max(0, (c.likes?.count || 0) - 1)
+              : (c.likes?.count || 0) + 1,
+          },
         };
       };
 
       // 1. Optimistic Update
-      setArgsList(prev => prev.map(updateCommentLike));
+      setArgsList((prev) => prev.map(updateCommentLike));
       if (selectedThread) {
-        setSelectedThread(prev => ({
+        setSelectedThread((prev) => ({
           ...prev,
           comment: updateCommentLike(prev.comment),
-          replies: prev.replies?.map(updateCommentLike)
+          replies: prev.replies?.map(updateCommentLike),
         }));
       }
 
@@ -826,15 +819,14 @@ function ArgumentsView({
         await likeComment(commentId);
         analytics.sendEvent("argument_upvoted", {
           comment_id: commentId,
-          discussion_id: cardId
+          discussion_id: cardId,
         });
 
         // Track "Answer Upvoted" (Client Rule: Core Loop Event 4)
         mixpanel.trackEvent("Answer Upvoted", {
-          question_id: cardId
+          question_id: cardId,
         });
       }
-
     } catch (err) {
       console.error("Like failed", err);
       // Ideally revert state here, but omitting for simplicity as requested
@@ -849,9 +841,9 @@ function ArgumentsView({
       // Enrich fetched replies with local data (specifically parentUser) if available
       // The main list endpoint seems to return parentUser, while the replies specific endpoint might not.
       if (comment.replies && Array.isArray(comment.replies)) {
-        fetchedReplies.forEach(fetchedReply => {
+        fetchedReplies.forEach((fetchedReply) => {
           if (!fetchedReply.parentUser) {
-            const local = comment.replies.find(r => r.id === fetchedReply.id);
+            const local = comment.replies.find((r) => r.id === fetchedReply.id);
             if (local && local.parentUser) {
               fetchedReply.parentUser = local.parentUser;
             }
@@ -871,7 +863,7 @@ function ArgumentsView({
   const handleCloseThread = () => {
     setSelectedThread(null);
     // Remove threadId from URL so it doesn't re-open or persist
-    setSearchParams(prev => {
+    setSearchParams((prev) => {
       const newParams = new URLSearchParams(prev);
       newParams.delete("threadId");
       return newParams;
@@ -956,9 +948,7 @@ function ArgumentsView({
 
   // Background visible only when expanded and not dragging down from top
   const isDraggingDownFromTop =
-    isDragging &&
-    dragStateRef.current?.fromTopExpanded &&
-    currentOffset > 0;
+    isDragging && dragStateRef.current?.fromTopExpanded && currentOffset > 0;
 
   const shouldShowBg = isExpanded && !isDraggingDownFromTop;
 
@@ -977,9 +967,7 @@ function ArgumentsView({
     >
       {/* DRAGGABLE SHEET (header + comments) */}
       <div className="flex-1 relative overflow-hidden">
-        {hasVoted && (
-          <CardNavigation onNext={onNext} onPrevious={onPrevious} />
-        )}
+        {hasVoted && <CardNavigation onNext={onNext} onPrevious={onPrevious} />}
         <div
           className="absolute inset-x-0 top-0 bottom-0 min-h-full z-50"
           onTouchStart={handleTouchStart}
@@ -1010,6 +998,38 @@ function ArgumentsView({
                   : "transparent",
               }}
             >
+              {suggestedBy && (
+                <div
+                  className="flex items-center gap-1"
+                  style={{
+                    opacity: Math.max(0, 1 - expansionProgress * 4),
+                    visibility: expansionProgress > 0.25 ? "hidden" : "visible",
+                    height: expansionProgress > 0.25 ? 0 : "auto",
+                    marginBottom: expansionProgress > 0.25 ? 0 : "8px",
+                    overflow: "hidden",
+                  }}
+                >
+                  <span className="text-[#FFFFFF] font-inter font-normal text-[13px]">
+                    Suggested by
+                  </span>
+                  <div className="flex items-center gap-1">
+                    {suggestedBy.profileImageUrl ? (
+                      <img
+                        src={suggestedBy.profileImageUrl}
+                        alt=""
+                        className="w-5 h-5 rounded-[40px] object-cover border border-white/10"
+                      />
+                    ) : (
+                      <div className="w-5 h-5 rounded-[40px] bg-white/20 flex items-center justify-center text-[8px] text-white font-bold border border-white/20">
+                        {suggestedBy.name?.[0] || "U"}
+                      </div>
+                    )}
+                    <span className="text-[#FFFFFF] font-inter font-bold text-[13px]">
+                      {suggestedBy.name}
+                    </span>
+                  </div>
+                </div>
+              )}
               <h2
                 className="text-left font-inter"
                 style={{
@@ -1074,14 +1094,10 @@ function ArgumentsView({
                         alt=""
                         className="w-full mb-3"
                       />
-                      <h3
-                        className="text-center font-intro mb-1 font-semibold text-lg leading-6 text-[#212121]"
-                      >
+                      <h3 className="text-center font-intro mb-1 font-semibold text-lg leading-6 text-[#212121]">
                         Bold minds lead
                       </h3>
-                      <p
-                        className="text-center font-inter font-normal text-xs leading-none text-[#4E4E4E]"
-                      >
+                      <p className="text-center font-inter font-normal text-xs leading-none text-[#4E4E4E]">
                         Add the first argument for this stance.
                       </p>
                     </div>
@@ -1091,11 +1107,10 @@ function ArgumentsView({
                 <div className="space-y-2">
                   {visibleArgs.map((arg, index) => {
                     const selectedOptionId =
-                      arg.answer?.selectedOptionId ||
-                      arg.selectedOptionId;
+                      arg.answer?.selectedOptionId || arg.selectedOptionId;
                     const theme = getCommentTheme(
                       selectedOptionId,
-                      answerOptions
+                      answerOptions,
                     );
                     const isFirstComment = index === 0;
                     const isReported = reportedComments.has(arg.id);
@@ -1108,9 +1123,7 @@ function ArgumentsView({
                         className={`rounded-2xl p-4 z-0 ${isExpanded ? "" : "max-h-[200px] overflow-hidden"
                           }`}
                         style={{ backgroundColor: theme.bgColor }}
-                        onTouchStart={(e) =>
-                          handleCommentTouchStart(e, arg.id)
-                        }
+                        onTouchStart={(e) => handleCommentTouchStart(e, arg.id)}
                         onTouchMove={handleCommentTouchMove}
                         onTouchEnd={handleCommentTouchEnd}
                         onContextMenu={(e) =>
@@ -1135,9 +1148,13 @@ function ArgumentsView({
                               onClick={(e) => {
                                 e.stopPropagation();
                                 // Track "Click on Add Counter Argument" (Reply)
-                                import('../../utils/mixpanel').then(({ default: mixpanel }) => {
-                                  mixpanel.trackEvent("Click on \"Add Counter Argument\"");
-                                });
+                                import("../../utils/mixpanel").then(
+                                  ({ default: mixpanel }) => {
+                                    mixpanel.trackEvent(
+                                      'Click on "Add Counter Argument"',
+                                    );
+                                  },
+                                );
                                 setReplyingTo(arg);
                                 setShowOpinionForm(true);
                               }}
@@ -1247,28 +1264,28 @@ function ArgumentsView({
                           </div>
                         </div>
 
-                        {
-                          isReported && (
-                            <span className="mt-1 mb-2 self-start text-xs px-2 py-0.5 rounded-full bg-neutral-700 text-neutral-200">
-                              Reported
-                            </span>
-                          )
-                        }
+                        {isReported && (
+                          <span className="mt-1 mb-2 self-start text-xs px-2 py-0.5 rounded-full bg-neutral-700 text-neutral-200">
+                            Reported
+                          </span>
+                        )}
 
                         <div
                           ref={isFirstComment ? firstCommentTextRef : null}
                           className="text-[#212121] font-inter font-normal text-base leading-[24px] text-start [&_p]:break-words"
                           dangerouslySetInnerHTML={{
                             __html: marked.parse(
-                              (arg.parentUser ? `**@${arg.parentUser.firstName}** ` : "") +
-                              (arg.text || "")
+                              (arg.parentUser
+                                ? `**@${arg.parentUser.firstName}** `
+                                : "") + (arg.text || ""),
                             ),
                           }}
                         />
 
                         {/* Countered Text for Root Comments */}
-                        {
-                          arg.depth === 0 && arg.replies && arg.replies.length > 0 && (
+                        {arg.depth === 0 &&
+                          arg.replies &&
+                          arg.replies.length > 0 && (
                             <div
                               className="font-inter mt-2 text-start text-sm font-normal cursor-pointer hover:underline"
                               style={{ color: theme.titleColor }}
@@ -1281,8 +1298,11 @@ function ArgumentsView({
                                 const uniqueNames = [
                                   ...new Set(
                                     arg.replies
-                                      .map((r) => r.user?.firstName || r.author || "")
-                                      .filter(Boolean)
+                                      .map(
+                                        (r) =>
+                                          r.user?.firstName || r.author || "",
+                                      )
+                                      .filter(Boolean),
                                   ),
                                 ];
                                 const count = uniqueNames.length;
@@ -1290,7 +1310,9 @@ function ArgumentsView({
 
                                 let text = "";
                                 if (count <= 3) {
-                                  text = uniqueNames.join(", ").replace(/, ([^,]*)$/, " and $1");
+                                  text = uniqueNames
+                                    .join(", ")
+                                    .replace(/, ([^,]*)$/, " and $1");
                                 } else {
                                   // "Rohit and 3 others" style as requested for overflow
                                   text = `${uniqueNames[0]} and ${count - 1} others`;
@@ -1298,44 +1320,42 @@ function ArgumentsView({
                                 return `${text} countered`;
                               })()}
                             </div>
-                          )
-                        }
+                          )}
 
                         {/* Reply Link */}
-                        {
-                          arg.parentUser && (
-                            <div
-                              className="flex items-center gap-2 mt-2 cursor-pointer w-fit"
-                              style={{
-                                color:
-                                  theme.bgColor === "#FCF9CF"
-                                    ? "#776F08" // Yellow theme text
-                                    : "#9105C6", // Purple theme text
-                              }}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (arg._rootComment) {
-                                  handleOpenThread(arg._rootComment);
-                                }
-                              }}
-                            >
-                              <ReplyLinkIcon
-                                width={16}
-                                height={16}
-                                fill={
-                                  theme.bgColor === "#FCF9CF"
-                                    ? "#776F08"
-                                    : "#9105C6"
-                                }
-                              />
-                              <span
-                                className="font-inter font-normal text-[14px] leading-[20px]"
-                              >
-                                to {arg._rootComment?.user?.firstName || arg._rootComment?.author || arg.parentUser?.firstName}
-                              </span>
-                            </div>
-                          )
-                        }
+                        {arg.parentUser && (
+                          <div
+                            className="flex items-center gap-2 mt-2 cursor-pointer w-fit"
+                            style={{
+                              color:
+                                theme.bgColor === "#FCF9CF"
+                                  ? "#776F08" // Yellow theme text
+                                  : "#9105C6", // Purple theme text
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (arg._rootComment) {
+                                handleOpenThread(arg._rootComment);
+                              }
+                            }}
+                          >
+                            <ReplyLinkIcon
+                              width={16}
+                              height={16}
+                              fill={
+                                theme.bgColor === "#FCF9CF"
+                                  ? "#776F08"
+                                  : "#9105C6"
+                              }
+                            />
+                            <span className="font-inter font-normal text-[14px] leading-[20px]">
+                              to{" "}
+                              {arg._rootComment?.user?.firstName ||
+                                arg._rootComment?.author ||
+                                arg.parentUser?.firstName}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     );
                   })}
@@ -1354,11 +1374,10 @@ function ArgumentsView({
       </div>
 
       {/* Context menu overlay */}
-      {
-        contextMenu.open &&
+      {contextMenu.open &&
         (() => {
           const selectedComment = argsList.find(
-            (arg) => arg.id === contextMenu.commentId
+            (arg) => arg.id === contextMenu.commentId,
           );
           const ownerId =
             selectedComment?.user?.id ||
@@ -1390,9 +1409,13 @@ function ArgumentsView({
                   className="block w-full text-left py-1.5 text-[#111827]"
                   onClick={() => {
                     // Track "Click on Report" (Comment)
-                    import('../../utils/mixpanel').then(({ default: mixpanel }) => {
-                      mixpanel.trackEvent("Click on Report", { type: "comment" });
-                    });
+                    import("../../utils/mixpanel").then(
+                      ({ default: mixpanel }) => {
+                        mixpanel.trackEvent("Click on Report", {
+                          type: "comment",
+                        });
+                      },
+                    );
                     handleReportComment();
                   }}
                 >
@@ -1401,8 +1424,7 @@ function ArgumentsView({
               </div>
             </div>
           );
-        })()
-      }
+        })()}
 
       {/* Delete Confirmation Modal */}
       <ConfirmDeleteModal
@@ -1497,8 +1519,8 @@ function ArgumentsView({
             }}
             onClick={() => {
               // Track "Click on Add Argument"
-              import('../../utils/mixpanel').then(({ default: mixpanel }) => {
-                mixpanel.trackEvent("Click on \"Add Argument\"");
+              import("../../utils/mixpanel").then(({ default: mixpanel }) => {
+                mixpanel.trackEvent('Click on "Add Argument"');
               });
               setShowOpinionForm(true);
             }}
@@ -1529,119 +1551,121 @@ function ArgumentsView({
       </div>
 
       {/* Opinion Form Bottom Sheet */}
-      {
-        (showOpinionForm || isClosingForm) && (
+      {(showOpinionForm || isClosingForm) && (
+        <div
+          className="fixed inset-0 z-[200] flex items-end"
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !isClosingForm) {
+              handleCloseForm();
+            }
+          }}
+        >
+          {/* Backdrop */}
           <div
-            className="fixed inset-0 z-[200] flex items-end"
-            onClick={(e) => {
-              if (e.target === e.currentTarget && !isClosingForm) {
+            className="absolute max-w-[480px] mx-auto inset-0 bg-black/50 transition-opacity duration-300 ease-out"
+            style={{
+              opacity: isClosingForm ? 0 : 1,
+            }}
+            onClick={() => {
+              if (!isClosingForm) {
                 handleCloseForm();
               }
             }}
-          >
-            {/* Backdrop */}
-            <div
-              className="absolute max-w-[480px] mx-auto inset-0 bg-black/50 transition-opacity duration-300 ease-out"
-              style={{
-                opacity: isClosingForm ? 0 : 1,
-              }}
-              onClick={() => {
-                if (!isClosingForm) {
-                  handleCloseForm();
-                }
-              }}
-            />
+          />
 
-            {/* Bottom Sheet */}
-            <div
-              className="relative w-full max-w-[480px] mx-auto bg-[#121212] rounded-t-2xl shadow-2xl"
-              style={{
-                animation: isClosingForm
-                  ? "slideDown 0.3s ease-out forwards"
-                  : "slideUp 0.3s ease-out forwards",
-              }}
-              onClick={(e) => {
-                e.stopPropagation();
-              }}
-            >
-              <div className="px-3 pt-4 pb-6">
-                <OpinionForm
-                  onAddOpinion={handleAddOpinion}
-                  placeholder={
-                    replyingTo
-                      ? "your counter..."
-                      : "Add your opinion..."
-                  }
-                  autoFocus={true}
-                  initialValue={
-                    replyingTo
-                      ? `<strong>@${replyingTo.user?.firstName || replyingTo.author || "User"}</strong><span style="font-weight: 400;"> </span>`
-                      : ""
-                  }
-                />
-              </div>
+          {/* Bottom Sheet */}
+          <div
+            className="relative w-full max-w-[480px] mx-auto bg-[#121212] rounded-t-2xl shadow-2xl"
+            style={{
+              animation: isClosingForm
+                ? "slideDown 0.3s ease-out forwards"
+                : "slideUp 0.3s ease-out forwards",
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+          >
+            <div className="px-3 pt-4 pb-6">
+              <OpinionForm
+                onAddOpinion={handleAddOpinion}
+                placeholder={
+                  replyingTo ? "your counter..." : "Add your opinion..."
+                }
+                autoFocus={true}
+                initialValue={
+                  replyingTo
+                    ? `<strong>@${replyingTo.user?.firstName || replyingTo.author || "User"}</strong><span style="font-weight: 400;"> </span>`
+                    : ""
+                }
+              />
             </div>
           </div>
-        )
-      }
+        </div>
+      )}
 
       {/* ThreadView rendered in a Portal to avoid parent transforms/clipping */}
-      {selectedThread && createPortal(
-        <ThreadView
-          selectedThread={selectedThread}
-          onClose={handleCloseThread}
-          question={question}
-          answerOptions={answerOptions}
-          userChoice={userChoice}
-          onPostReply={async (text, targetComment) => {
-            const newReply = await postReplyToComment(targetComment.id, text);
-            if (newReply) {
-              // Optimistic update: manually prepend the mention so it shows immediately
-              // (The backend/fetch might do this later, but we need it now)
-              if (targetComment.user?.firstName) {
-                newReply.text = `**@${targetComment.user.firstName}** ${newReply.text}`;
-              }
-              // Also attach parentUser for correct avatar display
-              newReply.parentUser = targetComment.user;
-
-              // Update local state for immediate feedback
-              setArgsList((prev) => {
-                const updated = [...prev];
-                // Find root comment index
-                const rootIdx = updated.findIndex((c) => c.id === (targetComment._rootComment?.id || targetComment.id));
-
-                if (rootIdx !== -1) {
-                  // Arguments list structure: root comment -> replies
-                  // We need to insert the new reply into the flat list after the last reply of this thread
-                  // Or just simplistic: append to end of replies for that root (if they are grouped)
-                  // BUT our argsList is FLAT. We need to insert it at the correct position.
-                  // For simplicity in this view, we might just append it after the parent or at the end of its block?
-
-                  // Actually, to keep it simple and safe: Re-fetch or let ThreadView handle its internal list.
-                  // ThreadView displays 'selectedThread.replies'. We need to update that too.
-                  return updated;
+      {selectedThread &&
+        createPortal(
+          <ThreadView
+            selectedThread={selectedThread}
+            onClose={handleCloseThread}
+            question={question}
+            suggestedBy={suggestedBy}
+            answerOptions={answerOptions}
+            userChoice={userChoice}
+            onPostReply={async (text, targetComment) => {
+              const newReply = await postReplyToComment(targetComment.id, text);
+              if (newReply) {
+                // Optimistic update: manually prepend the mention so it shows immediately
+                // (The backend/fetch might do this later, but we need it now)
+                if (targetComment.user?.firstName) {
+                  newReply.text = `**@${targetComment.user.firstName}** ${newReply.text}`;
                 }
-                return updated;
-              });
+                // Also attach parentUser for correct avatar display
+                newReply.parentUser = targetComment.user;
 
-              // Update the selectedThread state so the new reply shows up instantly in ThreadView
-              setSelectedThread((prev) => {
-                if (!prev) return null;
-                return {
-                  ...prev,
-                  replies: [...(prev.replies || []), newReply]
-                };
-              });
+                // Update local state for immediate feedback
+                setArgsList((prev) => {
+                  const updated = [...prev];
+                  // Find root comment index
+                  const rootIdx = updated.findIndex(
+                    (c) =>
+                      c.id ===
+                      (targetComment._rootComment?.id || targetComment.id),
+                  );
 
-              onNewComment?.();
-            }
-          }}
-          onLike={handleLike}
-          onNext={onNext}
-          onPrevious={onPrevious}
-        />,
-        document.body
-      )}
+                  if (rootIdx !== -1) {
+                    // Arguments list structure: root comment -> replies
+                    // We need to insert the new reply into the flat list after the last reply of this thread
+                    // Or just simplistic: append to end of replies for that root (if they are grouped)
+                    // BUT our argsList is FLAT. We need to insert it at the correct position.
+                    // For simplicity in this view, we might just append it after the parent or at the end of its block?
+
+                    // Actually, to keep it simple and safe: Re-fetch or let ThreadView handle its internal list.
+                    // ThreadView displays 'selectedThread.replies'. We need to update that too.
+                    return updated;
+                  }
+                  return updated;
+                });
+
+                // Update the selectedThread state so the new reply shows up instantly in ThreadView
+                setSelectedThread((prev) => {
+                  if (!prev) return null;
+                  return {
+                    ...prev,
+                    replies: [...(prev.replies || []), newReply],
+                  };
+                });
+
+                onNewComment?.();
+              }
+            }}
+            onLike={handleLike}
+            onNext={onNext}
+            onPrevious={onPrevious}
+          />,
+          document.body,
+        )}
 
       <style>{`
         @keyframes slideUp {
@@ -1653,7 +1677,7 @@ function ArgumentsView({
           to { transform: translateY(100%); }
         }
       `}</style>
-    </div >
+    </div>
   );
 }
 
