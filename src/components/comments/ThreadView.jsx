@@ -132,7 +132,7 @@ const ThreadView = ({
               color: getCommentTheme(mainComment.answer?.selectedOptionId, answerOptions).contextTextColor
             }}
           >
-            {mainComment.user?.firstName || "User"}’s argument
+            {mainComment.user?.firstName || "User"}’s opinion
           </p>
           <div
             className="font-inter font-normal text-base leading-[24px] text-start [&_p]:break-words"

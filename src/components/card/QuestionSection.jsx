@@ -234,7 +234,7 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle, onNext, onPre
           </div>
 
           <div className="gap-2 self-center my-4 font-inter font-medium text-base z-10 text-white text-center">
-            {totalStances} Stances • {commentCount} Arguments
+            {totalStances} Stances • {commentCount} Opinions
           </div>
         </div>
       )}

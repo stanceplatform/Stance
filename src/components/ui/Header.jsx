@@ -18,13 +18,79 @@ const Header = ({
   const menuRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
-  const { logout, user, isAuthenticated } = useAuth()
+  const { logout, user, isAuthenticated, fetchMe } = useAuth();
   const { questionId } = useCurrentQuestion();
+  const fileInputRef = useRef(null);
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      const compressedBlob = await resizeImage(file);
+      // Create a new File from the blob to preserve original name if possible, or just pass blob
+      const fileToUpload = new File([compressedBlob], file.name, { type: "image/jpeg" });
+
+      await apiService.updateProfilePicture(fileToUpload);
+      await fetchMe();
+    } catch (error) {
+      console.error("Failed to update profile picture", error);
+      alert("Failed to update profile picture.");
+    }
+
+    // Reset input so same file can be selected again if needed
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const resizeImage = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target.result;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 800;
+          const MAX_HEIGHT = 800;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Use toBlob instead of across toDataURL for efficient binary handling
+          canvas.toBlob((blob) => {
+            if (blob) resolve(blob);
+            else reject(new Error("Canvas to Blob failed"));
+          }, 'image/jpeg', 0.8);
+        };
+        img.onerror = (err) => reject(err);
+      };
+      reader.onerror = (err) => reject(err);
+    });
+  };
+
 
   // Get questionid from URL query params
   const questionIdFromUrl = new URLSearchParams(location.search).get('questionid');
 
   const [unreadCount, setUnreadCount] = useState(0);
+
   // Use a cache key based on the category (e.g., 'cricket') or 'global'
   const pathParts = location.pathname.split('/').filter(Boolean);
   const currentCategory = pathParts[0] && ALLOWED_CATEGORIES.includes(pathParts[0]) ? pathParts[0] : 'global';
@@ -159,7 +225,19 @@ const Header = ({
                   className="relative w-8 h-8 rounded-full bg-[#F0E224] text-[#9105C6] flex items-center justify-center font-intro font-bold text-sm shadow-sm hover:scale-105 transition-transform"
                   title={topUser ? `Leaderboard Leader: ${topUser.fullName || topUser.initials}` : "Leaderboard"}
                 >
-                  {topUser?.initials || initials}
+                  {(() => {
+                    const isMe = topUser?.userId === user?.id || topUser?.id === user?.id;
+                    const pic = isMe ? (user?.profilePicture || topUser?.profilePicture || topUser?.profilePic) : (topUser?.profilePicture || topUser?.profilePic);
+                    return pic ? (
+                      <img
+                        src={pic}
+                        alt={topUser.fullName}
+                        className="w-full h-full rounded-full object-cover"
+                      />
+                    ) : (
+                      topUser?.initials || initials
+                    );
+                  })()}
                   <span className="absolute -top-1 -right-1">
                     <CrownIcon />
                   </span>
@@ -247,12 +325,33 @@ const Header = ({
                   >
                     {/* Profile header */}
                     <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-200">
-                      <div className="h-10 w-10 rounded-full bg-[#9105C6] text-[#F0E224] font-intro flex items-center justify-center font-semibold">
-                        {initials}
-                      </div>
+                      {user?.profilePicture ? (
+                        <img
+                          src={user.profilePicture}
+                          alt="Profile"
+                          className="h-10 w-10 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="h-10 w-10 rounded-full bg-[#9105C6] text-[#F0E224] font-intro flex items-center justify-center font-semibold">
+                          {initials}
+                        </div>
+                      )}
                       <div className="flex flex-col items-start">
                         <span className="font-medium text-[#212121]">{user?.firstName} {user?.lastName}</span>
                         <span className="text-sm text-[#707070]">{user?.email}</span>
+                        <button
+                          onClick={() => fileInputRef.current?.click()}
+                          className="text-[12px] text-[#9105C6] font-semibold underline mt-0.5 hover:text-[#7A0499]"
+                        >
+                          {user?.profilePicture ? 'Update Profile Picture' : 'Add Profile Picture'}
+                        </button>
+                        <input
+                          type="file"
+                          ref={fileInputRef}
+                          onChange={handleFileChange}
+                          className="hidden"
+                          accept="image/*"
+                        />
                       </div>
                     </div>
 

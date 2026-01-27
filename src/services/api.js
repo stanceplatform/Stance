@@ -50,13 +50,21 @@ class ApiService {
   // ===== core fetch with auto refresh-on-401 =====
   async request(endpoint, options = {}) {
     const url = `${this.baseURL}${endpoint}`;
+
+    // START CHANGE: Handle headers carefully for multipart
+    const baseHeaders = this.getHeaders();
+    if (options.isMultipart) {
+      delete baseHeaders['Content-Type'];
+    }
+
     const config = {
       ...options,
       headers: {
-        ...this.getHeaders(),
+        ...baseHeaders,
         ...(options.headers || {}),
       },
     };
+    // END CHANGE
 
     try {
       let response = await fetch(url, config);
@@ -376,6 +384,22 @@ class ApiService {
     return this.request('/auth/college', {
       method: 'PUT',
       body: JSON.stringify({ collegeId }),
+    });
+  }
+
+  // Modified to handle multipart/form-data
+  async updateProfilePicture(fileObj) {
+    const formData = new FormData();
+    formData.append("file", fileObj);
+
+    // We pass FormData directly as body. 
+    // IMPORTANT: When using fetch with FormData, do NOT set Content-Type header manually.
+    // The browser will set it to multipart/form-data with the correct boundary.
+    return this.request('/users/profile-pic', {
+      method: 'POST',
+      body: formData,
+      // We'll signal our request method to skip default JSON headers
+      isMultipart: true
     });
   }
 

@@ -130,6 +130,8 @@ const Leaderboard = () => {
               color: assignedColor,
               crown: user.rank === 1,
               isCurrentUser: isMe,
+              // Fallback to currentUser profile picture if it's "me" and API is stale/missing field
+              profilePicture: isMe ? (currentUser?.profilePicture || user.profilePicture || user.profilePic) : (user.profilePicture || user.profilePic),
             };
           });
           setLeaderboardData(processed);
@@ -185,9 +187,17 @@ const Leaderboard = () => {
 
                   {/* Avatar */}
                   <div className="relative mr-4 shrink-0">
-                    <div className="w-12 h-12 rounded-full flex items-center justify-center bg-[#9105C6] text-[#F0E224] text-[20px] leading-[28px] font-semibold font-intro">
-                      {user.initials}
-                    </div>
+                    {user.profilePicture ? (
+                      <img
+                        src={user.profilePicture}
+                        alt={user.name}
+                        className="w-12 h-12 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 rounded-full flex items-center justify-center bg-[#9105C6] text-[#F0E224] text-[20px] leading-[28px] font-semibold font-intro">
+                        {user.initials}
+                      </div>
+                    )}
                     {user.crown && (
                       <span className="absolute -top-0 -right-0">
                         <CrownIcon />
@@ -225,7 +235,7 @@ const Leaderboard = () => {
       <div className="flex-none flex flex-col  px-6 pt-6 pb-8 text-start bg-white rounded-t-[48px] w-full">
         <h2 className="text-[18px] font-intro font-bold text-[#121212] mb-1">Want to reach the top?</h2>
         <p className="text-[15px] font-semibold font-inter text-[#121212] opacity-80 mb-3">
-          Stay consistent, post strong arguments, upvote others, and earn upvotes to climb the leaderboard.
+          Stay consistent, post strong opinions, upvote others, and earn upvotes to climb the leaderboard.
         </p>
 
         <CTAButton

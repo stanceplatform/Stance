@@ -18,11 +18,18 @@ export default function NotificationItem({ notification }) {
   // New fields from backend
   const {
     type, // We need 'type' for the tracking
-    html: contentHtml = "",
+    html = "",
     clickable,
     isUnread,
     link = "",
   } = notification || {};
+
+  // Transform "arguments" to "opinions" for consistency
+  const contentHtml = html
+    .replace(/arguments/g, "opinions")
+    .replace(/Arguments/g, "Opinions")
+    .replace(/argument/g, "opinion")
+    .replace(/Argument/g, "Opinion");
 
   // Keep avatar logic but leave initials blank (still show purple circle)
   const initials = "S";

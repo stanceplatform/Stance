@@ -890,7 +890,7 @@ function ArgumentsView({
       onRemoveComment?.();
       setShowDeleteConfirm(false);
       setCommentIdToDelete(null);
-      toast.success("Argument deleted.");
+      toast.success("Opinion deleted.");
     } catch (err) {
       console.error("Delete failed", err);
       toast.error("Failed to delete. Please try again.");
@@ -1061,7 +1061,7 @@ function ArgumentsView({
                       letterSpacing: "0%",
                     }}
                   >
-                    {stancesCount} Stances • {argumentsCount} Arguments
+                    {stancesCount} Stances • {argumentsCount} Opinions
                   </span>
                 </div>
               </div>
@@ -1098,7 +1098,7 @@ function ArgumentsView({
                         Bold minds lead
                       </h3>
                       <p className="text-center font-inter font-normal text-xs leading-none text-[#4E4E4E]">
-                        Add the first argument for this stance.
+                        Add the first opinion for this stance.
                       </p>
                     </div>
                   </div>
@@ -1151,7 +1151,7 @@ function ArgumentsView({
                                 import("../../utils/mixpanel").then(
                                   ({ default: mixpanel }) => {
                                     mixpanel.trackEvent(
-                                      'Click on "Add Counter Argument"',
+                                      'Click on "Add Counter Opinion"',
                                     );
                                   },
                                 );
@@ -1520,12 +1520,12 @@ function ArgumentsView({
             onClick={() => {
               // Track "Click on Add Argument"
               import("../../utils/mixpanel").then(({ default: mixpanel }) => {
-                mixpanel.trackEvent('Click on "Add Argument"');
+                mixpanel.trackEvent('Click on "Add Opinion"');
               });
               setShowOpinionForm(true);
             }}
           >
-            Add argument
+            Add Your Opinion
           </button>
 
           <button
