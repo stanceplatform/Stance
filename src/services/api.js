@@ -302,24 +302,45 @@ class ApiService {
 
   // Waitlist / Invites
   async requestInvite(email) {
-    return this.request('/waitlist/join', { method: 'POST', body: JSON.stringify({ email, instituteName: 'NITK' }) });
+    const pathParts = window.location.pathname.split('/').filter(Boolean);
+    const category = pathParts.length > 0 && ALLOWED_CATEGORIES.includes(pathParts[0]) ? pathParts[0] : null;
+
+    const payload = category
+      ? { email, category }
+      : { category: 'regular', email, instituteName: 'NITK' };
+
+    return this.request('/waitlist/join', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
   }
   async sendInvite(email) {
     return this.request('/waitlist/invite', { method: 'POST', body: JSON.stringify({ email }) });
   }
   // services/api.js (only the completeSignup method shown)
   async completeSignup({ token, name, collegeId, alternateEmail, password, confirmPassword, tags }) {
+    const pathParts = window.location.pathname.split('/').filter(Boolean);
+    const category = pathParts.length > 0 && ALLOWED_CATEGORIES.includes(pathParts[0]) ? pathParts[0] : null;
+
+    const payload = {
+      token,
+      name,
+      password,
+      confirmPassword,
+      tags,
+    };
+
+    if (category) {
+      payload.category = category;
+    } else {
+      payload.category = 'regular';
+      payload.collegeId = collegeId;
+      payload.alternateEmail = alternateEmail;
+    }
+
     return this.request('/waitlist/complete-signup', {
       method: 'POST',
-      body: JSON.stringify({
-        token,
-        name,
-        collegeId,
-        alternateEmail,
-        password,
-        confirmPassword,
-        tags,
-      }),
+      body: JSON.stringify(payload),
     });
   }
 
