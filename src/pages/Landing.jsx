@@ -82,9 +82,13 @@ const Landing = () => {
                 </div>
 
                 {/* Show Sign up button only if on the main /auth route (no category) */}
-                {location.pathname === '/auth' && (
+                {location.pathname.endsWith('/auth') && (
                     <div>
-                        <Link to="/request-invite" className="no-underline">
+                        <Link
+                            to={location.pathname.includes('/cricket') ? "/cricket/request-invite" : "/request-invite"}
+                            state={{ from: location.pathname }}
+                            className="no-underline"
+                        >
                             <CTAButton
                                 as="div"
                                 variant="secondary"
@@ -99,7 +103,7 @@ const Landing = () => {
 
                 <div className="pt-1 text-center">
                     <Link
-                        to="/forgot-password"
+                        to={location.pathname.includes('/cricket') ? "/cricket/forgot-password" : "/forgot-password"}
                         onClick={() => {
                             // Track "Click on Forget Password"
                             import('../utils/mixpanel').then(({ default: mixpanel }) => {

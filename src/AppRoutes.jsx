@@ -96,7 +96,23 @@ const AppRoutes = () => {
                             }
                         />
                         <Route
+                            path="/:category/request-invite"
+                            element={
+                                <GuestRoute>
+                                    <RequestInvite />
+                                </GuestRoute>
+                            }
+                        />
+                        <Route
                             path="/signup"
+                            element={
+                                <GuestRoute>
+                                    <Signup />
+                                </GuestRoute>
+                            }
+                        />
+                        <Route
+                            path="/:category/signup"
                             element={
                                 <GuestRoute>
                                     <Signup />
@@ -190,7 +206,23 @@ const AppRoutes = () => {
                             }
                         />
                         <Route
+                            path="/:category/forgot-password"
+                            element={
+                                <GuestRoute>
+                                    <ForgotPassword />
+                                </GuestRoute>
+                            }
+                        />
+                        <Route
                             path="/reset-password"
+                            element={
+                                <GuestRoute>
+                                    <ResetPassword />
+                                </GuestRoute>
+                            }
+                        />
+                        <Route
+                            path="/:category/reset-password"
                             element={
                                 <GuestRoute>
                                     <ResetPassword />

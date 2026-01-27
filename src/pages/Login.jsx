@@ -1,6 +1,6 @@
 // pages/Login.jsx
 import React, { useState } from 'react';
-import { useNavigate, Link, useSearchParams } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams, useLocation } from 'react-router-dom';
 import AuthShell from '../components/layouts/AuthShell';
 import Logo from '../components/ui/Logo';
 import CTAButton from '../components/ui/CTAButton';
@@ -14,6 +14,7 @@ import mixpanel from '../utils/mixpanel'; // Import Mixpanel
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const [form, setForm] = useState({ usernameOrEmail: '', password: '' });
   const [err, setErr] = useState('');
@@ -135,7 +136,7 @@ const Login = () => {
 
         <div className="mt-4 text-center">
           <Link
-            to="/forgot-password"
+            to={location.pathname.includes('/cricket') ? "/cricket/forgot-password" : "/forgot-password"}
             onClick={() => {
               // Track "Click on Forget Password"
               mixpanel.trackEvent("Click on Forget Password");

@@ -1,6 +1,6 @@
 // pages/Signup.jsx
 import React, { useMemo, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import CTAButton from "../components/ui/CTAButton";
 import apiService from "../services/api";
 import TextField from "../components/ui/TextField";
@@ -12,8 +12,11 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function Signup() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [params] = useSearchParams();
   const { authenticateWithTokens } = useAuth();
+
+  const isCricket = useMemo(() => location.pathname.includes('/cricket'), [location.pathname]);
 
   // ----- Prefill from invite link -----
   const tokenFromLink = useMemo(() => params.get("token") || "", [params]);
@@ -33,10 +36,13 @@ export default function Signup() {
   // Should we show the College field?
   // Show only if we have a non-empty name OR a valid id not equal to "-1"
   const showCollege = useMemo(() => {
+    // If cricket context, hide college regardless
+    if (isCricket) return false;
+
     if (instituteNameFromLink) return true;
     if (instituteIdFromLink && instituteIdFromLink !== "-1") return true;
     return false;
-  }, [instituteNameFromLink, instituteIdFromLink]);
+  }, [instituteNameFromLink, instituteIdFromLink, isCricket]);
 
   // What to display in the "College" field (when shown)
   const collegeDisplay = useMemo(() => {
@@ -73,8 +79,9 @@ export default function Signup() {
     if (!form.name.trim()) {
       errors.name = "Please enter your name.";
     }
+
     // College is required ONLY when it is shown
-    if (showCollege) {
+    if (showCollege && !isCricket) {
       if (!form.college.trim()) {
         errors.college = "College is required.";
       }
@@ -82,7 +89,8 @@ export default function Signup() {
         errors.college = "Missing valid collegeId in invite link.";
       }
     }
-    if (!form.alternateEmail || !emailRegex.test(form.alternateEmail)) {
+    // Alternate email validation - skip if cricket
+    if (!isCricket && (!form.alternateEmail || !emailRegex.test(form.alternateEmail))) {
       errors.alternateEmail = "Please enter a valid alternate email.";
     }
     if (!form.password) {
@@ -124,12 +132,13 @@ export default function Signup() {
       const payload = {
         token: tokenFromLink,
         name: form.name.trim(),
-        alternateEmail: form.alternateEmail.trim(),
+        alternateEmail: isCricket ? form.studentEmail : form.alternateEmail.trim(),
         password: form.password,
         confirmPassword: form.confirmPassword,
-        ...(showCollege && instituteIdFromLink && instituteIdFromLink !== "-1"
+        ...(showCollege && instituteIdFromLink && instituteIdFromLink !== "-1" && !isCricket
           ? { collegeId: String(instituteIdFromLink) }
-          : {}),
+          : { collegeId: null }),
+        tags: isCricket ? [{ tag_name: 'cricket', tag_type: 'INTEREST' }] : [],
       };
 
       const res = await apiService.completeSignup(payload);
@@ -223,20 +232,25 @@ export default function Signup() {
               </>
             )}
 
-            <div className="mt-4" />
-            <TextField
-              id="alternateEmail"
-              label="Alternate email*"
-              name="alternateEmail"
-              type="email"
-              inputMode="email"
-              autoComplete="email"
-              placeholder="Enter email"
-              value={form.alternateEmail}
-              onChange={onChange}
-              inputClass="bg-white text-[#121212] placeholder:text-gray-500"
-              error={fieldErrors.alternateEmail}
-            />
+            {/* Alternate Email (hide if cricket) */}
+            {!isCricket && (
+              <>
+                <div className="mt-4" />
+                <TextField
+                  id="alternateEmail"
+                  label="Alternate email*"
+                  name="alternateEmail"
+                  type="email"
+                  inputMode="email"
+                  autoComplete="email"
+                  placeholder="Enter email"
+                  value={form.alternateEmail}
+                  onChange={onChange}
+                  inputClass="bg-white text-[#121212] placeholder:text-gray-500"
+                  error={fieldErrors.alternateEmail}
+                />
+              </>
+            )}
 
             <div className="mt-4" />
             <TextField

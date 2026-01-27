@@ -300,7 +300,7 @@ class ApiService {
     return this.request('/waitlist/invite', { method: 'POST', body: JSON.stringify({ email }) });
   }
   // services/api.js (only the completeSignup method shown)
-  async completeSignup({ token, name, collegeId, alternateEmail, password, confirmPassword }) {
+  async completeSignup({ token, name, collegeId, alternateEmail, password, confirmPassword, tags }) {
     return this.request('/waitlist/complete-signup', {
       method: 'POST',
       body: JSON.stringify({
@@ -310,6 +310,7 @@ class ApiService {
         alternateEmail,
         password,
         confirmPassword,
+        tags,
       }),
     });
   }

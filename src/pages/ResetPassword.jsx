@@ -37,13 +37,21 @@ export default function ResetPassword() {
     try {
       const res = await apiService.resetPassword(token, pw);
       setMsg(res?.message || 'Password updated successfully.');
-      setTimeout(() => navigate('/login', { replace: true }), 1500);
+      // Determine redirect path
+      const pathParts = window.location.pathname.split('/').filter(Boolean);
+      const isCricket = pathParts[0] === 'cricket' || pathParts.includes('cricket');
+      const loginPath = isCricket ? '/cricket/login' : '/login';
+      setTimeout(() => navigate(loginPath, { replace: true }), 1500);
     } catch (error) {
       setErr(error.data?.message || error.data?.error || error.message || 'Failed to reset password. Try again.');
     } finally {
       setLoading(false);
     }
   };
+
+  const pathParts = window.location.pathname.split('/').filter(Boolean);
+  const isCricket = pathParts[0] === 'cricket' || pathParts.includes('cricket');
+  const forgotPath = isCricket ? '/cricket/forgot-password' : '/forgot-password';
 
   return (
     <AuthShell
@@ -70,7 +78,7 @@ export default function ResetPassword() {
         <div className="w-full max-w-[360px] pb-20">
           <p className="text-white/90 text-[15px]">
             Reset token is missing or invalid. Go back to{' '}
-            <Link to="/forgot-password" className="underline">Forgot Password</Link>.
+            <Link to={forgotPath} className="underline">Forgot Password</Link>.
           </p>
         </div>
       ) : (
