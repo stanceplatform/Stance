@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import ImageCropper from "./ImageCropper";
 import CrownIcon from "./CrownIcon";
 import { useAuth } from "../../context/AuthContext";
 import { useCurrentQuestion } from "../../context/CurrentQuestionContext";
@@ -22,67 +23,40 @@ const Header = ({
   const { questionId } = useCurrentQuestion();
   const fileInputRef = useRef(null);
 
-  const handleFileChange = async (e) => {
+  const [cropperOpen, setCropperOpen] = useState(false);
+  const [imageToCrop, setImageToCrop] = useState(null);
+
+  const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    try {
-      const compressedBlob = await resizeImage(file);
-      // Create a new File from the blob to preserve original name if possible, or just pass blob
-      const fileToUpload = new File([compressedBlob], file.name, { type: "image/jpeg" });
+    const reader = new FileReader();
+    reader.addEventListener('load', () => {
+      setImageToCrop(reader.result);
+      setCropperOpen(true);
+    });
+    reader.readAsDataURL(file);
 
+    // Reset input
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handleCropSave = async (croppedBlob) => {
+    try {
+      const fileToUpload = new File([croppedBlob], "profile.jpg", { type: "image/jpeg" });
       await apiService.updateProfilePicture(fileToUpload);
       await fetchMe();
+      setCropperOpen(false);
+      setImageToCrop(null);
     } catch (error) {
       console.error("Failed to update profile picture", error);
       alert("Failed to update profile picture.");
     }
-
-    // Reset input so same file can be selected again if needed
-    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  const resizeImage = (file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = (event) => {
-        const img = new Image();
-        img.src = event.target.result;
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          const MAX_WIDTH = 800;
-          const MAX_HEIGHT = 800;
-          let width = img.width;
-          let height = img.height;
-
-          if (width > height) {
-            if (width > MAX_WIDTH) {
-              height *= MAX_WIDTH / width;
-              width = MAX_WIDTH;
-            }
-          } else {
-            if (height > MAX_HEIGHT) {
-              width *= MAX_HEIGHT / height;
-              height = MAX_HEIGHT;
-            }
-          }
-
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, width, height);
-
-          // Use toBlob instead of across toDataURL for efficient binary handling
-          canvas.toBlob((blob) => {
-            if (blob) resolve(blob);
-            else reject(new Error("Canvas to Blob failed"));
-          }, 'image/jpeg', 0.8);
-        };
-        img.onerror = (err) => reject(err);
-      };
-      reader.onerror = (err) => reject(err);
-    });
+  const handleCropCancel = () => {
+    setCropperOpen(false);
+    setImageToCrop(null);
   };
 
 
@@ -518,6 +492,14 @@ const Header = ({
           )}
         </div>
       </div>
+      {cropperOpen && imageToCrop && (
+        <ImageCropper
+          imageSrc={imageToCrop}
+          onCancel={handleCropCancel}
+          onSave={handleCropSave}
+          circular={true}
+        />
+      )}
     </header>
   );
 };
