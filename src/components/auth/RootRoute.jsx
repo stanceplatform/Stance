@@ -16,9 +16,12 @@ const RootRoute = ({ children }) => {
     return <div className="text-center text-white">Checking session…</div>;
   }
 
+  // Check if user has 'cricket' interest
+  const isCricketUser = user?.tags?.some(t => t.tag_name === 'cricket');
+
   // If authenticated but collegeSelected is false or missing, redirect to select-college
-  // Preserve questionid in sessionStorage if it exists in URL
-  if (isAuthenticated && user && user.collegeSelected !== true && location.pathname === '/') {
+  // Skips redirect if user is associated with cricket
+  if (isAuthenticated && user && user.collegeSelected !== true && location.pathname === '/' && !isCricketUser) {
     const questionid = new URLSearchParams(location.search).get('questionid');
     if (questionid) {
       sessionStorage.setItem('redirectQuestionId', questionid);
