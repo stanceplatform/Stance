@@ -132,7 +132,7 @@ export default function Signup() {
       const payload = {
         token: tokenFromLink,
         name: form.name.trim(),
-        alternateEmail: isCricket ? form.studentEmail : form.alternateEmail.trim(),
+        alternateEmail: isCricket ? emailFromLink : form.alternateEmail.trim(),
         password: form.password,
         confirmPassword: form.confirmPassword,
         ...(showCollege && instituteIdFromLink && instituteIdFromLink !== "-1" && !isCricket

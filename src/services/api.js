@@ -332,6 +332,7 @@ class ApiService {
 
     if (category) {
       payload.category = category;
+      payload.alternateEmail = alternateEmail;
     } else {
       payload.category = 'regular';
       payload.collegeId = collegeId;
