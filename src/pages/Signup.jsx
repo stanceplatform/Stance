@@ -150,7 +150,7 @@ export default function Signup() {
         });
         analytics.trackEvent('Auth', 'Signup Success');
         setOk("Signup completed!");
-        navigate("/");
+        navigate(isCricket ? "/cricket" : "/");
       } else {
         setErr(res?.message || "Signup failed. Please try again.");
       }
