@@ -65,9 +65,10 @@ const Header = ({
 
   const [unreadCount, setUnreadCount] = useState(0);
 
-  // Use a cache key based on the category (e.g., 'cricket') or 'global'
+  // Determine if we are on a category-specific path
   const pathParts = location.pathname.split('/').filter(Boolean);
-  const currentCategory = pathParts[0] && ALLOWED_CATEGORIES.includes(pathParts[0]) ? pathParts[0] : 'global';
+  const isCategoryPath = pathParts[0] && ALLOWED_CATEGORIES.includes(pathParts[0]);
+  const currentCategory = isCategoryPath ? pathParts[0] : 'global';
   const leaderboardCacheKey = `topUser_${currentCategory}`;
 
   const [topUser, setTopUser] = useState(() => {
@@ -80,11 +81,18 @@ const Header = ({
   });
 
   const [showLeaderboard, setShowLeaderboard] = useState(() => {
-    // Initialize from cache
+    // Hide if category path, otherwise check cache
+    if (isCategoryPath) return false;
     return sessionStorage.getItem(`${leaderboardCacheKey}_show`) === 'true';
   });
 
   useEffect(() => {
+    // Don't show or fetch leaderboard if we are on a category path
+    if (isCategoryPath) {
+      setShowLeaderboard(false);
+      return;
+    }
+
     if (isAuthenticated) {
       apiService.getLeaderboardTop()
         .then(data => {
@@ -114,7 +122,7 @@ const Header = ({
           setShowLeaderboard(false);
         });
     }
-  }, [isAuthenticated, leaderboardCacheKey]);
+  }, [isAuthenticated, leaderboardCacheKey, isCategoryPath]);
 
   useEffect(() => {
     if (isAuthenticated) {
