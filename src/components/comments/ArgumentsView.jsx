@@ -22,6 +22,8 @@ import ReportComment from "./ReportCommentSheet";
 import ReplyIcon from "../icons/ReplyIcon";
 import ReplyLinkIcon from "../icons/ReplyLinkIcon";
 import ThreadView from "./ThreadView";
+import ShareIcon from "../icons/ShareIcon";
+import ShareModal from "../ui/ShareModal";
 
 // Delete Confirmation Modal
 function ConfirmDeleteModal({ open, onCancel, onConfirm, loading }) {
@@ -129,6 +131,7 @@ function ArgumentsView({
   const [reportedComments, setReportedComments] = useState(new Set());
   const [replyingTo, setReplyingTo] = useState(null);
   const [selectedThread, setSelectedThread] = useState(null); // { comment, replies: [] }
+  const [showShareModal, setShowShareModal] = useState(false);
 
   const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams(); // Hook for URL params
@@ -1052,7 +1055,7 @@ function ArgumentsView({
                   secondOptionPercentage={secondPct}
                   hasVoted={hasVoted}
                 />
-                <div className="w-full pt-2 pb-4 text-center">
+                <div className="w-full pt-2 pb-4 flex items-center justify-center gap-4">
                   <span
                     className="font-inter font-normal text-white"
                     style={{
@@ -1061,8 +1064,15 @@ function ArgumentsView({
                       letterSpacing: "0%",
                     }}
                   >
-                    {stancesCount} Stances • {argumentsCount} Opinions
+                    {stancesCount} Stances • {argumentsCount} Opinions •
                   </span>
+                  <button
+                    onClick={() => setShowShareModal(true)}
+                    className="flex items-center gap-1 px-2 py-1 rounded-full transition-colors text-[11px] text-white"
+                  >
+                    <ShareIcon className="w-3.5 h-3.5" />
+                    <span>Share</span>
+                  </button>
                 </div>
               </div>
             </div>
@@ -1677,6 +1687,11 @@ function ArgumentsView({
           to { transform: translateY(100%); }
         }
       `}</style>
+      <ShareModal
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        title={question}
+      />
     </div>
   );
 }

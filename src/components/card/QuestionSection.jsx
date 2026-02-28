@@ -9,6 +9,8 @@ import toast from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
 import LoginSignupModal from '../auth/LoginSignupModal';
 import analytics from '../../utils/analytics';
+import ShareIcon from '../icons/ShareIcon';
+import ShareModal from '../ui/ShareModal';
 
 // put this near the top of the file
 const formatPct = (v) => {
@@ -48,6 +50,7 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle, onNext, onPre
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
   const drawerRef = useRef(null);
 
   // ✅ calculate total stances
@@ -233,8 +236,15 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle, onNext, onPre
             </AnimatePresence>
           </div>
 
-          <div className="gap-2 self-center my-4 font-inter font-medium text-base z-10 text-white text-center">
-            {totalStances} Stances • {commentCount} Opinions
+          <div className="flex items-center justify-center my-4 font-inter font-medium text-base z-10 text-white">
+            <span>{totalStances} Stances • {commentCount} Opinions • </span>
+            <button
+              onClick={() => setShowShareModal(true)}
+              className="flex ml-1 items-center gap-1 transition-colors text-sm"
+            >
+              <ShareIcon className="w-4 h-4" />
+              <span>Share</span>
+            </button>
           </div>
         </div>
       )}
@@ -261,6 +271,12 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle, onNext, onPre
       <LoginSignupModal
         isOpen={showLoginModal}
         onClose={() => setShowLoginModal(false)}
+      />
+
+      <ShareModal
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        title={question.question}
       />
     </section>
   );
