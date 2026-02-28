@@ -367,7 +367,17 @@ class ApiService {
     if (data?.refreshToken) this.setRefreshToken(data.refreshToken);
 
     if (data?.id || data?.email || data?.username) {
-      localStorage.setItem('user', JSON.stringify({ id: data.id, email: data.email, username: data.username }));
+      const userToSave = {
+        id: data.id,
+        email: data.email,
+        username: data.username,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        profilePicture: data.profilePicture,
+        profilePic: data.profilePic,
+        picture: data.picture,
+      };
+      localStorage.setItem('user', JSON.stringify(userToSave));
     }
 
     return data;
@@ -396,7 +406,17 @@ class ApiService {
     if (data?.refreshToken) this.setRefreshToken(data.refreshToken);
 
     if (data?.id || data?.email || data?.username) {
-      localStorage.setItem('user', JSON.stringify({ id: data.id, email: data.email, username: data.username }));
+      const userToSave = {
+        id: data.id,
+        email: data.email,
+        username: data.username,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        profilePicture: data.profilePicture || profilePicture,
+        profilePic: data.profilePic,
+        picture: data.picture || profilePicture,
+      };
+      localStorage.setItem('user', JSON.stringify(userToSave));
     }
 
     return data;

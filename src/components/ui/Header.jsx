@@ -209,7 +209,9 @@ const Header = ({
                 >
                   {(() => {
                     const isMe = topUser?.userId === user?.id || topUser?.id === user?.id;
-                    const pic = isMe ? (user?.profilePicture || topUser?.profilePicture || topUser?.profilePic) : (topUser?.profilePicture || topUser?.profilePic);
+                    const pic = isMe
+                      ? (user?.profilePicture || user?.profilePic || user?.picture || topUser?.profilePicture || topUser?.profilePic)
+                      : (topUser?.profilePicture || topUser?.profilePic);
                     return pic ? (
                       <img
                         src={pic}
@@ -307,9 +309,9 @@ const Header = ({
                   >
                     {/* Profile header */}
                     <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-200">
-                      {user?.profilePicture ? (
+                      {(user?.profilePicture || user?.profilePic || user?.picture) ? (
                         <img
-                          src={user.profilePicture}
+                          src={user.profilePicture || user.profilePic || user.picture}
                           alt="Profile"
                           className="h-10 w-10 rounded-full object-cover"
                         />
@@ -325,7 +327,7 @@ const Header = ({
                           onClick={() => fileInputRef.current?.click()}
                           className="text-[12px] text-[#9105C6] font-semibold underline mt-0.5 hover:text-[#7A0499]"
                         >
-                          {user?.profilePicture ? 'Update Profile Picture' : 'Add Profile Picture'}
+                          {(user?.profilePicture || user?.profilePic || user?.picture) ? 'Update Profile Picture' : 'Add Profile Picture'}
                         </button>
                         <input
                           type="file"
