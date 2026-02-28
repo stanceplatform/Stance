@@ -1055,7 +1055,7 @@ function ArgumentsView({
                   secondOptionPercentage={secondPct}
                   hasVoted={hasVoted}
                 />
-                <div className="w-full pt-2 pb-4 flex items-center justify-center gap-4">
+                <div className="w-full pt-2 pb-4 flex items-center justify-center">
                   <span
                     className="font-inter font-normal text-white"
                     style={{
@@ -1070,7 +1070,10 @@ function ArgumentsView({
                     onClick={() => setShowShareModal(true)}
                     className="flex items-center gap-1 px-2 py-1 rounded-full transition-colors text-[11px] text-white"
                   >
-                    <ShareIcon className="w-3.5 h-3.5" />
+                    <svg width="14" height="14" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M10.95 7.12487C10.95 11.2727 10.4873 11.6999 6.00005 11.6999C1.5128 11.6999 1.05005 11.2727 1.05005 7.12487H1.95005C1.95005 10.7316 2.0258 10.7999 6.00005 10.7999C9.9743 10.7999 10.05 10.7316 10.05 7.12487H10.95ZM5.55005 2.65112V7.87487H6.45005V2.65112L8.6498 4.85012L9.2858 4.21412L6.00005 0.927246L2.7143 4.2145L3.3503 4.8505L5.55005 2.65112Z" fill="white" />
+                    </svg>
+
                     <span>Share</span>
                   </button>
                 </div>
