@@ -241,9 +241,7 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle, onNext, onPre
             <button
               onClick={async () => {
                 const shareData = {
-                  title: question.question,
-                  text: `Check out this question on Stance: ${question.question}`,
-                  url: `${window.location.origin}/auth?questionid=${question.id}`,
+                  url: window.location.href,
                 };
 
                 // Track "Click on Share"
