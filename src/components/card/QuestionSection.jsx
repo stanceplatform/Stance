@@ -239,7 +239,34 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle, onNext, onPre
           <div className="flex items-center justify-center my-4 font-inter font-medium text-base z-10 text-white">
             <span>{totalStances} Stances • {commentCount} Opinions • </span>
             <button
-              onClick={() => setShowShareModal(true)}
+              onClick={async () => {
+                const shareData = {
+                  title: question.question,
+                  text: `Check out this question on Stance: ${question.question}`,
+                  url: `${window.location.origin}/auth?questionid=${question.id}`,
+                };
+
+                // Track "Click on Share"
+                mixpanel.trackEvent("Click on Share", {
+                  question_id: question.id,
+                  topic: question.topic || "General"
+                });
+
+                if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+                  try {
+                    await navigator.share(shareData);
+                  } catch (err) {
+                    if (err.name !== 'AbortError') {
+                      console.error('Error sharing:', err);
+                      // Fallback to modal if it fails
+                      setShowShareModal(true);
+                    }
+                  }
+                } else {
+                  // Fallback for browsers that don't support native share
+                  setShowShareModal(true);
+                }
+              }}
               className="flex ml-1 items-center gap-1 transition-colors text-sm"
             >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
