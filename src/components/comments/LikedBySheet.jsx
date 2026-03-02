@@ -57,10 +57,10 @@ export default function LikedBySheet({ open, onClose, users = [] }) {
                     className="flex items-center gap-3 px-3 py-3"
                   >
                     {/* Avatar */}
-                    {u?.profilePicture ? (
+                    {(u?.profilePicture || u?.profilePic || u?.picture) ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
-                        src={u.profilePicture}
+                        src={u.profilePicture || u.profilePic || u.picture}
                         alt={name}
                         className="h-9 w-9 rounded-full object-cover border border-neutral-700"
                       />

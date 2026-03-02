@@ -1,7 +1,7 @@
 // Card.jsx
 import { motion } from 'framer-motion'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useLocation, useSearchParams } from 'react-router-dom'
+import { useLocation, useSearchParams, useParams, useNavigate } from 'react-router-dom'
 import { fetchAllCards } from '../../services/operations'
 import { useApi } from '../../hooks/useApi'
 import CardNavigation from './CardNavigation'
@@ -10,6 +10,7 @@ import { useCurrentQuestion } from '../../context/CurrentQuestionContext'
 import ShareStanceThanks from '../thankyou/ShareStanceThanks'
 import { useAuth } from '../../context/AuthContext'
 import LoginSignupModal from '../auth/LoginSignupModal'
+import { ALLOWED_CATEGORIES } from '../../utils/constants'
 
 const SWIPE_THRESHOLD = 60;           // px needed to trigger a swipe
 const ANGLE_GUARD = 0.6;              // require mostly-horizontal: |dx| > 0.6*|dy|
@@ -29,6 +30,8 @@ const Card = () => {
   const { isAuthenticated } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
   const location = useLocation()
+  const { category } = useParams()
+  const navigate = useNavigate()
 
   const questionIdParam = useMemo(() => {
     try {
@@ -38,17 +41,26 @@ const Card = () => {
     }
   }, [location.search])
 
-  const setQuestionSearchParam = useCallback((id, options = { replace: true }) => {
-    setSearchParams(prev => {
-      const params = new URLSearchParams(prev)
-      if (id != null) {
-        params.set('questionid', String(id))
-      } else {
-        params.delete('questionid')
-      }
-      return params
-    }, options)
-  }, [setSearchParams])
+  const slugParam = useMemo(() => {
+    if (category && !ALLOWED_CATEGORIES.includes(category)) {
+      return category
+    }
+    return null
+  }, [category])
+  
+  const updateUrl = useCallback((question) => {
+    if (!question) {
+      // if no question (e.g. end of list?), maybe go to root?
+      // navigate('/', { replace: true })
+      return
+    }
+    if (question.slug) {
+      navigate(`/${question.slug}`, { replace: true })
+    } else {
+      // fallback to query param if no slug
+      navigate(`/?questionid=${question.id}`, { replace: true })
+    }
+  }, [navigate])
 
   // swipe state (touch/pointer)
   const startX = useRef(0)
@@ -108,11 +120,9 @@ const Card = () => {
       setCurrentQuestionIndex(newIndex)
       setNextBackgroundImage(null)
       blocked.current = false
-      const nextId = questions[newIndex]?.id
-      if (nextId != null) {
-        setQuestionSearchParam(nextId)
-      } else {
-        setQuestionSearchParam(null)
+      const nextQuestion = questions[newIndex]
+      if (nextQuestion) {
+        updateUrl(nextQuestion)
       }
     }, 150) // keep your quick transition
   }
@@ -121,11 +131,9 @@ const Card = () => {
     if (showSuggestQuestion) {
       setShowSuggestQuestion(false)
       setCurrentQuestionIndex(0)
-      const firstId = questions[0]?.id
-      if (firstId != null) {
-        setQuestionSearchParam(firstId)
-      } else {
-        setQuestionSearchParam(null)
+      const firstQuestion = questions[0]
+      if (firstQuestion) {
+        updateUrl(firstQuestion)
       }
       return
     }
@@ -152,11 +160,9 @@ const Card = () => {
     if (showSuggestQuestion) {
       setShowSuggestQuestion(false)
       setCurrentQuestionIndex(questions.length - 1)
-      const lastId = questions[questions.length - 1]?.id
-      if (lastId != null) {
-        setQuestionSearchParam(lastId)
-      } else {
-        setQuestionSearchParam(null)
+      const lastQuestion = questions[questions.length - 1]
+      if (lastQuestion) {
+        updateUrl(lastQuestion)
       }
       return
     }
@@ -261,8 +267,18 @@ const Card = () => {
     const initializeQuestions = async () => {
       let finalData = questionsData;
 
-      // If we have a specific question ID requested
-      if (questionIdParam) {
+      // Priority 1: Check for slug match
+      if (slugParam) {
+        const idx = questionsData.findIndex(q => q.slug === slugParam);
+        if (idx === -1) {
+          // If not found by slug in initial batch, we can't easily fetch by slug yet
+          // unless we add a new API call. For now, fallback to default order or maybe Try by ID if we could guess it (we can't)
+          // Maybe we should redirect to home? Or just show default list.
+          // We'll just show default list.
+        }
+      }
+      // Priority 2: Check for ID match (fallback for old links)
+      else if (questionIdParam) {
         const existsInInitial = questionsData.some(q => String(q.id) === questionIdParam);
 
         if (!existsInInitial) {
@@ -283,7 +299,13 @@ const Card = () => {
       // Sanitize and Reorder
       let processed = sanitize(finalData);
 
-      if (questionIdParam) {
+      if (slugParam) {
+        const idx = processed.findIndex(q => q.slug === slugParam);
+        if (idx > -1) {
+          const [target] = processed.splice(idx, 1);
+          processed.unshift(target);
+        }
+      } else if (questionIdParam) {
         const idx = processed.findIndex(q => String(q.id) === questionIdParam);
         if (idx > -1) {
           const [target] = processed.splice(idx, 1);
@@ -296,14 +318,28 @@ const Card = () => {
     };
 
     initializeQuestions();
-  }, [questionsData, questionIdParam, questions.length, loading]);
+  }, [questionsData, questionIdParam, slugParam, questions.length, loading]);
 
   useEffect(() => {
     if (!questions.length) return
 
-    const currentId = questions[currentQuestionIndex]?.id
+    const currentQuestion = questions[currentQuestionIndex]
+    const currentSlug = currentQuestion?.slug
+    const currentId = currentQuestion?.id
 
-    if (questionIdParam) {
+    if (slugParam) {
+      const targetIndex = questions.findIndex(q => q.slug === slugParam)
+      if (targetIndex !== -1) {
+        if (showSuggestQuestion && slugParam !== currentSlug) {
+          setShowSuggestQuestion(false)
+        }
+        if (targetIndex !== currentQuestionIndex) {
+          setCurrentQuestionIndex(targetIndex)
+          // URL is already correct (slugParam matches)
+        }
+        return
+      }
+    } else if (questionIdParam) {
       const targetIndex = questions.findIndex(q => String(q.id) === questionIdParam)
       if (targetIndex !== -1) {
         if (
@@ -314,35 +350,42 @@ const Card = () => {
         }
         if (targetIndex !== currentQuestionIndex) {
           setCurrentQuestionIndex(targetIndex)
-          const targetId = questions[targetIndex]?.id
-          if (targetId != null && questionIdParam !== String(targetId)) {
-            setQuestionSearchParam(targetId)
+          // If we have a slug for this question, we should prefer updating URL to slug?
+          // Optional: Upgrade URL from ID to slug automatically?
+          // Let's do it to "fix" old links
+          const targetQuestion = questions[targetIndex]
+          if (targetQuestion?.slug) {
+            updateUrl(targetQuestion)
           }
         }
         return
       }
     }
 
-    const fallbackId = questions[0]?.id
-    if (fallbackId != null) {
+    // Fallback or "Home" state
+    const fallbackQuestion = questions[0]
+    if (fallbackQuestion) {
       if (showSuggestQuestion) {
+        // We are in suggest mode, URL might should reflect that or stay on last question?
+        // Original logic: setShowSuggestQuestion(false)
         setShowSuggestQuestion(false)
       }
       if (currentQuestionIndex !== 0) {
         setCurrentQuestionIndex(0)
       }
-      if (questionIdParam !== String(fallbackId)) {
-        setQuestionSearchParam(fallbackId)
+
+      // Ensure URL matches the fallback question if no params provided
+      if (!slugParam && !questionIdParam) {
+        updateUrl(fallbackQuestion)
       }
-    } else {
-      setQuestionSearchParam(null)
     }
   }, [
+    slugParam,
     questionIdParam,
     questions,
     currentQuestionIndex,
     showSuggestQuestion,
-    setQuestionSearchParam,
+    updateUrl,
   ])
 
 

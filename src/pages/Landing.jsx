@@ -36,6 +36,10 @@ const Landing = () => {
                         <Link to="/terms-conditions" className="underline">
                             Terms & Conditions
                         </Link>
+                        {' '}and{' '}
+                        <Link to="/privacy-policy" className="underline">
+                            Privacy Policy
+                        </Link>
                         .
                     </p>
                 </div>

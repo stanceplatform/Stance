@@ -19,6 +19,7 @@ import ForgotPassword from './pages/ForgotPassword';
 import SuggestQuestion from './pages/SuggestQuestion';
 import ReportQuestion from './pages/ReportQuestion';
 import Terms from './pages/Terms';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 import Leaderboard from './pages/Leaderboard';
 import SelectCollege from './pages/SelectCollege';
 import SelectCollegeRoute from './components/auth/SelectCollegeRoute';
@@ -196,6 +197,10 @@ const AppRoutes = () => {
                         <Route
                             path="/terms-conditions"
                             element={<Terms />}
+                        />
+                        <Route
+                            path="/privacy-policy"
+                            element={<PrivacyPolicy />}
                         />
                         <Route
                             path="/forgot-password"
