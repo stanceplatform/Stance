@@ -1064,9 +1064,9 @@ function ArgumentsView({
                       letterSpacing: "0%",
                     }}
                   >
-                    {stancesCount} Stances • {argumentsCount} Opinions
+                    {stancesCount} Stances • {argumentsCount} Opinions •
                   </span>
-                  {/* <button
+                  <button
                     onClick={() => setShowShareModal(true)}
                     className="flex items-center gap-1 px-2 py-1 rounded-full transition-colors text-[11px] text-white"
                   >
@@ -1075,7 +1075,7 @@ function ArgumentsView({
                     </svg>
 
                     <span>Share</span>
-                  </button> */}
+                  </button>
                 </div>
               </div>
             </div>
