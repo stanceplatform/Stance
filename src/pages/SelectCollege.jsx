@@ -46,7 +46,6 @@ const SelectCollege = () => {
       setColleges(data || []);
     } catch (err) {
       console.error('Failed to fetch colleges:', err);
-      setError('Failed to load colleges. Please try again.');
       // Fallback to hardcoded list if API fails
       setColleges([
         { id: '1', name: 'NITK' },
@@ -66,30 +65,33 @@ const SelectCollege = () => {
     e.preventDefault();
     setError('');
 
+    // Validation
     if (!selectedCollege) {
-      const validationMessage = 'Please select a college';
-      setError(validationMessage);
+      setError('Please select a college');
       return;
     }
 
     setLoading(true);
     try {
-      // Update user's college
+      // Find the college name to use as tag
+      const selectedCollegeObj = colleges.find(c => c.id === selectedCollege);
+      if (selectedCollegeObj) {
+        const tagsPayload = [{
+          tagName: [selectedCollegeObj.name],
+          tagType: 'COLLEGE',
+          instituteId: Number(selectedCollege)
+        }];
+        await apiService.addUserTags(tagsPayload);
+      }
+
+      // Update user's college via the existing endpoint
       await apiService.updateUserCollege(selectedCollege);
 
       // Refresh user data to get updated collegeSelected status
       await fetchMe();
 
-      toast.success('College added successfully');
-
-      // Navigate to dashboard, preserving questionid if it exists in sessionStorage
-      const questionid = sessionStorage.getItem('redirectQuestionId');
-      if (questionid) {
-        sessionStorage.removeItem('redirectQuestionId');
-        navigate(`/?questionid=${questionid}`, { replace: true });
-      } else {
-        navigate('/', { replace: true });
-      }
+      // Navigate to select-interests
+      navigate('/select-interests', { replace: true });
     } catch (err) {
       console.error('Failed to update college:', err);
       const errorMessage = getApiErrorMessage(err);
@@ -102,23 +104,24 @@ const SelectCollege = () => {
 
   return (
     <AuthShell bgImage={bg}>
-
-
       {/* Headline */}
       <h1 className="text-center font-intro text-[36px] leading-[48px] font-[600] text-[#F0E224] mb-8">
-        Select your college
+        Select your College
       </h1>
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="w-full max-w-[360px]">
-        <div className="mb-4 px-3 ">
+        {/* College Dropdown */}
+        <div className="mb-4 px-3 animate-fadeIn">
           <select
             value={selectedCollege}
             onChange={(e) => {
               setSelectedCollege(e.target.value);
               setError('');
             }}
-            className={`w-full px-4 py-3 h-[56px] rounded-[16px] border-2 border-dashed bg-white/95 backdrop-blur-sm text-[#121212] focus:outline-none focus:ring-2 focus:ring-[#F0E224]/30 appearance-none cursor-pointer font-inter text-[16px] leading-[24px] shadow-lg transition-all duration-200 hover:border-white hover:bg-white ${error ? 'border-red-300 focus:border-red-300' : 'border-white/80 focus:border-[#F0E224]'
+            className={`w-full px-4 py-3 h-[56px] rounded-[16px] border-2 border-dashed bg-white/95 backdrop-blur-sm text-[#121212] focus:outline-none focus:ring-2 focus:ring-[#F0E224]/30 appearance-none cursor-pointer font-inter text-[16px] leading-[24px] shadow-lg transition-all duration-200 hover:border-white hover:bg-white ${error && !selectedCollege
+              ? 'border-red-300 focus:border-red-300'
+              : 'border-white/80 focus:border-[#F0E224]'
               }`}
             disabled={loading}
             style={{
@@ -154,9 +157,24 @@ const SelectCollege = () => {
           </CTAButton>
         </div>
       </form>
+
+      <style jsx>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.3s ease-out;
+        }
+      `}</style>
     </AuthShell>
   );
 };
 
 export default SelectCollege;
-

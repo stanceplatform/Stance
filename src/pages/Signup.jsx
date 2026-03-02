@@ -135,9 +135,11 @@ export default function Signup() {
         alternateEmail: isCricket ? emailFromLink : form.alternateEmail.trim(),
         password: form.password,
         confirmPassword: form.confirmPassword,
-        ...(showCollege && instituteIdFromLink && instituteIdFromLink !== "-1" && !isCricket
-          ? { collegeId: String(instituteIdFromLink) }
-          : { collegeId: null }),
+        ...(!isCricket && instituteIdFromLink === "-1"
+          ? { collegeId: "-1" }
+          : showCollege && instituteIdFromLink && !isCricket
+            ? { collegeId: String(instituteIdFromLink) }
+            : { collegeId: null }),
         tags: isCricket ? [{ tag_name: 'cricket', tag_type: 'INTEREST' }] : [],
       };
 
