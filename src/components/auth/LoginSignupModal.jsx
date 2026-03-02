@@ -171,7 +171,7 @@ const LoginSignupModal = ({ isOpen, onClose }) => {
           Log in or sign up to vote and see what others think.
         </p>
 
-        {/* Terms & Conditions */}
+        {/* Terms & Conditions & Privacy Policy */}
         <p className="text-center text-[#1B1B1B] text-xs leading-4 mb-6">
           By continuing you agree to Stance's{' '}
           <Link
@@ -184,6 +184,18 @@ const LoginSignupModal = ({ isOpen, onClose }) => {
           >
             Terms & Conditions
           </Link>
+          {' '}and{' '}
+          <Link
+            to="/privacy-policy"
+            className="underline text-[#9105C6]"
+            onClick={(e) => {
+              e.stopPropagation();
+              onClose();
+            }}
+          >
+            Privacy Policy
+          </Link>
+          .
         </p>
 
         {/* Sign up with Google button */}
