@@ -429,6 +429,13 @@ class ApiService {
     });
   }
 
+  async addUserTags(tagsPayload) {
+    return this.request('/user-tags', {
+      method: 'POST',
+      body: JSON.stringify(tagsPayload),
+    });
+  }
+
   // Modified to handle multipart/form-data
   async updateProfilePicture(fileObj) {
     const formData = new FormData();

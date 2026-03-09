@@ -237,16 +237,41 @@ function QuestionSection({ question, onVoteUpdate, onDrawerToggle, onNext, onPre
           </div>
 
           <div className="flex items-center justify-center my-4 font-inter font-medium text-base z-10 text-white">
-            <span>{totalStances} Stances • {commentCount} Opinions  </span>
-            {/* <button
-              onClick={() => setShowShareModal(true)}
+            <span>{totalStances} Stances • {commentCount} Opinions • </span>
+            <button
+              onClick={async () => {
+                const shareData = {
+                  url: window.location.href,
+                };
+
+                // Track "Click on Share"
+                mixpanel.trackEvent("Click on Share", {
+                  question_id: question.id,
+                  topic: question.topic || "General"
+                });
+
+                if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+                  try {
+                    await navigator.share(shareData);
+                  } catch (err) {
+                    if (err.name !== 'AbortError') {
+                      console.error('Error sharing:', err);
+                      // Fallback to modal if it fails
+                      setShowShareModal(true);
+                    }
+                  }
+                } else {
+                  // Fallback for browsers that don't support native share
+                  setShowShareModal(true);
+                }
+              }}
               className="flex ml-1 items-center gap-1 transition-colors text-sm"
             >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M14.5999 9.49983C14.5999 15.0303 13.9829 15.5998 7.9999 15.5998C2.0169 15.5998 1.3999 15.0303 1.3999 9.49983H2.5999C2.5999 14.3088 2.7009 14.3998 7.9999 14.3998C13.2989 14.3998 13.3999 14.3088 13.3999 9.49983H14.5999ZM7.3999 3.53483V10.4998H8.5999V3.53483L11.5329 6.46683L12.3809 5.61883L7.9999 1.23633L3.6189 5.61933L4.4669 6.46733L7.3999 3.53483Z" fill="white" />
               </svg>
               <span>Share</span>
-            </button> */}
+            </button>
           </div>
         </div>
       )}

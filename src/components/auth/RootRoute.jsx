@@ -29,6 +29,15 @@ const RootRoute = ({ children }) => {
     return <Navigate to="/select-college" replace />;
   }
 
+  // Check if they need to select interests. If college is selected but interestSelected is false, redirect to select-interests
+  if (isAuthenticated && user && user.collegeSelected === true && user.interestSelected === false && location.pathname === '/' && !isCricketUser) {
+    const questionid = new URLSearchParams(location.search).get('questionid');
+    if (questionid) {
+      sessionStorage.setItem('redirectQuestionId', questionid);
+    }
+    return <Navigate to="/select-interests" replace />;
+  }
+
   // Otherwise, show the children (Dashboard)
   return children;
 };

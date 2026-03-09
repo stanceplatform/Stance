@@ -22,7 +22,9 @@ import Terms from './pages/Terms';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import Leaderboard from './pages/Leaderboard';
 import SelectCollege from './pages/SelectCollege';
+import SelectInterests from './pages/SelectInterests';
 import SelectCollegeRoute from './components/auth/SelectCollegeRoute';
+import SelectInterestsRoute from './components/auth/SelectInterestsRoute';
 import RootRoute from './components/auth/RootRoute';
 import NotFound from './pages/NotFound';
 
@@ -128,6 +130,16 @@ const AppRoutes = () => {
                                 <SelectCollegeRoute>
                                     <SelectCollege />
                                 </SelectCollegeRoute>
+                            }
+                        />
+
+                        {/* Select Interests */}
+                        <Route
+                            path="/select-interests"
+                            element={
+                                <SelectInterestsRoute>
+                                    <SelectInterests />
+                                </SelectInterestsRoute>
                             }
                         />
 
