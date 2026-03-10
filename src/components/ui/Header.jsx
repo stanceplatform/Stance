@@ -6,6 +6,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useCurrentQuestion } from "../../context/CurrentQuestionContext";
 import { ALLOWED_CATEGORIES } from "../../utils/constants";
 import { apiService } from "../../services/api";
+import OpenAppButton from "../common/OpenAppButton/OpenAppButton";
 
 const Header = ({
   onNotificationsClick,
@@ -228,6 +229,9 @@ const Header = ({
                 </button>
               )}
 
+              {/* Open App Button (Authenticated) */}
+              <OpenAppButton />
+
               {/* Bell (Notifications) */}
               <IconButton
                 aria-label="Notifications"
@@ -443,6 +447,9 @@ const Header = ({
             </>
           ) : (
             <>
+              {/* Open App Button (Guest) */}
+              <OpenAppButton />
+
               {/* Sign up button */}
               <button
                 onClick={() => {
