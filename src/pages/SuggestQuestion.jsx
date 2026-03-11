@@ -8,7 +8,7 @@ import analytics from "../utils/analytics";
 
 const SuggestQuestion = () => {
   const { isAuthenticated } = useAuth();
-  const [form, setForm] = useState({ question: "", option1: "", option2: "" });
+  const [form, setForm] = useState({ question: "", option1: "", option2: "", isAnonymous: false });
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState("");
   const [isError, setIsError] = useState(false);
@@ -17,8 +17,8 @@ const SuggestQuestion = () => {
 
 
   const onChange = (e) => {
-    const { name, value } = e.target;
-    setForm((s) => ({ ...s, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setForm((s) => ({ ...s, [name]: type === "checkbox" ? checked : value }));
   };
 
   const validate = () => {
@@ -54,6 +54,7 @@ const SuggestQuestion = () => {
         question: form.question.trim(),
         option1: form.option1.trim(),
         option2: form.option2.trim(),
+        isAnonymous: !!form.isAnonymous,
       });
       setMsg(res?.message || "Thanks! Your suggestion has been submitted.");
       analytics.trackEvent("Content", "Suggest Question", form.question.trim());
@@ -63,7 +64,7 @@ const SuggestQuestion = () => {
         mixpanel.trackEvent("Submit Question", { question: form.question.trim() });
       });
 
-      setForm({ question: "", option1: "", option2: "" });
+      setForm({ question: "", option1: "", option2: "", isAnonymous: false });
       setIsError(false);
     } catch (error) {
       const errText =
@@ -142,8 +143,22 @@ const SuggestQuestion = () => {
               placeholder="Enter Option 2"
               value={form.option2}
               onChange={onChange}
-              className="w-full mb-6 rounded-xl px-4 h-[48px] text-[16px] outline-none bgwhite text-[#1B1B1B] placeholder:text-[#A3A3A3] border border-[#E5E5E5] focus:border-[#BDBDBD]"
+              className="w-full mb-5 rounded-xl px-4 h-[48px] text-[16px] outline-none bg-white text-[#1B1B1B] placeholder:text-[#A3A3A3] border border-[#E5E5E5] focus:border-[#BDBDBD]"
             />
+
+            {/* Suggest anonymously – default unchecked; value saved in DB */}
+            <label className="flex items-center gap-3 text-left mb-6 cursor-pointer">
+              <input
+                type="checkbox"
+                name="isAnonymous"
+                checked={!!form.isAnonymous}
+                onChange={onChange}
+                className="w-4 h-4 rounded border-[#E5E5E5] text-[#5B037C] focus:ring-[#5B037C]"
+              />
+              <span className="text-[14px] leading-[20px] font-medium text-[#707070]">
+                Suggest anonymously
+              </span>
+            </label>
 
             {/* Helper text */}
             <p className="text-left text-[14px] leading-[22px] text-[#4E4E4E] mb-6">
