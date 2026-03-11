@@ -30,6 +30,7 @@ import NotFound from './pages/NotFound';
 
 import AnalyticsTracker from './components/AnalyticsTracker';
 import Support from './pages/Support';
+import BannerRedirect from './pages/BannerRedirect';
 
 const AppRoutes = () => {
     return (
@@ -218,6 +219,11 @@ const AppRoutes = () => {
                         <Route
                             path="/support"
                             element={<Support />}
+                        />
+                        {/* Banner link: https://stance-development.vercel.app/app → device redirect */}
+                        <Route
+                            path="/app"
+                            element={<BannerRedirect />}
                         />
                         <Route
                             path="/forgot-password"
