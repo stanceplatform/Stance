@@ -184,10 +184,11 @@ const Header = ({
           {/* Replace src later */}
           <img
             loading="lazy"
-            src="/logo-sm.svg"
+            src="/light.svg"
             alt="Logo"
-            className="object-contain shrink-0 self-stretch my-auto aspect-[2.72] w-[98px]"
+            className="object-contain my-auto w-[36px]"
           />
+
         </div>
 
         <div className="flex items-center gap-2">

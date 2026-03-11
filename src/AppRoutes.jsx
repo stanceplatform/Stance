@@ -29,6 +29,7 @@ import RootRoute from './components/auth/RootRoute';
 import NotFound from './pages/NotFound';
 
 import AnalyticsTracker from './components/AnalyticsTracker';
+import Support from './pages/Support';
 
 const AppRoutes = () => {
     return (
@@ -213,6 +214,10 @@ const AppRoutes = () => {
                         <Route
                             path="/privacy-policy"
                             element={<PrivacyPolicy />}
+                        />
+                        <Route
+                            path="/support"
+                            element={<Support />}
                         />
                         <Route
                             path="/forgot-password"
