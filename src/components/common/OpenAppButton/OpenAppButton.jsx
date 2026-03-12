@@ -16,9 +16,10 @@ import { openAndroidApp } from "../../../utils/openMobileApp";
  * @param {string} props.label - Button label (defaults to "Open app")
  */
 const OpenAppButton = ({ className = "", path, label = "Open app" }) => {
-  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const isAndroid = /Android/i.test(navigator.userAgent);
 
-  if (!isMobile) return null;
+  // Only show on Android (iOS app-store flow not ready)
+  if (!isAndroid) return null;
 
   return (
     <button
