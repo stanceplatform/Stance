@@ -159,4 +159,34 @@ export const createCard = async (cardData) => {
   return { success: true };
 };
 
+export const fetchBlockedUsers = async () => {
+  if (!isAuthenticated()) return [];
+  try {
+    return await apiService.getBlockedUsers();
+  } catch (error) {
+    console.error('Error fetching blocked users:', error);
+    return [];
+  }
+};
+
+export const blockUserAction = async (userId) => {
+  try {
+    return await apiService.blockUser(userId);
+  } catch (error) {
+    console.error('Error blocking user:', error);
+    toast.error(getApiErrorMessage(error));
+    throw error;
+  }
+};
+
+export const unblockUserAction = async (userId) => {
+  try {
+    return await apiService.unblockUser(userId);
+  } catch (error) {
+    console.error('Error unblocking user:', error);
+    toast.error(getApiErrorMessage(error));
+    throw error;
+  }
+};
+
 export { apiService };

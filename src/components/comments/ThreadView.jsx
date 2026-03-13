@@ -55,7 +55,8 @@ const ThreadView = ({
   onPostReply, // function(text, parentCommentId)
   onLike,  // function(commentId)
   onNext,
-  onPrevious
+  onPrevious,
+  blockedUserIds,
 }) => {
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [replyingTo, setReplyingTo] = useState(null); // comment object to reply to
@@ -134,15 +135,24 @@ const ThreadView = ({
           >
             {mainComment.user?.firstName || "User"}’s opinion
           </p>
-          <div
-            className="font-inter font-normal text-base leading-[24px] text-start [&_p]:break-words"
-            style={{
-              color: getCommentTheme(mainComment.answer?.selectedOptionId, answerOptions).contextTextColor
-            }}
-            dangerouslySetInnerHTML={{
-              __html: marked.parse(mainComment.text || ""),
-            }}
-          />
+          {(() => {
+            const uid = mainComment.user?.id || mainComment.authorId || mainComment.createdById;
+            return uid && blockedUserIds.has(Number(uid));
+          })() ? (
+            <p className="text-[#A3A3A3] text-sm leading-[20px] italic text-start font-sans">
+              You have blocked this user
+            </p>
+          ) : (
+            <div
+              className="text-base leading-[24px] font-inter font-normal text-start [&_p]:break-words"
+              style={{
+                color: getCommentTheme(mainComment.answer?.selectedOptionId, answerOptions).contextTextColor
+              }}
+              dangerouslySetInnerHTML={{
+                __html: marked.parse(mainComment.text || ""),
+              }}
+            />
+          )}
         </div>
 
         {/* Replies List */}
@@ -274,15 +284,25 @@ const ThreadView = ({
                   </div>
                 </div>
 
-                <div
-                  className="text-[#212121] font-inter font-normal text-base leading-[24px] text-start"
-                  dangerouslySetInnerHTML={{
-                    __html: marked.parse(
-                      (reply.parentUser ? `**@${reply.parentUser.firstName}** ` : "") +
-                      (reply.text || "")
-                    ),
-                  }}
-                />
+                {(() => {
+                  const uid = reply.user?.id || reply.authorId || reply.createdById;
+                  return uid && blockedUserIds.has(Number(uid));
+                })() ? (
+                  <p className="text-[#A3A3A3] text-sm leading-[20px] italic text-start font-sans">
+                    You have blocked this user
+                  </p>
+                ) : (
+                  <div
+                    className="text-[#212121] font-inter font-normal text-start text-base leading-[24px]"
+                    dangerouslySetInnerHTML={{
+                      __html: marked.parse(
+                        (reply.parentUser
+                          ? `**@${reply.parentUser.firstName}** `
+                          : "") + (reply.text || ""),
+                      ),
+                    }}
+                  />
+                )}
 
 
               </div>

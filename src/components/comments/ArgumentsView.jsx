@@ -12,6 +12,9 @@ import {
   likeComment,
   unlikeComment,
   apiService,
+  fetchBlockedUsers,
+  blockUserAction,
+  unblockUserAction,
 } from "../../services/operations";
 import { marked } from "marked";
 import OpinionForm from "./OpinionForm";
@@ -132,6 +135,8 @@ function ArgumentsView({
   const [replyingTo, setReplyingTo] = useState(null);
   const [selectedThread, setSelectedThread] = useState(null); // { comment, replies: [] }
   const [showShareModal, setShowShareModal] = useState(false);
+  const [blockedUserIds, setBlockedUserIds] = useState(new Set());
+  const [isBlocking, setIsBlocking] = useState(false);
 
   const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams(); // Hook for URL params
@@ -179,33 +184,37 @@ function ArgumentsView({
     }
   };
 
-  const openContextMenu = (commentId, cardElement) => {
-    if (!cardElement || typeof window === "undefined") return;
+  const openContextMenu = (commentId, x, y) => {
+    if (typeof window === "undefined") return;
 
-    const rect = cardElement.getBoundingClientRect();
-    const viewportHeight =
-      window.innerHeight || document.documentElement.clientHeight;
+    const viewportHeight = window.innerHeight;
+    const viewportWidth = window.innerWidth;
+    const menuHeight = 120; // safe buffer
+    const menuWidth = 170; // safe buffer
 
-    const menuHeight = 88; // approx. 2 items
-    const gapBelow = 8; // Gap when menu opens below comment
-    const gapAbove = 4; // Gap when menu opens above comment (reduced space)
+    let top = y;
+    let left = x;
 
-    const spaceBelow = viewportHeight - rect.bottom;
-    const opensBelow = spaceBelow >= menuHeight || rect.top < menuHeight;
+    // Ensure menu stays within horizontal bounds of the VIEWPORT
+    if (left + menuWidth > viewportWidth - 16) {
+      left = viewportWidth - menuWidth - 16;
+    }
+    if (left < 16) left = 16;
 
-    const top = opensBelow
-      ? rect.bottom + gapBelow
-      : rect.top - menuHeight - gapAbove;
-
-    // Left align with comment padding (comment has p-4 = 16px)
-    const left = rect.left + 16;
+    // Handle vertical orientation (open above or below)
+    const opensAbove = y + menuHeight > viewportHeight - 80;
+    if (opensAbove) {
+      top = y - menuHeight;
+    } else {
+      top = y + 10;
+    }
 
     setContextMenu({
       open: true,
       commentId,
       top,
       left,
-      openAbove: !opensBelow,
+      openAbove: opensAbove,
     });
   };
 
@@ -228,6 +237,35 @@ function ArgumentsView({
     const timer = setTimeout(() => setEnableTransition(true), 0);
     return () => clearTimeout(timer);
   }, []);
+
+  // Fetch blocked users on open
+  useEffect(() => {
+    if (isOpen) {
+      const loadBlocked = async () => {
+        try {
+          const response = await fetchBlockedUsers();
+          // The response might be a direct array or an object with a 'content' array
+          const usersList = Array.isArray(response)
+            ? response
+            : (response?.content || response?.data || []);
+
+          if (Array.isArray(usersList)) {
+            const ids = new Set(
+              usersList.map((u) => {
+                // Handle different possible backend structures
+                const id = u.id || u.blockedUserId || (typeof u === 'number' || typeof u === 'string' ? u : null);
+                return id ? Number(id) : null;
+              }).filter(id => id !== null)
+            );
+            setBlockedUserIds(ids);
+          }
+        } catch (err) {
+          console.error("Failed to load blocked users:", err);
+        }
+      };
+      loadBlocked();
+    }
+  }, [isOpen]);
 
   // Deep linking logic
   useEffect(() => {
@@ -910,6 +948,43 @@ function ArgumentsView({
     setShowReport(true);
   };
 
+  const handleBlockUserToggle = async () => {
+    const commentId = contextMenu.commentId;
+    if (!commentId) return;
+
+    const selectedComment = argsList.find((arg) => arg.id === commentId);
+    const userId =
+      selectedComment?.user?.id ||
+      selectedComment?.authorId ||
+      selectedComment?.createdById;
+
+    if (!userId) return;
+
+    try {
+      setIsBlocking(true);
+      const isBlocked = blockedUserIds.has(Number(userId));
+
+      if (isBlocked) {
+        await unblockUserAction(userId);
+        setBlockedUserIds((prev) => {
+          const next = new Set(prev);
+          next.delete(Number(userId));
+          return next;
+        });
+        toast.success("User unblocked.");
+      } else {
+        await blockUserAction(userId);
+        setBlockedUserIds((prev) => new Set(prev).add(Number(userId)));
+        toast.success("User blocked.");
+      }
+      closeContextMenu();
+    } catch (err) {
+      console.error("Block toggle failed", err);
+    } finally {
+      setIsBlocking(false);
+    }
+  };
+
   // TOUCH / CONTEXT HANDLERS FOR COMMENT CARD
 
   const handleCommentTouchStart = (e, commentId) => {
@@ -919,11 +994,12 @@ function ArgumentsView({
     const touch = e.touches[0];
     if (!touch) return;
 
-    longPressStartYRef.current = touch.clientY;
-    const cardElement = e.currentTarget;
+    const touchX = touch.clientX;
+    const touchY = touch.clientY;
+    longPressStartYRef.current = touchY;
 
     longPressTimerRef.current = window.setTimeout(() => {
-      openContextMenu(commentId, cardElement);
+      openContextMenu(commentId, touchX, touchY);
     }, LONG_PRESS_DURATION);
   };
 
@@ -944,7 +1020,7 @@ function ArgumentsView({
   const handleCommentContextMenu = (e, commentId) => {
     e.preventDefault();
     if (!isExpanded) return;
-    openContextMenu(commentId, e.currentTarget);
+    openContextMenu(commentId, e.clientX, e.clientY);
   };
 
   // -------------------------------------------
@@ -1128,6 +1204,10 @@ function ArgumentsView({
                     const isFirstComment = index === 0;
                     const isReported = reportedComments.has(arg.id);
 
+                    const authorId =
+                      arg.user?.id || arg.authorId || arg.createdById;
+                    const isBlocked = authorId && blockedUserIds.has(Number(authorId));
+
                     return (
                       <div
                         key={arg.id}
@@ -1283,17 +1363,25 @@ function ArgumentsView({
                           </span>
                         )}
 
-                        <div
-                          ref={isFirstComment ? firstCommentTextRef : null}
-                          className="text-[#212121] font-inter font-normal text-base leading-[24px] text-start [&_p]:break-words"
-                          dangerouslySetInnerHTML={{
-                            __html: marked.parse(
-                              (arg.parentUser
-                                ? `**@${arg.parentUser.firstName}** `
-                                : "") + (arg.text || ""),
-                            ),
-                          }}
-                        />
+                        {isBlocked ? (
+                          <p
+                            ref={isFirstComment ? firstCommentTextRef : null}
+                            className="text-[#A3A3A3] text-sm leading-[20px] italic text-start font-sans"
+                          >
+                            You have blocked this user
+                          </p>
+                        ) : (
+                          <div
+                            ref={isFirstComment ? firstCommentTextRef : null}
+                            className="text-[#212121] font-inter font-normal text-base leading-[24px] text-start [&_p]:break-words"
+                            dangerouslySetInnerHTML={{
+                              __html: marked.parse(
+                                (arg.parentUser ? `**@${arg.parentUser.firstName}** ` : "") +
+                                (arg.text || "")
+                              ),
+                            }}
+                          />
+                        )}
 
                         {/* Countered Text for Root Comments */}
                         {arg.depth === 0 &&
@@ -1386,58 +1474,82 @@ function ArgumentsView({
         </div>
       </div>
 
-      {/* Context menu overlay */}
+      {/* Context menu overlay - Portaled to bypass container overflow/widths */}
       {contextMenu.open &&
-        (() => {
-          const selectedComment = argsList.find(
-            (arg) => arg.id === contextMenu.commentId,
-          );
-          const ownerId =
-            selectedComment?.user?.id ||
-            selectedComment?.authorId ||
-            selectedComment?.createdById;
-          const isOwn =
-            user?.id && ownerId && Number(ownerId) === Number(user.id);
+        createPortal(
+          (() => {
+            const selectedComment = argsList.find(
+              (arg) => arg.id === contextMenu.commentId,
+            );
+            const ownerId =
+              selectedComment?.user?.id ||
+              selectedComment?.authorId ||
+              selectedComment?.createdById;
+            const isOwn =
+              user?.id && ownerId && Number(ownerId) === Number(user.id);
 
-          return (
-            <div className="fixed inset-0 z-[150]" onClick={closeContextMenu}>
-              <div
-                className="absolute bg-white rounded-xl shadow-lg py-2 px-3 text-sm"
-                style={{
-                  top: contextMenu.top,
-                  left: contextMenu.left,
-                  minWidth: "140px",
-                }}
-                onClick={(e) => e.stopPropagation()}
-              >
-                {isOwn && (
-                  <button
-                    className="block w-full text-left py-1.5 text-[#E11D48] font-medium"
-                    onClick={handleDeleteComment}
-                  >
-                    Delete
-                  </button>
-                )}
-                <button
-                  className="block w-full text-left py-1.5 text-[#111827]"
-                  onClick={() => {
-                    // Track "Click on Report" (Comment)
-                    import("../../utils/mixpanel").then(
-                      ({ default: mixpanel }) => {
-                        mixpanel.trackEvent("Click on Report", {
-                          type: "comment",
-                        });
-                      },
-                    );
-                    handleReportComment();
+            return (
+              <div className="fixed inset-0 z-[200] bg-transparent" onClick={closeContextMenu}>
+                <div
+                  className="absolute bg-white rounded-xl shadow-lg py-2 px-3 text-sm border border-neutral-100"
+                  style={{
+                    top: contextMenu.top,
+                    left: contextMenu.left,
+                    minWidth: "140px",
                   }}
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  Report
-                </button>
+                  {isOwn && (
+                    <button
+                      className="block w-full text-left py-1.5 text-[#E11D48] font-medium"
+                      onClick={handleDeleteComment}
+                    >
+                      Delete
+                    </button>
+                  )}
+                  <button
+                    className="block w-full text-left py-1.5 text-[#111827]"
+                    onClick={() => {
+                      // Track "Click on Report" (Comment)
+                      import("../../utils/mixpanel").then(
+                        ({ default: mixpanel }) => {
+                          mixpanel.trackEvent("Click on Report", {
+                            type: "comment",
+                          });
+                        },
+                      );
+                      handleReportComment();
+                    }}
+                  >
+                    Report
+                  </button>
+
+                  {!isOwn && (
+                    <button
+                      className="block w-full text-left py-1.5 text-[#111827] disabled:opacity-50"
+                      disabled={isBlocking}
+                      onClick={handleBlockUserToggle}
+                    >
+                      {(() => {
+                        const selectedComment = argsList.find(
+                          (arg) => arg.id === contextMenu.commentId,
+                        );
+                        const uid =
+                          selectedComment?.user?.id ||
+                          selectedComment?.authorId ||
+                          selectedComment?.createdById;
+                        return blockedUserIds.has(Number(uid))
+                          ? "Unblock"
+                          : "Block";
+                      })()}
+                    </button>
+                  )}
+                </div>
               </div>
-            </div>
-          );
-        })()}
+            );
+          })(),
+          document.body
+        )}
 
       {/* Delete Confirmation Modal */}
       <ConfirmDeleteModal
@@ -1676,6 +1788,7 @@ function ArgumentsView({
             onLike={handleLike}
             onNext={onNext}
             onPrevious={onPrevious}
+            blockedUserIds={blockedUserIds}
           />,
           document.body,
         )}

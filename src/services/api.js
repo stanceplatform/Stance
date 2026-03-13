@@ -497,6 +497,19 @@ class ApiService {
       method: 'PUT'
     });
   }
+
+  // User Blocking
+  async getBlockedUsers() {
+    return this.request('/users/blocked', { method: 'GET' });
+  }
+
+  async blockUser(userId) {
+    return this.request(`/users/${userId}/block`, { method: 'POST' });
+  }
+
+  async unblockUser(userId) {
+    return this.request(`/users/${userId}/unblock`, { method: 'POST' });
+  }
 }
 
 export const apiService = new ApiService();
